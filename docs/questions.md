@@ -51,3 +51,16 @@
     failed, "We're checking your selfie" (manual review), "We couldn't verify you"
     (rejected) and "Account removed" (under 18). Goldens are in `app/test/goldens/`; review
     the copy.
+
+## Raised in M2 planning
+
+18. **Text → call for strangers.** Chat (06) shows voice/video buttons and a "Let's switch to
+    voice" quick reply, but the PRD only defines voice → video upgrades in calls (FR-14).
+    Should a stranger text chat be able to become a call (both agree, like the upgrade)?
+19. **Live online count on the searching screen** (FR-9) isn't in the Matching design; M2
+    adds a small "N people online" line like Home's.
+20. **Slur list for the chat filter (SF-8).** Needs a curated list covering English, Pidgin,
+    Hausa, Yoruba and Igbo. M2 ships a small placeholder list in config.
+21. **Interest catalogue.** The server controls the list (FR-19). M2 seeds a starter set
+    (Afrobeats, Football, Tech, Poetry, Food, …) that can be edited in admin. Supply the
+    real list when ready.
