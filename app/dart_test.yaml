@@ -1,0 +1,6 @@
+tags:
+  e2e:
+    # Needs the dev stack (`make up`); excluded from the default run.
+    skip: "run with --tags e2e against make up"
+  golden:
+    # Golden images are rendered on macOS; font rasterisation differs on Linux CI.

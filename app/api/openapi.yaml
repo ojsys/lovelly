@@ -1,0 +1,480 @@
+openapi: 3.0.3
+info:
+  title: Korram API
+  version: 1.0.0
+paths:
+  /api/v1/auth/otp/request:
+    post:
+      operationId: auth_otp_request_create
+      description: 'FR-1: text or call a 6-digit code. Signed-in Google/Apple users
+        use this too (FR-2).'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtpRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OtpRequestResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+  /api/v1/auth/otp/verify:
+    post:
+      operationId: auth_otp_verify_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtpVerifyRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+  /api/v1/auth/refresh:
+    post:
+      operationId: auth_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/v1/auth/social:
+    post:
+      operationId: auth_social_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SocialSignInRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+  /api/v1/health:
+    get:
+      operationId: health_retrieve
+      tags:
+      - health
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+          description: ''
+  /api/v1/me/basics:
+    put:
+      operationId: me_basics_update
+      tags:
+      - me
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BasicsRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationState'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+  /api/v1/me/selfie:
+    post:
+      operationId: me_selfie_create
+      tags:
+      - me
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SelfieRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationState'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+  /api/v1/me/verification:
+    get:
+      operationId: me_verification_retrieve
+      tags:
+      - me
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationState'
+          description: ''
+components:
+  schemas:
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        detail:
+          type: string
+        retry_after:
+          type: integer
+      required:
+      - code
+      - detail
+    BasicsRequest:
+      type: object
+      properties:
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 40
+        dob:
+          type: string
+          format: date
+        gender:
+          $ref: '#/components/schemas/GenderEnum'
+        adult_confirmed:
+          type: boolean
+      required:
+      - adult_confirmed
+      - dob
+      - first_name
+      - gender
+    ChannelEnum:
+      enum:
+      - sms
+      - voice
+      type: string
+      description: |-
+        * `sms` - sms
+        * `voice` - voice
+    GenderEnum:
+      enum:
+      - woman
+      - man
+      - other
+      type: string
+      description: |-
+        * `woman` - Woman
+        * `man` - Man
+        * `other` - Other
+    Health:
+      type: object
+      properties:
+        status:
+          type: string
+        db:
+          type: boolean
+        redis:
+          type: boolean
+      required:
+      - db
+      - redis
+      - status
+    NextStepEnum:
+      enum:
+      - phone
+      - basics
+      - selfie
+      - review
+      - done
+      type: string
+      description: |-
+        * `phone` - phone
+        * `basics` - basics
+        * `selfie` - selfie
+        * `review` - review
+        * `done` - done
+    OtpRequestRequest:
+      type: object
+      properties:
+        phone:
+          type: string
+          minLength: 1
+          maxLength: 32
+        channel:
+          allOf:
+          - $ref: '#/components/schemas/ChannelEnum'
+          default: sms
+      required:
+      - phone
+    OtpRequestResponse:
+      type: object
+      properties:
+        phone:
+          type: string
+          description: E.164 form of the number
+        masked:
+          type: string
+          description: e.g. +234 803 ••• ••42
+        resend_in:
+          type: integer
+          description: Seconds until another code may be sent
+      required:
+      - masked
+      - phone
+      - resend_in
+    OtpVerifyRequest:
+      type: object
+      properties:
+        phone:
+          type: string
+          minLength: 1
+          maxLength: 32
+        code:
+          type: string
+          minLength: 1
+          pattern: ^\d{6}$
+      required:
+      - code
+      - phone
+    ProviderEnum:
+      enum:
+      - google
+      - apple
+      type: string
+      description: |-
+        * `google` - Google
+        * `apple` - Apple
+    SelfieEnum:
+      enum:
+      - none
+      - failed
+      - manual_review
+      - rejected
+      - passed
+      type: string
+      description: |-
+        * `none` - none
+        * `failed` - failed
+        * `manual_review` - manual_review
+        * `rejected` - rejected
+        * `passed` - passed
+    SelfieRequest:
+      type: object
+      properties:
+        pose_front:
+          type: string
+          format: binary
+        pose_left:
+          type: string
+          format: binary
+      required:
+      - pose_front
+      - pose_left
+    Session:
+      type: object
+      properties:
+        access:
+          type: string
+        refresh:
+          type: string
+        next_step:
+          $ref: '#/components/schemas/NextStepEnum'
+      required:
+      - access
+      - next_step
+      - refresh
+    SocialSignInRequest:
+      type: object
+      properties:
+        provider:
+          $ref: '#/components/schemas/ProviderEnum'
+        id_token:
+          type: string
+          minLength: 1
+      required:
+      - id_token
+      - provider
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+      required:
+      - access
+      - refresh
+    TokenRefreshRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          minLength: 1
+      required:
+      - refresh
+    VerificationState:
+      type: object
+      properties:
+        phone_verified:
+          type: boolean
+        basics_done:
+          type: boolean
+        selfie:
+          $ref: '#/components/schemas/SelfieEnum'
+        attempts_left:
+          type: integer
+        is_verified:
+          type: boolean
+        next_step:
+          $ref: '#/components/schemas/NextStepEnum'
+      required:
+      - attempts_left
+      - basics_done
+      - is_verified
+      - next_step
+      - phone_verified
+      - selfie
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

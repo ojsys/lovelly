@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: korram
+          POSTGRES_USER: korram
+          POSTGRES_PASSWORD: korram
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U korram" --health-interval 3s --health-retries 20
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 3s --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.10.10"
+      - run: uv sync --frozen --python 3.12
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run python manage.py makemigrations --check --dry-run
+        env:
+          DJANGO_SETTINGS_MODULE: korram.settings.test
+      - run: uv run pytest -q
+        env:
+          DATABASE_URL: postgres://korram:korram@localhost:5432/korram
+          REDIS_URL: redis://localhost:6379/0
+      # The Dart client is generated from app/api/openapi.yaml; fail if the API changed
+      # without regenerating it (app/tool/gen_api.sh).
+      - name: OpenAPI schema matches the app's copy
+        run: |
+          uv run python manage.py spectacular --validate --fail-on-warn --file /tmp/openapi.yaml
+          diff -u ../app/api/openapi.yaml /tmp/openapi.yaml
+        env:
+          DJANGO_SETTINGS_MODULE: korram.settings.test
+
+  app:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.32.0"
+          channel: stable
+      - run: flutter pub get
+      - run: dart format --output=none --set-exit-if-changed -l 100 lib test
+      - run: flutter analyze
+      # Goldens are rendered on macOS (text rasterisation differs on Linux); e2e needs the
+      # dev stack and is skipped by default (dart_test.yaml).
+      - run: flutter test --exclude-tags golden
+
+  admin:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: admin
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: admin/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build

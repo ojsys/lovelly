@@ -1,0 +1,13 @@
+swagger_parser:
+  schema_path: api/openapi.yaml
+  output_directory: lib/api/generated
+  name: korram
+  language: dart
+  json_serializer: json_serializable
+  root_client: true
+  root_client_name: KorramApi
+  put_clients_in_folder: true
+  enums_to_json: true
+  unknown_enum_value: true
+  mark_files_as_generated: true
+  original_http_response: false
