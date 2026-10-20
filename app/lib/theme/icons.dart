@@ -33,6 +33,25 @@ enum KIcon {
     '<path d="M15 10l5-3v10l-5-3"/><rect x="3" y="6" width="12" height="12" rx="3"/><path d="M3 3l18 18"/>',
   ),
   plus('<path d="M12 5v14"/><path d="M5 12h14"/>'),
+  heart(
+    '<path d="M12 21s-7-4.5-9-9.5C1.5 7.5 4 4 7.5 4c2 0 3.5 1 4.5 2.5C13 5 14.5 4 16.5 4 20 4 22.5 7.5 21 11.5 19 16.5 12 21 12 21z"/>',
+  ),
+  coffee(
+    '<path d="M4 9h13v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M17 11h1.5a2.5 2.5 0 0 1 0 5H17"/><path d="M8 3v3"/><path d="M12 3v3"/>',
+  ),
+  jollof('<path d="M3 11h18a9 9 0 0 1-18 0z"/><path d="M7 11c0-3 2-5 5-5s5 2 5 5"/>'),
+  star('<path d="M12 3l2.8 5.8 6.2.9-4.5 4.4 1.1 6.2L12 17.4 6.4 20.3l1.1-6.2L3 9.7l6.2-.9z"/>'),
+  drum(
+    '<ellipse cx="12" cy="7" rx="7" ry="3"/><path d="M5 7v8c0 1.7 3.1 3 7 3s7-1.3 7-3V7"/><path d="M9 10l-1 7"/><path d="M15 10l1 7"/>',
+  ),
+  flame(
+    '<path d="M12 21a6 6 0 0 0 6-6c0-4-3-6-4-10-2 2-3 4-3 6-1-1-2-2-2-3-2 2-3 4-3 7a6 6 0 0 0 6 6z"/>',
+  ),
+  crown('<path d="M3 8l4 4 5-7 5 7 4-4-2 11H5z"/>'),
+  gem('<path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/><path d="M9 3l3 18 3-18"/>'),
+  giftBow(
+    '<rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13"/><path d="M3 12h18"/><path d="M12 8c-2-4-6-4-6-1.5S9 8 12 8c3 0 6-.5 6-1.5S14 4 12 8z"/>',
+  ),
   search('<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>'),
   addFriend(
     '<circle cx="9" cy="8" r="4"/><path d="M2 21c1-4 4-6 7-6s6 2 7 6"/><path d="M19 8v6"/><path d="M16 11h6"/>',

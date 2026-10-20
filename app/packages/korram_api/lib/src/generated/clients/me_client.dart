@@ -11,6 +11,8 @@ import 'package:retrofit/retrofit.dart';
 import '../models/account_status.dart';
 import '../models/basics_request.dart';
 import '../models/device_request.dart';
+import '../models/invite.dart';
+import '../models/invite_redeem_request.dart';
 import '../models/my_profile.dart';
 import '../models/patched_profile_update_request.dart';
 import '../models/verification_state.dart';
@@ -31,6 +33,13 @@ abstract class MeClient {
   /// Sign-out: stop pushes to this install.
   @DELETE('/api/v1/me/devices')
   Future<void> meDevicesDestroy({@Query('fcm_token') required String fcmToken});
+
+  @GET('/api/v1/me/invite')
+  Future<Invite> meInviteRetrieve();
+
+  /// Before verification: the code the app was installed or opened with (MN-3).
+  @POST('/api/v1/me/invite/redeem')
+  Future<void> meInviteRedeemCreate({@Body() required InviteRedeemRequest body});
 
   @POST('/api/v1/me/notices/{notice_id}/seen')
   Future<void> meNoticesSeenCreate({@Path('notice_id') required String noticeId});

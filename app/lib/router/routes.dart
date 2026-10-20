@@ -24,7 +24,7 @@ abstract final class Routes {
   static const report = '/report/:sessionId';
   static const profileEdit = '/profile/edit';
   static const coins = '/coins';
-  static const gifts = '/call/gifts';
+  static const coinHistory = '/coins/history'; // no design
   static const plus = '/plus';
   static const confirmCharge = '/match/confirm-charge';
 }

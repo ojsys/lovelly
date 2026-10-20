@@ -93,10 +93,20 @@
     account.
 32. **What a coin pack gives** (MN-1): is "550 · +50 bonus" 550 in total or 600? See
     plans/M6.md, decision 1.
+    → **Answered 2026-10-20:** 550 in total (500 + 50 bonus, two ledger rows).
 33. **Invites on iOS** (MN-3): no install referrer; count only already-installed opens, or
     add an invite-code field? And a monthly cap on invite rewards? See plans/M6.md, decision 3.
+    → **Answered 2026-10-20:** Android install referrer now; iOS through app links only (needs
+    the real domain); no cap, device-id and selfie checks guard against farming.
 34. **Refunds after spending:** allow a negative balance? See plans/M6.md, decision 5.
+    → **Answered 2026-10-20:** yes; spending is blocked until topped up, risk score raised.
 35. **Store accounts** for in-app purchases: Play Console app + products + service account +
     Pub/Sub topic; App Store Connect app + products + In-App Purchase key.
 36. **Gifts and the daily cap** (MN-9): do gifts count toward `spent_today`? See plans/M6.md,
     decision 7.
+    → **Answered 2026-10-20:** gifts count toward `spent_today`; reaching the cap switches off
+    paid filters only (M7).
+37. **Invite landing page.** The share link (`INVITE_BASE_URL`, a placeholder for now) needs a
+    page on Korram's domain that sends Android users to the Play Store with
+    `referrer=invite%3D<CODE>` and opens the app when it is already installed (app links /
+    universal links). Which domain?

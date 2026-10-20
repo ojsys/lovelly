@@ -169,6 +169,39 @@ void main() {
     await golden(tester, 'video_call');
   });
 
+  testWidgets('11 Gifts', (tester) async {
+    final app = await call(tester, 'video', 'Tobi');
+    app.engine.remote(video: true);
+    await tester.pump(const Duration(seconds: 6));
+    await tester.tap(find.bySemanticsLabel('Send a gift'));
+    await tester.pumpAndSettle();
+    await golden(tester, 'gifts');
+  });
+
+  testWidgets('11 Gifts — the moment', (tester) async {
+    final app = await call(tester, 'video', 'Tobi');
+    app.engine.remote(video: true);
+    await tester.pump(const Duration(seconds: 6));
+    app.realtime.emit({
+      'type': 'gift.received',
+      'session_id': 's1',
+      'gift': {'slug': 'jollof', 'name': 'Jollof', 'cost': 20},
+      'sender_id': 'me',
+    });
+    for (var i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    await golden(tester, 'gift_sent');
+  });
+
+  testWidgets('10 Coin store', (tester) async {
+    await pumpApp(tester, setUp: (app) => app.verified());
+    await tester.pumpAndSettle();
+    await tester.tap(find.bySemanticsLabel(RegExp(r'^Coins: ')));
+    await tester.pumpAndSettle();
+    await golden(tester, 'coin_store');
+  });
+
   testWidgets('05 Voice call', (tester) async {
     final app = await call(tester, 'voice', 'Zainab');
     app.engine.remote(level: 0.8);

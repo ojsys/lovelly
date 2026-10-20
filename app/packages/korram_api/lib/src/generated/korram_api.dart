@@ -8,12 +8,15 @@ import 'clients/auth_client.dart';
 import 'clients/blocks_client.dart';
 import 'clients/chats_client.dart';
 import 'clients/friends_client.dart';
+import 'clients/gifts_client.dart';
 import 'clients/health_client.dart';
 import 'clients/interests_client.dart';
 import 'clients/match_client.dart';
 import 'clients/me_client.dart';
+import 'clients/purchases_client.dart';
 import 'clients/reports_client.dart';
 import 'clients/sessions_client.dart';
+import 'clients/wallet_client.dart';
 
 /// Korram API `v1.0.0`
 class KorramApi {
@@ -28,12 +31,15 @@ class KorramApi {
   BlocksClient? _blocks;
   ChatsClient? _chats;
   FriendsClient? _friends;
+  GiftsClient? _gifts;
   HealthClient? _health;
   InterestsClient? _interests;
   MatchClient? _match;
   MeClient? _me;
+  PurchasesClient? _purchases;
   ReportsClient? _reports;
   SessionsClient? _sessions;
+  WalletClient? _wallet;
 
   AuthClient get auth => _auth ??= AuthClient(_dio, baseUrl: _baseUrl);
 
@@ -43,6 +49,8 @@ class KorramApi {
 
   FriendsClient get friends => _friends ??= FriendsClient(_dio, baseUrl: _baseUrl);
 
+  GiftsClient get gifts => _gifts ??= GiftsClient(_dio, baseUrl: _baseUrl);
+
   HealthClient get health => _health ??= HealthClient(_dio, baseUrl: _baseUrl);
 
   InterestsClient get interests => _interests ??= InterestsClient(_dio, baseUrl: _baseUrl);
@@ -51,7 +59,11 @@ class KorramApi {
 
   MeClient get me => _me ??= MeClient(_dio, baseUrl: _baseUrl);
 
+  PurchasesClient get purchases => _purchases ??= PurchasesClient(_dio, baseUrl: _baseUrl);
+
   ReportsClient get reports => _reports ??= ReportsClient(_dio, baseUrl: _baseUrl);
 
   SessionsClient get sessions => _sessions ??= SessionsClient(_dio, baseUrl: _baseUrl);
+
+  WalletClient get wallet => _wallet ??= WalletClient(_dio, baseUrl: _baseUrl);
 }

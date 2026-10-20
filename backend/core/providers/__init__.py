@@ -19,7 +19,10 @@ _REGISTRY = {
         "fake": "core.providers.media.FakeMediaProvider",
         "livekit": "core.providers.media.LiveKitMediaProvider",
     },
-    "store_receipts": {"fake": "core.providers.store_receipts.FakeStoreReceiptsProvider"},
+    "store_receipts": {
+        "fake": "core.providers.store_receipts.FakeStoreReceiptsProvider",
+        "real": "core.providers.store_receipts.RealStoreReceiptsProvider",
+    },
     "paystack": {"fake": "core.providers.paystack.FakePaystackProvider"},
     "push": {
         "fake": "core.providers.push.FakePushProvider",

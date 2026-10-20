@@ -7,7 +7,10 @@ import 'package:go_router/go_router.dart';
 import '../../router/routes.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/onboarding_scaffold.dart';
+import '../../api/api.dart' show Gift;
 import '../friends/friends_controller.dart';
+import '../wallet/gift_sheet.dart';
+import '../wallet/wallet_controller.dart';
 import 'chat_widgets.dart';
 import 'match_controller.dart';
 
@@ -72,6 +75,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     });
     final state = ref.watch(matchControllerProvider);
     final peer = state.peer;
+    final giftNames = {
+      for (final g in ref.watch(giftCatalogueProvider).value ?? const <Gift>[]) g.slug: g.name,
+    };
     final ended = state.phase != MatchPhase.matched || state.sessionId != widget.sessionId;
     final insets = MediaQuery.viewPaddingOf(context);
 
@@ -92,26 +98,34 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               top: math.max(52, insets.top + 8),
             ),
             Expanded(
-              child: ListView(
-                controller: _scroll,
-                padding: const EdgeInsets.all(KSpacing.lg),
+              child: Stack(
                 children: [
-                  Center(child: ChatBanner(shared: peer?.sharedInterests ?? const [])),
-                  for (final m in state.messages) ...[
-                    const SizedBox(height: 10),
-                    MessageBubble(message: m),
-                  ],
-                  if (ended && peer != null) ...[
-                    const SizedBox(height: KSpacing.lg),
-                    Center(
-                      child: Text(
-                        state.endReason == 'moderation'
-                            ? 'This chat was ended for safety'
-                            : '${peer.firstName} left the chat',
-                        style: KType.small.copyWith(color: KColors.muted),
-                      ),
-                    ),
-                  ],
+                  ListView(
+                    controller: _scroll,
+                    padding: const EdgeInsets.all(KSpacing.lg),
+                    children: [
+                      Center(child: ChatBanner(shared: peer?.sharedInterests ?? const [])),
+                      for (final m in state.messages) ...[
+                        const SizedBox(height: 10),
+                        MessageBubble(message: m, peerName: peer?.firstName, giftNames: giftNames),
+                      ],
+                      if (ended && peer != null) ...[
+                        const SizedBox(height: KSpacing.lg),
+                        Center(
+                          child: Text(
+                            state.endReason == 'moderation'
+                                ? 'This chat was ended for safety'
+                                : '${peer.firstName} left the chat',
+                            style: KType.small.copyWith(color: KColors.muted),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  Align(
+                    alignment: const Alignment(0, -0.3),
+                    child: GiftMoment(peerName: peer?.firstName ?? '', sessionId: widget.sessionId),
+                  ),
                 ],
               ),
             ),
@@ -153,6 +167,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 bottom: math.max(30, insets.bottom + 10),
                 onChanged: (_) => _controller.typing(),
                 onSend: () => _send(),
+                onGift: () =>
+                    showGiftSheet(context, sessionId: widget.sessionId, backLabel: 'Back to chat'),
               ),
             ],
           ],

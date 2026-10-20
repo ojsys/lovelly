@@ -181,6 +181,33 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/chats/{chat_id}/gifts:
+    post:
+      operationId: chats_gifts_create
+      parameters:
+      - in: path
+        name: chat_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - chats
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GiftSendRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GiftSent'
+          description: ''
   /api/v1/chats/{chat_id}/messages:
     get:
       operationId: chats_messages_retrieve
@@ -281,6 +308,22 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/gifts:
+    get:
+      operationId: gifts_list
+      tags:
+      - gifts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Gift'
+          description: ''
   /api/v1/health:
     get:
       operationId: health_retrieve
@@ -393,6 +436,38 @@ paths:
         required: true
       tags:
       - me
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/me/invite:
+    get:
+      operationId: me_invite_retrieve
+      tags:
+      - me
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invite'
+          description: ''
+  /api/v1/me/invite/redeem:
+    post:
+      operationId: me_invite_redeem_create
+      description: 'Before verification: the code the app was installed or opened
+        with (MN-3).'
+      tags:
+      - me
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InviteRedeemRequest'
+        required: true
       security:
       - jwtAuth: []
       responses:
@@ -616,6 +691,26 @@ paths:
               schema:
                 $ref: '#/components/schemas/VerificationState'
           description: ''
+  /api/v1/purchases/verify:
+    post:
+      operationId: purchases_verify_create
+      tags:
+      - purchases
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurchaseVerifyRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurchaseResult'
+          description: ''
   /api/v1/reports:
     post:
       operationId: reports_create
@@ -660,6 +755,33 @@ paths:
               schema:
                 $ref: '#/components/schemas/SessionDetail'
           description: ''
+  /api/v1/sessions/{session_id}/gifts:
+    post:
+      operationId: sessions_gifts_create
+      parameters:
+      - in: path
+        name: session_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - sessions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GiftSendRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GiftSent'
+          description: ''
   /api/v1/sessions/{session_id}/media-token:
     post:
       operationId: sessions_media_token_create
@@ -681,6 +803,70 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MediaToken'
+          description: ''
+  /api/v1/wallet:
+    get:
+      operationId: wallet_retrieve
+      tags:
+      - wallet
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wallet'
+          description: ''
+  /api/v1/wallet/claim-daily:
+    post:
+      operationId: wallet_claim_daily_create
+      tags:
+      - wallet
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wallet'
+          description: ''
+  /api/v1/wallet/ledger:
+    get:
+      operationId: wallet_ledger_retrieve
+      parameters:
+      - in: query
+        name: before
+        schema:
+          type: string
+        description: 'ISO time: older than this'
+      tags:
+      - wallet
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ledger'
+          description: ''
+  /api/v1/wallet/packs:
+    get:
+      operationId: wallet_packs_list
+      tags:
+      - wallet
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pack'
           description: ''
 components:
   schemas:
@@ -805,6 +991,20 @@ components:
       - seen_at
       - sender_id
       - sent_at
+    Checkin:
+      type: object
+      properties:
+        claimed_today:
+          type: boolean
+        day:
+          type: integer
+          description: Day N of 7 (today's, or the one a claim gives)
+        coins:
+          type: integer
+      required:
+      - claimed_today
+      - coins
+      - day
     DeviceRequest:
       type: object
       properties:
@@ -923,6 +1123,48 @@ components:
         * `woman` - Woman
         * `man` - Man
         * `other` - Other
+    Gift:
+      type: object
+      properties:
+        slug:
+          type: string
+        name:
+          type: string
+        cost:
+          type: integer
+      required:
+      - cost
+      - name
+      - slug
+    GiftSendRequestRequest:
+      type: object
+      properties:
+        gift:
+          type: string
+          minLength: 1
+          description: Gift slug
+        idempotency_key:
+          type: string
+          minLength: 1
+          description: Made once per tap, so a retry never charges twice
+          maxLength: 64
+      required:
+      - gift
+      - idempotency_key
+    GiftSent:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        gift:
+          $ref: '#/components/schemas/Gift'
+        balance:
+          type: integer
+      required:
+      - balance
+      - gift
+      - id
     Health:
       type: object
       properties:
@@ -946,6 +1188,32 @@ components:
       required:
       - label
       - slug
+    Invite:
+      type: object
+      properties:
+        code:
+          type: string
+        link:
+          type: string
+        coins:
+          type: integer
+        rewarded:
+          type: integer
+          description: Friends who joined and earned you coins
+      required:
+      - code
+      - coins
+      - link
+      - rewarded
+    InviteRedeemRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 12
+      required:
+      - code
     LastMessage:
       type: object
       properties:
@@ -963,6 +1231,56 @@ components:
       - kind
       - mine
       - sent_at
+    Ledger:
+      type: object
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/LedgerEntry'
+        more:
+          type: boolean
+      required:
+      - entries
+      - more
+    LedgerEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        delta:
+          type: integer
+        reason:
+          $ref: '#/components/schemas/LedgerReasonEnum'
+        ref_id:
+          type: string
+          description: 'For gifts: the gift slug'
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - created_at
+      - delta
+      - id
+      - reason
+      - ref_id
+    LedgerReasonEnum:
+      enum:
+      - purchase
+      - purchase_bonus
+      - gift
+      - daily_checkin
+      - invite_reward
+      - refund
+      type: string
+      description: |-
+        * `purchase` - Coin pack
+        * `purchase_bonus` - Pack bonus
+        * `gift` - Gift sent
+        * `daily_checkin` - Daily check-in
+        * `invite_reward` - Invite reward
+        * `refund` - Refund
     MediaToken:
       type: object
       properties:
@@ -1089,6 +1407,27 @@ components:
       required:
       - code
       - phone
+    Pack:
+      type: object
+      properties:
+        product_id:
+          type: string
+          description: The store product id; the price comes from the store
+        coins:
+          type: integer
+          description: Total coins, bonus included
+        bonus:
+          type: integer
+        label:
+          type: string
+        tag:
+          type: string
+      required:
+      - bonus
+      - coins
+      - label
+      - product_id
+      - tag
     PatchedProfileUpdateRequest:
       type: object
       description: FR-19 limits are checked in the service layer (accounts.services.profile).
@@ -1176,6 +1515,51 @@ components:
       description: |-
         * `google` - Google
         * `apple` - Apple
+    PurchaseResult:
+      type: object
+      properties:
+        status:
+          allOf:
+          - $ref: '#/components/schemas/PurchaseStatusEnum'
+          description: |-
+            credited: finish the purchase in the store. pending: wait for payment.
+
+            * `pending` - Pending payment
+            * `credited` - Credited
+            * `refunded` - Refunded
+        balance:
+          type: integer
+      required:
+      - balance
+      - status
+    PurchaseStatusEnum:
+      enum:
+      - pending
+      - credited
+      - refunded
+      type: string
+      description: |-
+        * `pending` - Pending payment
+        * `credited` - Credited
+        * `refunded` - Refunded
+    PurchaseVerifyRequestRequest:
+      type: object
+      properties:
+        store:
+          $ref: '#/components/schemas/StoreEnum'
+        product_id:
+          type: string
+          minLength: 1
+          maxLength: 60
+        token:
+          type: string
+          minLength: 1
+          description: 'Google: the purchase token. Apple: the StoreKit 2 signed transaction
+            (JWS).'
+      required:
+      - product_id
+      - store
+      - token
     ReasonEnum:
       enum:
       - minor
@@ -1311,6 +1695,14 @@ components:
         * `active` - active
         * `suspended` - suspended
         * `banned` - banned
+    StoreEnum:
+      enum:
+      - apple
+      - google
+      type: string
+      description: |-
+        * `apple` - App Store
+        * `google` - Google Play
     TokenRefresh:
       type: object
       properties:
@@ -1352,6 +1744,19 @@ components:
       - next_step
       - phone_verified
       - selfie
+    Wallet:
+      type: object
+      properties:
+        balance:
+          type: integer
+        spent_today:
+          type: integer
+        checkin:
+          $ref: '#/components/schemas/Checkin'
+      required:
+      - balance
+      - checkin
+      - spent_today
   securitySchemes:
     jwtAuth:
       type: http

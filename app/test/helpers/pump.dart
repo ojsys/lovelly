@@ -11,7 +11,11 @@ import 'package:korram/features/call/call_engine.dart';
 import 'package:korram/features/friends/friends_repository.dart';
 import 'package:korram/features/friends/profile_screen.dart';
 import 'package:korram/features/home/home_data.dart';
+import 'package:korram/features/wallet/coin_store_screen.dart';
+import 'package:korram/features/wallet/wallet_repository.dart';
+import 'package:korram/platform/invite_source.dart';
 import 'package:korram/platform/push.dart';
+import 'package:korram/platform/store_billing.dart';
 import 'package:korram/platform/device_id.dart';
 import 'package:korram/platform/permissions.dart';
 import 'package:korram/platform/selfie_camera.dart';
@@ -30,6 +34,10 @@ class TestApp {
   final freshTokens = <String>[];
   final friends = FakeFriendsRepository();
   final push = FakePushService();
+  final wallet = FakeWalletRepository();
+  final billing = FakeStoreBilling();
+  final invites = FakeInviteSource();
+  final shared = <String>[];
   String? pickedPhoto = '/tmp/picked.jpg';
   int online = 12480;
   MyProfile profile = const MyProfile(
@@ -86,6 +94,10 @@ Future<TestApp> pumpApp(
         friendsRepositoryProvider.overrideWithValue(app.friends),
         clockProvider.overrideWithValue(() => DateTime(2026, 10, 20, 14, 14)),
         pushServiceProvider.overrideWithValue(app.push),
+        walletRepositoryProvider.overrideWithValue(app.wallet),
+        storeBillingProvider.overrideWithValue(app.billing),
+        inviteSourceProvider.overrideWithValue(app.invites),
+        shareProvider.overrideWithValue((text) async => app.shared.add(text)),
         photoPickerProvider.overrideWithValue(() async => app.pickedPhoto),
         callEngineProvider.overrideWithValue(app.engine),
         mediaTokenFetcherProvider.overrideWithValue((id) async {

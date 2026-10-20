@@ -100,12 +100,42 @@ wheels = [
 ]
 
 [[package]]
+name = "app-store-server-library"
+version = "3.1.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "asn1" },
+    { name = "attrs" },
+    { name = "cattrs" },
+    { name = "cryptography" },
+    { name = "pyjwt" },
+    { name = "pyopenssl" },
+    { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/8c/c2/1b2b39f910b6359dd1954dd6e6ae050b1e9e8e57d17f57efb32afdd713eb/app_store_server_library-3.1.2.tar.gz", hash = "sha256:0b9005c93298674c934dfa9bc164cd44bfc3f43a8d0dc3834eaf6f66c3572d45", size = 90451, upload-time = "2026-06-01T18:36:37.376Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/62/f9/1908c439040359869a42ba2f4aa3bb80134cc929e03de1b4d33a6c2d4194/app_store_server_library-3.1.2-py3-none-any.whl", hash = "sha256:8007b3dca89fd08a1123fae2ffdbe7bc72b99a7eabfb0a32e21b45a344159e62", size = 131461, upload-time = "2026-06-01T18:36:35.946Z" },
+]
+
+[[package]]
 name = "asgiref"
 version = "3.12.1"
 source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/e6/26/3b59f2bdae5f640389becb1f673cded775287f5fc4f816309d9ca9a3f93d/asgiref-3.12.1.tar.gz", hash = "sha256:59dcb51c272ad209d59bed5708a64a333083e86017d7fcdd67498eeab7784340", size = 42378, upload-time = "2026-07-14T09:56:18.087Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c0/1b/54f4ad77cd8a584fa70746c47df988e002cf1ee1eba43364d46f87803647/asgiref-3.12.1-py3-none-any.whl", hash = "sha256:fe386d1c2bff7259ea95929266d12a8cf9a8b5a1c2598402967d8792e7a7c094", size = 25478, upload-time = "2026-07-14T09:56:16.926Z" },
+]
+
+[[package]]
+name = "asn1"
+version = "3.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "enum-compat" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/cc/9b/17b20f2ccdeca7f6e61d201a5bc3bd7cafc3d97889e7b3dd0ef673177cf1/asn1-3.2.0.tar.gz", hash = "sha256:0860ad40bbffd6475d2d54b82f50d9196e31b7cee985812ed9559b40e7d809c7", size = 51343, upload-time = "2026-02-07T16:34:18.223Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/26/50/fed4dc9ac21c77ddbb7893093d4208c7da8a35b83b13ebb880b1633c3349/asn1-3.2.0-py2.py3-none-any.whl", hash = "sha256:3c1788508d49f4f101c3c6b842b5a6d0fc9f68e2782e891d41af19bf321fedbb", size = 17781, upload-time = "2026-02-07T16:34:16.875Z" },
 ]
 
 [[package]]
@@ -187,6 +217,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/ce/c8/b508359d1f3846a918c06807a9ae27eee063f904559269e42ccde9de09ea/botocore-1.43.114.tar.gz", hash = "sha256:f366fa4db518775632ad1eb128cd8203ca46396cecf37209d904f0bbc049ce90", size = 16369844, upload-time = "2026-10-14T19:24:17.683Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/9a/41/7c6fa7ac5fcfd5ea3c6f32aab001942da32b184a210f39042778cb1ad8ed/botocore-1.43.114-py3-none-any.whl", hash = "sha256:d1c441a22e93e158de5b1e026205f5d6d67a4545d10540c5090c62dccb3a9eca", size = 16067885, upload-time = "2026-10-14T19:24:14.629Z" },
+]
+
+[[package]]
+name = "cattrs"
+version = "26.2.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "attrs" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/23/75/e72b839c3dc869c990b4842f3dba730bdcdf5215f68fc7955edf849a1792/cattrs-26.2.1.tar.gz", hash = "sha256:679132bfdc225c5ee40c024fc42519954767c387f950dc6751946c586bccdc6d", size = 525617, upload-time = "2026-09-26T20:53:21.114Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e8/cf/22794a399d99480486120e26e879ef008e21f5e85274c2ed591d568bb326/cattrs-26.2.1-py3-none-any.whl", hash = "sha256:a12aaa3453dc8f633a815293179f08b7421ed18d2575c459c3c736f840beac24", size = 74843, upload-time = "2026-09-26T20:53:19.767Z" },
 ]
 
 [[package]]
@@ -571,6 +614,15 @@ wheels = [
 ]
 
 [[package]]
+name = "enum-compat"
+version = "0.0.3"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/41/46/8ed2368976d934652d8f33f1fdd86f5580fab45e890c90a848e83097a093/enum-compat-0.0.3.tar.gz", hash = "sha256:3677daabed56a6f724451d585662253d8fb4e5569845aafa8bb0da36b1a8751e", size = 1389, upload-time = "2019-10-14T18:48:35.264Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/55/ae/467bc4509246283bb59746e21a1a2f5a8aecbef56b1fa6eaca78cd438c8b/enum_compat-0.0.3-py3-none-any.whl", hash = "sha256:88091b617c7fc3bbbceae50db5958023c48dc40b50520005aa3bf27f8f7ea157", size = 1322, upload-time = "2019-10-14T18:48:37.663Z" },
+]
+
+[[package]]
 name = "frozenlist"
 version = "1.8.0"
 source = { registry = "https://pypi.org/simple" }
@@ -750,6 +802,7 @@ name = "korram-backend"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "app-store-server-library" },
     { name = "celery", extra = ["redis"] },
     { name = "channels", extra = ["daphne"] },
     { name = "channels-redis" },
@@ -783,6 +836,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "app-store-server-library", specifier = ">=3.1.2" },
     { name = "celery", extras = ["redis"], specifier = ">=5.4" },
     { name = "channels", extras = ["daphne"], specifier = ">=4.2" },
     { name = "channels-redis", specifier = ">=4.2" },

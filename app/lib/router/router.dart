@@ -8,6 +8,7 @@ import '../features/friends/friend_chat_screen.dart';
 import '../features/friends/friends_screen.dart';
 import '../features/friends/profile_screen.dart';
 import '../features/home/home_screen.dart';
+import '../features/wallet/coin_store_screen.dart';
 import '../features/match/chat_screen.dart';
 import '../features/call/video_call_screen.dart';
 import '../features/call/voice_call_screen.dart';
@@ -28,8 +29,6 @@ import 'routes.dart';
 
 /// Screens not built yet, keyed by route: (canvas number, design title, milestone).
 const _pending = <String, (String, String, String)>{
-  Routes.coins: ('10', 'Coin store', 'M6'),
-  Routes.gifts: ('11', 'In-call gifts', 'M6'),
   Routes.plus: ('12', 'Korram Plus', 'M7'),
   Routes.confirmCharge: ('13', 'Pay as you go — charge confirm', 'M7'),
 };
@@ -138,6 +137,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(path: Routes.videoCall, builder: (context, state) => const VideoCallScreen()),
       GoRoute(path: Routes.voiceCall, builder: (context, state) => const VoiceCallScreen()),
+      GoRoute(path: Routes.coins, builder: (context, state) => const CoinStoreScreen()),
+      GoRoute(path: Routes.coinHistory, builder: (context, state) => const CoinHistoryScreen()),
       for (final MapEntry(key: path, value: (number, title, milestone)) in _pending.entries)
         GoRoute(
           path: path,

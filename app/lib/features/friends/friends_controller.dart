@@ -112,6 +112,7 @@ class FriendChatController extends Notifier<FriendChatState> {
     flagged: m.flagged,
     flagReason: m.flagReason,
     system: m.kind == 'system',
+    gift: m.kind == 'gift',
   );
 
   @override

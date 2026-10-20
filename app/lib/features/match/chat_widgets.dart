@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../theme/icons.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/onboarding_scaffold.dart';
+import '../wallet/gift_icons.dart';
 import 'match_controller.dart';
 
 // Chat building blocks (06), shared by stranger chat and friend chat.
@@ -154,9 +155,13 @@ class ChatBanner extends StatelessWidget {
 }
 
 class MessageBubble extends StatelessWidget {
-  const MessageBubble({super.key, required this.message});
+  const MessageBubble({super.key, required this.message, this.peerName, this.giftNames});
 
   final ChatMessage message;
+
+  /// For gift lines: "Kwame sent you a Jollof" (MN-5).
+  final String? peerName;
+  final Map<String, String>? giftNames;
 
   static const _warnings = {
     'phone': 'This message has a phone number. Only share contact details if you trust them.',
@@ -170,6 +175,34 @@ class MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (message.gift) {
+      final name = withArticle(giftNames?[message.body] ?? 'gift');
+      final (icon, color) = giftLook(message.body);
+      return Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: KColors.surface,
+            borderRadius: BorderRadius.circular(KRadius.md),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              KIconView(icon, size: 18, color: color, stroke: 1.8),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  message.mine
+                      ? 'You sent ${peerName ?? 'them'} $name · ${_time(context)}'
+                      : '${peerName ?? 'They'} sent you $name · ${_time(context)}',
+                  style: KType.small.copyWith(height: 1.2, color: KColors.text),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     if (message.system) {
       return Center(
         child: Text(
@@ -304,12 +337,16 @@ class ChatComposer extends StatelessWidget {
     required this.bottom,
     required this.onChanged,
     required this.onSend,
+    this.onGift,
   });
 
   final TextEditingController controller;
   final double bottom;
   final ValueChanged<String> onChanged;
   final VoidCallback onSend;
+
+  /// Opens the gift sheet (11) from the chat (06 design).
+  final VoidCallback? onGift;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -319,7 +356,26 @@ class ChatComposer extends StatelessWidget {
     ),
     child: Row(
       children: [
-        // The gift button arrives with coins (M6).
+        if (onGift != null) ...[
+          Semantics(
+            button: true,
+            label: 'Send a gift',
+            excludeSemantics: true,
+            child: Material(
+              color: KColors.surface,
+              shape: const CircleBorder(),
+              child: InkWell(
+                customBorder: const CircleBorder(),
+                onTap: onGift,
+                child: const SizedBox.square(
+                  dimension: 44,
+                  child: Center(child: KIconView(KIcon.gift, size: 20, color: KColors.gold)),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: KSpacing.sm),
+        ],
         Expanded(
           child: TextField(
             controller: controller,

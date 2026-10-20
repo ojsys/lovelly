@@ -85,10 +85,17 @@ that's configured with hosting, not in local dev (docs/questions.md #24).
 | `flutter run --dart-define` | `SOCIAL_SIGN_IN` | `fake` (default), `real`, `off` |
 | `infra/.env` | `PROVIDER_PUSH` | `fake` (default: pushes are logged) / `fcm` with `FCM_PROJECT_ID` and `FCM_CREDENTIALS_JSON` (service-account key) |
 | `flutter run --dart-define` | `PUSH` | unset (default: no Firebase) / `fcm` (needs `google-services.json` / `GoogleService-Info.plist`) |
+| `infra/.env` | `PROVIDER_STORE_RECEIPTS` | `fake` (default: tokens `fake:<product>:<txn>`) / `real` with `PLAY_PACKAGE_NAME`, `PLAY_CREDENTIALS_JSON`, `PLAY_RTDN_SECRET`, `APPLE_BUNDLE_ID`, `APPLE_APP_ID`, `APPLE_ENVIRONMENT`, `APPLE_ROOT_CERTS_DIR` |
 
 In development the phone code is printed in the API logs:
 `docker compose -f infra/docker-compose.yml logs api | grep "fake sms code"`.
 Pushes to friends who are offline are logged the same way: `grep "fake push to"`.
+
+**Coins (M6).** Store webhooks are `POST /api/v1/webhooks/google?secret=…` (Pub/Sub push) and
+`POST /api/v1/webhooks/apple` (App Store Server Notifications v2); in development they need a
+public HTTPS tunnel. The gift catalogue is edited in Django admin. Check the ledger with
+`docker compose -f infra/docker-compose.yml exec api python manage.py check_ledger` (also runs
+nightly).
 Manual selfie reviews are approved or rejected in Django admin at
 http://localhost:8100/django-admin/ (create a login with
 `docker compose -f infra/docker-compose.yml exec api python manage.py createsuperuser`).

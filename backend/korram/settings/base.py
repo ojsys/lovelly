@@ -108,6 +108,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "accounts.tasks.purge_verified_selfies",
         "schedule": 60 * 60 * 6,
     },
+    "check-ledger": {
+        "task": "wallet.tasks.check_ledger",
+        "schedule": 60 * 60 * 24,
+    },
 }
 
 # Private S3-compatible storage (MinIO in development). Files are served via signed URLs.
@@ -227,6 +231,13 @@ SPECTACULAR_SETTINGS = {
     # Separate request/response components, so read-only and file fields generate correctly.
     "COMPONENT_SPLIT_REQUEST": True,
     "SERVE_INCLUDE_SCHEMA": False,
+    # Stable names for enums whose field names clash (the Dart client uses these names).
+    "ENUM_NAME_OVERRIDES": {
+        "ReasonEnum": "safety.models.Report.Reason",
+        "StatusEnum": ["active", "suspended", "banned"],
+        "LedgerReasonEnum": "wallet.models.CoinLedger.Reason",
+        "PurchaseStatusEnum": "billing.models.Purchase.Status",
+    },
 }
 
 SENTRY_DSN = env("SENTRY_DSN", default="")
@@ -247,3 +258,15 @@ LOGGING = {
     "handlers": {"console": {"class": "logging.StreamHandler", "formatter": "structured"}},
     "root": {"handlers": ["console"], "level": "INFO"},
 }
+
+# "Invite a friend" links (MN-3). Placeholder until the app has a domain with app links.
+INVITE_BASE_URL = env("INVITE_BASE_URL", default="https://example.com/korram/i")
+
+# In-app purchases (MN-4), PROVIDER_STORE_RECEIPTS=real.
+PLAY_PACKAGE_NAME = env("PLAY_PACKAGE_NAME", default="")
+PLAY_CREDENTIALS_JSON = env("PLAY_CREDENTIALS_JSON", default="")
+PLAY_RTDN_SECRET = env("PLAY_RTDN_SECRET", default="")
+APPLE_BUNDLE_ID = env("APPLE_BUNDLE_ID", default="")
+APPLE_APP_ID = env("APPLE_APP_ID", default="")
+APPLE_ENVIRONMENT = env("APPLE_ENVIRONMENT", default="Sandbox")
+APPLE_ROOT_CERTS_DIR = env("APPLE_ROOT_CERTS_DIR", default="/run/secrets/apple-roots")

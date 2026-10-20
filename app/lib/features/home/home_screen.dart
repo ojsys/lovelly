@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../config/clock.dart';
 import '../../router/routes.dart';
+import '../wallet/wallet_controller.dart';
 import '../../theme/icons.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/format.dart';
@@ -70,8 +71,10 @@ class HomeScreen extends ConsumerWidget {
                         ],
                       ),
                     ),
-                    // Coins arrive in M6; no balance can exist before then.
-                    _CoinsPill(balance: 0, onTap: () => context.push(Routes.coins)),
+                    _CoinsPill(
+                      balance: ref.watch(walletControllerProvider).value?.balance,
+                      onTap: () => context.push(Routes.coins),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 22),
@@ -145,13 +148,13 @@ class _Avatar extends StatelessWidget {
 class _CoinsPill extends StatelessWidget {
   const _CoinsPill({required this.balance, required this.onTap});
 
-  final int balance;
+  final int? balance;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) => Semantics(
     button: true,
-    label: 'Coins: $balance. Open store',
+    label: 'Coins: ${balance ?? 'loading'}. Open store',
     excludeSemantics: true,
     child: Material(
       color: KColors.surface,
@@ -168,7 +171,7 @@ class _CoinsPill extends StatelessWidget {
               const KIconView(KIcon.coin, size: 18, color: KColors.gold),
               const SizedBox(width: KSpacing.sm),
               Text(
-                '$balance',
+                balance == null ? '…' : '$balance',
                 style: KType.button.copyWith(fontWeight: FontWeight.w700, color: KColors.gold),
               ),
             ],

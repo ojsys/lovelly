@@ -83,6 +83,10 @@ def _refresh_verified(user: User) -> None:
     if verified and not profile.is_verified:
         profile.is_verified, profile.verified_at = True, timezone.now()
         profile.save(update_fields=["is_verified", "verified_at"])
+        # MN-3: whoever invited them earns their coins now.
+        from wallet.free_coins import reward_inviter
+
+        transaction.on_commit(lambda: reward_inviter(user))
 
 
 def tokens_for(user: User) -> dict:

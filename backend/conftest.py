@@ -69,6 +69,8 @@ def events(monkeypatch):
     monkeypatch.setattr("safety.moderation.send_to_user", record)
     monkeypatch.setattr("chat.friends.send_to_user", record)
     monkeypatch.setattr("matching.friend_calls.send_to_user", record)
+    monkeypatch.setattr("wallet.services.send_to_user", record)
+    monkeypatch.setattr("wallet.gifts.send_to_user", record)
 
     class Events(list):
         def of(self, user, event_type=None):
@@ -144,3 +146,21 @@ def friends_pair(make_user, redis_db, events):
     friends.accept(b, f.id)
     f.refresh_from_db()
     return f, a, b, s
+
+
+@pytest.fixture
+def acknowledged():
+    """Purchases the fake store was told we delivered (MN-4)."""
+    from core.providers.store_receipts import FakeStoreReceiptsProvider
+
+    FakeStoreReceiptsProvider.acknowledged.clear()
+    return FakeStoreReceiptsProvider.acknowledged
+
+
+def api_client(user):
+    from rest_framework.test import APIClient
+    from rest_framework_simplejwt.tokens import AccessToken
+
+    c = APIClient()
+    c.credentials(HTTP_AUTHORIZATION=f"Bearer {AccessToken.for_user(user)}")
+    return c

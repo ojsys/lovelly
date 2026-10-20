@@ -21,6 +21,7 @@ ThemeData buildKorramTheme() {
     colorScheme: scheme,
     scaffoldBackgroundColor: KColors.background,
     fontFamily: KFonts.body,
+    fontFamilyFallback: KFonts.bodyFallback,
     textTheme: const TextTheme(
       displayLarge: KType.hero,
       headlineLarge: KType.title,

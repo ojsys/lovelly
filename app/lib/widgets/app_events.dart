@@ -8,6 +8,10 @@ import '../auth/session.dart';
 import '../features/friends/friends_controller.dart';
 import '../features/friends/friends_repository.dart';
 import '../features/match/match_controller.dart';
+import '../api/api.dart';
+import '../features/wallet/wallet_controller.dart';
+import '../features/wallet/wallet_repository.dart';
+import '../platform/invite_source.dart';
 import '../platform/push.dart';
 import '../router/router.dart';
 import '../router/routes.dart';
@@ -35,6 +39,31 @@ class _AppEventsState extends ConsumerState<AppEvents> {
   void dispose() {
     _opened?.cancel();
     super.dispose();
+  }
+
+  bool _inviteTried = false;
+
+  /// MN-3: a new account passes on the invite code it was installed with (once a run;
+  /// the server ignores codes after verification).
+  Future<void> _redeemInvite() async {
+    if (_inviteTried) return;
+    _inviteTried = true;
+    final code = await ref.read(inviteSourceProvider).code();
+    if (code == null) return;
+    try {
+      await ref.read(walletRepositoryProvider).redeemInvite(code);
+    } on ApiFailure {
+      // Unknown or own code, or too late: nothing to tell the user.
+    }
+  }
+
+  void _onStep(OnboardingStep? step) {
+    if (step == OnboardingStep.basics || step == OnboardingStep.selfie) _redeemInvite();
+    if (step == OnboardingStep.done) {
+      _startPush();
+      // MN-4: purchases that finished while the app was closed are delivered now.
+      ref.read(storeControllerProvider.notifier).listen();
+    }
   }
 
   void _startPush() {
@@ -67,12 +96,9 @@ class _AppEventsState extends ConsumerState<AppEvents> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen(sessionProvider, (_, next) {
-      if (next.value?.step == OnboardingStep.done) _startPush();
-    });
-    if (ref.read(sessionProvider).value?.step == OnboardingStep.done) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _startPush());
-    }
+    ref.listen(sessionProvider, (_, next) => _onStep(next.value?.step));
+    final step = ref.read(sessionProvider).value?.step;
+    if (step != null) WidgetsBinding.instance.addPostFrameCallback((_) => _onStep(step));
     ref.listen(callInviteProvider, (prev, next) {
       if (next.direction == InviteDirection.incoming &&
           prev?.direction != InviteDirection.incoming) {

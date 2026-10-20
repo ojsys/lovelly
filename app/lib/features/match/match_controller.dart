@@ -62,6 +62,7 @@ class ChatMessage {
     this.flagged = false,
     this.flagReason = '',
     this.system = false,
+    this.gift = false,
   });
 
   factory ChatMessage.fromJson(Map<String, dynamic> json, String myId) => ChatMessage(
@@ -73,6 +74,7 @@ class ChatMessage {
     flagged: json['flagged'] as bool? ?? false,
     flagReason: json['flag_reason'] as String? ?? '',
     system: json['kind'] == 'system',
+    gift: json['kind'] == 'gift',
   );
 
   final String id;
@@ -86,6 +88,9 @@ class ChatMessage {
   /// "Missed video call" and similar lines (not typed by anyone).
   final bool system;
 
+  /// A gift (MN-5); [body] is the gift's slug.
+  final bool gift;
+
   ChatMessage copyWith({bool? seen}) => ChatMessage(
     id: id,
     mine: mine,
@@ -95,6 +100,7 @@ class ChatMessage {
     flagged: flagged,
     flagReason: flagReason,
     system: system,
+    gift: gift,
   );
 }
 

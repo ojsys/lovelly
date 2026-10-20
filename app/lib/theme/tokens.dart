@@ -63,6 +63,14 @@ abstract final class KColors {
   /// Bottom navigation bar background.
   static const navBar = Color(0xFF131218);
 
+  /// Gift icon strokes (11) that aren't brand colours: Coffee and Jollof.
+  static const giftLatte = Color(0xFFE8B48A);
+  static const giftOrange = Color(0xFFFF8D5A);
+
+  /// 11: the call behind the gift sheet, and the "You sent …" pill.
+  static const giftScrim = Color(0x730F0E13);
+  static const toast = Color(0xBF0F0E13);
+
   /// Avatar placeholders (initials) and their text.
   static const avatarPlum = Color(0xFF2A2233);
   static const avatarPlumText = Color(0xFFD9D3E6);
@@ -93,6 +101,9 @@ abstract final class KFonts {
 
   /// Body text.
   static const body = 'DMSans';
+
+  /// DM Sans has no naira sign (₦); Bricolage Grotesque supplies it (and any other gap).
+  static const bodyFallback = [display];
 }
 
 /// Text styles. Sizes, weights, line heights and tracking from the canvas.
@@ -170,6 +181,7 @@ abstract final class KType {
   // Body — DM Sans.
   static const buttonLarge = TextStyle(
     fontFamily: KFonts.body,
+    fontFamilyFallback: KFonts.bodyFallback,
     fontWeight: FontWeight.w700,
     fontSize: 17,
   );
@@ -177,12 +189,14 @@ abstract final class KType {
   /// Body copy under onboarding titles.
   static const lead = TextStyle(
     fontFamily: KFonts.body,
+    fontFamilyFallback: KFonts.bodyFallback,
     fontWeight: FontWeight.w400,
     fontSize: 15,
     height: 1.5,
   );
   static const input = TextStyle(
     fontFamily: KFonts.body,
+    fontFamilyFallback: KFonts.bodyFallback,
     fontWeight: FontWeight.w500,
     fontSize: 16,
   );
@@ -194,39 +208,50 @@ abstract final class KType {
   );
   static const bodyLarge = TextStyle(
     fontFamily: KFonts.body,
+    fontFamilyFallback: KFonts.bodyFallback,
     fontWeight: FontWeight.w400,
     fontSize: 16,
     height: 1.5,
   );
   static const button = TextStyle(
     fontFamily: KFonts.body,
+    fontFamilyFallback: KFonts.bodyFallback,
     fontWeight: FontWeight.w500,
     fontSize: 15,
   );
   static const body = TextStyle(
     fontFamily: KFonts.body,
+    fontFamilyFallback: KFonts.bodyFallback,
     fontWeight: FontWeight.w400,
     fontSize: 14,
     height: 1.4,
   );
   static const caption = TextStyle(
     fontFamily: KFonts.body,
+    fontFamilyFallback: KFonts.bodyFallback,
     fontWeight: FontWeight.w400,
     fontSize: 13,
   );
   static const small = TextStyle(
     fontFamily: KFonts.body,
+    fontFamilyFallback: KFonts.bodyFallback,
     fontWeight: FontWeight.w400,
     fontSize: 12,
     height: 1.5,
   );
 
   /// Message time and status (11 px).
-  static const meta = TextStyle(fontFamily: KFonts.body, fontWeight: FontWeight.w400, fontSize: 11);
+  static const meta = TextStyle(
+    fontFamily: KFonts.body,
+    fontFamilyFallback: KFonts.bodyFallback,
+    fontWeight: FontWeight.w400,
+    fontSize: 11,
+  );
 
   /// Uppercase section labels ("6-DIGIT CODE", "WHAT HAPPENED?").
   static const label = TextStyle(
     fontFamily: KFonts.body,
+    fontFamilyFallback: KFonts.bodyFallback,
     fontWeight: FontWeight.w700,
     fontSize: 12,
     letterSpacing: 0.8,

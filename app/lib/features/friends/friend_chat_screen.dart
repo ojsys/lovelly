@@ -6,7 +6,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../router/routes.dart';
 import '../../theme/tokens.dart';
+import '../../api/api.dart' show Gift;
 import '../match/chat_widgets.dart';
+import '../wallet/gift_sheet.dart';
+import '../wallet/wallet_controller.dart';
 import '../match/match_controller.dart';
 import 'friends_controller.dart';
 
@@ -77,6 +80,9 @@ class _FriendChatScreenState extends ConsumerState<FriendChatScreen> {
     });
     final state = ref.watch(provider);
     final friend = state.friend;
+    final giftNames = {
+      for (final g in ref.watch(giftCatalogueProvider).value ?? const <Gift>[]) g.slug: g.name,
+    };
     final peer = friend == null
         ? null
         : Peer(
@@ -105,15 +111,27 @@ class _FriendChatScreenState extends ConsumerState<FriendChatScreen> {
           Expanded(
             child: state.loading
                 ? const Center(child: CircularProgressIndicator(color: KColors.coral))
-                : ListView(
-                    controller: _scroll,
-                    padding: const EdgeInsets.all(KSpacing.lg),
+                : Stack(
                     children: [
-                      if (!state.more) const Center(child: ChatBanner(shared: [])),
-                      for (final m in state.messages) ...[
-                        const SizedBox(height: 10),
-                        MessageBubble(message: m),
-                      ],
+                      ListView(
+                        controller: _scroll,
+                        padding: const EdgeInsets.all(KSpacing.lg),
+                        children: [
+                          if (!state.more) const Center(child: ChatBanner(shared: [])),
+                          for (final m in state.messages) ...[
+                            const SizedBox(height: 10),
+                            MessageBubble(
+                              message: m,
+                              peerName: friend?.firstName,
+                              giftNames: giftNames,
+                            ),
+                          ],
+                        ],
+                      ),
+                      Align(
+                        alignment: const Alignment(0, -0.3),
+                        child: GiftMoment(peerName: friend?.firstName ?? '', chatId: widget.chatId),
+                      ),
                     ],
                   ),
           ),
@@ -122,6 +140,7 @@ class _FriendChatScreenState extends ConsumerState<FriendChatScreen> {
             bottom: math.max(30, insets.bottom + 10),
             onChanged: (_) => _controller.typing(),
             onSend: () => _send(),
+            onGift: () => showGiftSheet(context, chatId: widget.chatId, backLabel: 'Back to chat'),
           ),
         ],
       ),

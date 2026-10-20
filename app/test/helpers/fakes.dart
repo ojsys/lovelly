@@ -7,7 +7,10 @@ import 'package:korram/auth/onboarding_repository.dart';
 import 'package:korram/auth/token_store.dart';
 import 'package:korram/features/call/call_engine.dart';
 import 'package:korram/features/friends/friends_repository.dart';
+import 'package:korram/features/wallet/wallet_repository.dart';
+import 'package:korram/platform/invite_source.dart';
 import 'package:korram/platform/push.dart';
+import 'package:korram/platform/store_billing.dart';
 import 'package:korram/platform/device_id.dart';
 import 'package:korram/platform/permissions.dart';
 import 'package:korram/platform/selfie_camera.dart';
@@ -438,4 +441,140 @@ class FakePushService implements PushService {
     started = true;
     await register('android', 'fcm-test-token');
   }
+}
+
+const giftCatalogue = [
+  Gift(slug: 'heart', name: 'Heart', cost: 5),
+  Gift(slug: 'coffee', name: 'Coffee', cost: 10),
+  Gift(slug: 'jollof', name: 'Jollof', cost: 20),
+  Gift(slug: 'star', name: 'Star', cost: 30),
+  Gift(slug: 'talking_drum', name: 'Talking drum', cost: 50),
+  Gift(slug: 'vibes', name: 'Vibes', cost: 80),
+  Gift(slug: 'crown', name: 'Crown', cost: 150),
+  Gift(slug: 'diamond', name: 'Diamond', cost: 300),
+];
+
+const coinPacks = [
+  Pack(productId: 'coins_100', coins: 100, bonus: 0, label: 'Starter', tag: ''),
+  Pack(productId: 'coins_550', coins: 550, bonus: 50, label: '+50 bonus', tag: 'Popular'),
+  Pack(productId: 'coins_1200', coins: 1200, bonus: 200, label: '+200 bonus', tag: ''),
+  Pack(productId: 'coins_3000', coins: 3000, bonus: 700, label: '+700 bonus', tag: 'Best value'),
+];
+
+/// Server side of coins in tests: a balance the fakes keep consistent.
+class FakeWalletRepository implements WalletRepository {
+  final calls = <String>[];
+  int balance = 240;
+  int spentToday = 0;
+  Checkin checkin = const Checkin(claimedToday: false, day: 3, coins: 10);
+  List<LedgerEntry> entries = [];
+  PurchaseStatusEnum purchaseStatus = PurchaseStatusEnum.credited;
+  ApiFailure? giftError;
+  ApiFailure? verifyError;
+
+  Wallet get _wallet => Wallet(balance: balance, spentToday: spentToday, checkin: checkin);
+
+  @override
+  Future<Wallet> wallet() async => _wallet;
+
+  @override
+  Future<Ledger> ledger({String? before}) async {
+    calls.add('ledger${before == null ? '' : ' before'}');
+    return Ledger(entries: before == null ? entries : const [], more: false);
+  }
+
+  @override
+  Future<Wallet> claimDaily() async {
+    calls.add('claimDaily');
+    if (!checkin.claimedToday) {
+      balance += checkin.coins;
+      checkin = Checkin(claimedToday: true, day: checkin.day, coins: checkin.coins);
+    }
+    return _wallet;
+  }
+
+  @override
+  Future<List<Pack>> packs() async => coinPacks;
+
+  @override
+  Future<Invite> invite() async => const Invite(
+    code: 'ADA23456',
+    link: 'https://example.com/korram/i/ADA23456',
+    coins: 50,
+    rewarded: 0,
+  );
+
+  @override
+  Future<void> redeemInvite(String code) async => calls.add('redeem $code');
+
+  @override
+  Future<List<Gift>> gifts() async => giftCatalogue;
+
+  @override
+  Future<GiftSent> sendGift(String gift, String key, {String? sessionId, String? chatId}) async {
+    calls.add('gift $gift ${sessionId ?? 'chat:$chatId'}');
+    if (giftError case final e?) throw e;
+    final g = giftCatalogue.firstWhere((x) => x.slug == gift);
+    balance -= g.cost;
+    return GiftSent(id: 'g1', gift: g, balance: balance);
+  }
+
+  @override
+  Future<PurchaseResult> verifyPurchase(String store, String productId, String token) async {
+    calls.add('verify $store $productId $token');
+    if (verifyError case final e?) throw e;
+    if (purchaseStatus == PurchaseStatusEnum.credited) {
+      balance += coinPacks.firstWhere((p) => p.productId == productId).coins;
+    }
+    return PurchaseResult(status: purchaseStatus, balance: balance);
+  }
+}
+
+class FakeStoreBilling implements StoreBilling {
+  final purchases_ = StreamController<StorePurchase>.broadcast();
+  final finished = <String>[];
+  final bought = <String>[];
+  bool storeAvailable = true;
+
+  @override
+  Future<bool> available() async => storeAvailable;
+
+  @override
+  Future<List<StoreProduct>> products(Set<String> ids) async => [
+    for (final (id, price) in [
+      ('coins_100', '₦1,500'),
+      ('coins_550', '₦7,500'),
+      ('coins_1200', '₦15,000'),
+      ('coins_3000', '₦35,000'),
+    ])
+      if (ids.contains(id)) StoreProduct(id, price),
+  ];
+
+  @override
+  Future<void> buy(String productId, {required String accountId}) async =>
+      bought.add('$productId for $accountId');
+
+  @override
+  Stream<StorePurchase> get purchases => purchases_.stream;
+
+  /// What the store reports after its purchase sheet.
+  void complete(String productId, {StorePurchaseStatus status = StorePurchaseStatus.purchased}) =>
+      purchases_.add(
+        StorePurchase(
+          productId: productId,
+          store: 'google',
+          token: 'tok-$productId',
+          status: status,
+        ),
+      );
+
+  @override
+  Future<void> finish(StorePurchase purchase) async => finished.add(purchase.token);
+}
+
+class FakeInviteSource implements InviteSource {
+  String? value;
+
+  @override
+  Future<String?> code() async => value;
 }

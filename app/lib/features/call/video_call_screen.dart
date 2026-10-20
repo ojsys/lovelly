@@ -7,6 +7,7 @@ import '../../theme/icons.dart';
 import '../../theme/tokens.dart';
 import '../friends/friends_controller.dart';
 import '../match/match_controller.dart';
+import '../wallet/gift_sheet.dart';
 import 'call_controller.dart';
 import 'call_engine.dart';
 import 'call_widgets.dart';
@@ -211,6 +212,18 @@ class _VideoCallScreenState extends ConsumerState<VideoCallScreen> with CallScre
                         ),
                 ),
               ),
+              // 11: the gift moment, over the call.
+              Positioned(
+                top: 230,
+                left: 16,
+                right: 16,
+                child: Center(
+                  child: GiftMoment(
+                    peerName: match.peer?.firstName ?? '',
+                    sessionId: call.sessionId,
+                  ),
+                ),
+              ),
               Positioned(
                 top: math.max(52, insets.top + 8) + 310,
                 left: 0,
@@ -243,7 +256,13 @@ class _VideoCallScreenState extends ConsumerState<VideoCallScreen> with CallScre
                           foreground: engine.cameraOn ? KColors.text : KColors.background,
                           onPressed: controller.toggleCamera,
                         ),
-                        // Gift arrives with coins (M6).
+                        if (call.sessionId != null)
+                          CallButton(
+                            icon: KIcon.giftBow,
+                            label: 'Send a gift',
+                            foreground: KColors.gold,
+                            onPressed: () => showGiftSheet(context, sessionId: call.sessionId),
+                          ),
                         if (match.chatId == null && call.sessionId != null)
                           _AddFriendButton(sessionId: call.sessionId!),
                         CallButton(
