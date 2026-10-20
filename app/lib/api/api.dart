@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../auth/token_store.dart';
 import '../config/app_config.dart';
-import 'generated/export.dart';
+import 'package:korram_api/korram_api.dart';
 
-export 'generated/export.dart';
+export 'package:korram_api/korram_api.dart';
 
 /// A server error with its stable `code` (see backend core/exceptions.py).
 class ApiFailure implements Exception {

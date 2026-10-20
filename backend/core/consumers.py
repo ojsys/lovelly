@@ -8,6 +8,7 @@ from accounts.models import User
 from chat import services as chat
 from core.exceptions import ApiError
 from core.realtime import user_group
+from matching import calls
 from matching import service as matching
 from matching.models import MatchSession
 
@@ -54,6 +55,18 @@ def _handle(user_id, event: dict) -> dict | None:
             return None
         case "chat.typing":
             chat.typing(event.get("session_id"), user)
+            return None
+        case "reveal.request" | "reveal.accept":
+            calls.request_reveal(event.get("session_id"), user)
+            return None
+        case "upgrade.request":
+            calls.request_upgrade(event.get("session_id"), user)
+            return None
+        case "upgrade.accept":
+            calls.accept_upgrade(event.get("session_id"), user)
+            return None
+        case "upgrade.decline":
+            calls.decline_upgrade(event.get("session_id"), user)
             return None
     raise ApiError("unknown_event", f"Unknown event: {kind}")
 

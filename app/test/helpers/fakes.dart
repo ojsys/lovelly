@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:korram/api/api.dart';
 import 'package:korram/auth/onboarding_repository.dart';
 import 'package:korram/auth/token_store.dart';
+import 'package:korram/features/call/call_engine.dart';
 import 'package:korram/platform/permissions.dart';
 import 'package:korram/platform/selfie_camera.dart';
 import 'package:korram/platform/social_sign_in.dart';
@@ -195,10 +196,12 @@ Map<String, dynamic> matchFound({
     'age': 27,
     'city': 'Accra',
     'shared_interests': shared,
+    'shared_languages': ['english', 'pidgin'],
     'verified': true,
   },
   'room_name': 'room',
   'media_token': mode == 'text' ? null : 'tok',
+  'media_url': mode == 'text' ? null : 'ws://lk.test',
 };
 
 Map<String, dynamic> chatMessage(
@@ -222,3 +225,66 @@ Map<String, dynamic> chatMessage(
     'flag_reason': reason,
   },
 };
+
+/// Stands in for LiveKit: records what the app asks for; tests drive remote state.
+class FakeCallEngine extends CallEngine {
+  final joins = <({String url, String token, bool camera})>[];
+  int leaves = 0;
+
+  @override
+  Future<void> join({required String url, required String token, required bool camera}) async {
+    joins.add((url: url, token: token, camera: camera));
+    cameraOn = camera;
+    speakerOn = camera;
+    link = CallLink.connected;
+    notifyListeners();
+  }
+
+  @override
+  Future<void> leave() async {
+    leaves++;
+    link = CallLink.idle;
+    notifyListeners();
+  }
+
+  @override
+  Future<void> setMic(bool on) async {
+    micOn = on;
+    notifyListeners();
+  }
+
+  @override
+  Future<void> setCamera(bool on) async {
+    cameraOn = on;
+    notifyListeners();
+  }
+
+  @override
+  Future<void> setSpeaker(bool on) async {
+    speakerOn = on;
+    notifyListeners();
+  }
+
+  @override
+  Widget remoteVideo() => const SizedBox.expand(key: Key('remote-video'));
+
+  @override
+  Widget localVideo() => const SizedBox.expand(key: Key('local-video'));
+
+  void remote({bool? video, double? level}) {
+    if (video != null) remoteVideoOn = video;
+    if (level != null) remoteAudioLevel = level;
+    notifyListeners();
+  }
+
+  void setLink(CallLink value) {
+    link = value;
+    notifyListeners();
+  }
+
+  /// LiveKit gave up reconnecting.
+  void lose() {
+    setLink(CallLink.lost);
+    onLost?.call();
+  }
+}

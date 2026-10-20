@@ -145,4 +145,36 @@ void main() {
     }
     await golden(tester, 'chat');
   });
+
+  Future<TestApp> call(WidgetTester tester, String mode, String name) async {
+    final app = await pumpApp(tester, setUp: (app) => app.verified());
+    await tester.tap(find.bySemanticsLabel(mode == 'video' ? 'Video' : 'Voice'));
+    await tester.pump();
+    await tester.tap(find.bySemanticsLabel(RegExp('^Start matching')));
+    for (var i = 0; i < 8; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    app.realtime.emit(matchFound(mode: mode, name: name, shared: const ['Afrobeats']));
+    for (var i = 0; i < 8; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    return app;
+  }
+
+  testWidgets('04 Video call', (tester) async {
+    final app = await call(tester, 'video', 'Tobi');
+    app.engine.remote(video: true);
+    await tester.pump(const Duration(seconds: 6)); // past the 5 s blur
+    await tester.pump(const Duration(milliseconds: 500));
+    await golden(tester, 'video_call');
+  });
+
+  testWidgets('05 Voice call', (tester) async {
+    final app = await call(tester, 'voice', 'Zainab');
+    app.engine.remote(level: 0.8);
+    for (var i = 0; i < 4; i++) {
+      await tester.pump(const Duration(milliseconds: 100)); // let the bars animate
+    }
+    await golden(tester, 'voice_call');
+  });
 }

@@ -5,6 +5,8 @@ import 'package:korram/api/api.dart';
 import 'package:korram/app.dart';
 import 'package:korram/auth/onboarding_repository.dart';
 import 'package:korram/auth/token_store.dart';
+import 'package:korram/features/call/call_controller.dart';
+import 'package:korram/features/call/call_engine.dart';
 import 'package:korram/features/home/home_data.dart';
 import 'package:korram/platform/permissions.dart';
 import 'package:korram/platform/selfie_camera.dart';
@@ -19,6 +21,8 @@ class TestApp {
   final permissions = FakePermissionGateway();
   final camera = FakeSelfieCamera();
   final realtime = FakeRealtimeClient();
+  final engine = FakeCallEngine();
+  final freshTokens = <String>[];
   int online = 12480;
   MyProfile profile = const MyProfile(
     firstName: 'Ada',
@@ -68,6 +72,11 @@ Future<TestApp> pumpApp(
         selfieCameraProvider.overrideWith((ref) => app.camera),
         socialSignInProvider.overrideWithValue(FakeSocialSignIn()),
         realtimeClientProvider.overrideWithValue(app.realtime),
+        callEngineProvider.overrideWithValue(app.engine),
+        mediaTokenFetcherProvider.overrideWithValue((id) async {
+          app.freshTokens.add(id);
+          return const MediaToken(mediaToken: 'fresh', mediaUrl: 'ws://lk.test');
+        }),
         myProfileProvider.overrideWith((ref) async => app.profile),
         onlineCountProvider.overrideWith((ref) => Stream.value(app.online)),
       ],

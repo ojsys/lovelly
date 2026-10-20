@@ -5,6 +5,7 @@
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
+import '../models/media_token.dart';
 import '../models/session_detail.dart';
 
 part 'sessions_client.g.dart';
@@ -16,4 +17,8 @@ abstract class SessionsClient {
   /// A session the user took part in, with its messages (to resume after a reconnect).
   @GET('/api/v1/sessions/{session_id}')
   Future<SessionDetail> sessionsRetrieve({@Path('session_id') required String sessionId});
+
+  /// A fresh LiveKit join token to rejoin a call after a drop.
+  @POST('/api/v1/sessions/{session_id}/media-token')
+  Future<MediaToken> sessionsMediaTokenCreate({@Path('session_id') required String sessionId});
 }

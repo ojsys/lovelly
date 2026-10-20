@@ -128,7 +128,11 @@ STORAGES = {
 }
 S3_BUCKET_EVIDENCE = env("S3_BUCKET_EVIDENCE", default="evidence")
 
+# LIVEKIT_URL is what apps connect to; LIVEKIT_API_URL is how Django reaches the server API.
 LIVEKIT_URL = env("LIVEKIT_URL", default="ws://localhost:7880")
+LIVEKIT_API_URL = env("LIVEKIT_API_URL", default="http://localhost:7880")
+# Join tokens only gate entry; a dropped call gets a fresh one (POST sessions/{id}/media-token).
+MEDIA_TOKEN_TTL_SECONDS = 10 * 60
 LIVEKIT_API_KEY = env("LIVEKIT_API_KEY", default="")
 LIVEKIT_API_SECRET = env("LIVEKIT_API_SECRET", default="")
 

@@ -13,6 +13,7 @@ class Peer {
     required this.age,
     required this.city,
     required this.sharedInterests,
+    required this.sharedLanguages,
     required this.verified,
   });
 
@@ -24,6 +25,8 @@ class Peer {
   final String city;
   @JsonKey(name: 'shared_interests')
   final List<String> sharedInterests;
+  @JsonKey(name: 'shared_languages')
+  final List<String> sharedLanguages;
   final bool verified;
 
   Map<String, Object?> toJson() => _$PeerToJson(this);

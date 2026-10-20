@@ -7,8 +7,9 @@ from chat.services import serialize
 from core.exceptions import ApiError
 
 from . import service
+from .calls import fresh_token
 from .models import MatchSession
-from .serializers import OnlineCountSerializer, SessionDetailSerializer
+from .serializers import MediaTokenSerializer, OnlineCountSerializer, SessionDetailSerializer
 
 
 class OnlineCountView(APIView):
@@ -40,3 +41,13 @@ class SessionDetailView(APIView):
                 "messages": [serialize(m) for m in session.messages.all()],
             }
         )
+
+
+class MediaTokenView(APIView):
+    """A fresh LiveKit join token to rejoin a call after a drop."""
+
+    permission_classes = [IsVerified]
+
+    @extend_schema(request=None, responses=MediaTokenSerializer)
+    def post(self, request, session_id):
+        return Response(fresh_token(session_id, request.user))

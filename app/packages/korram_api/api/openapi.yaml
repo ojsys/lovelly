@@ -345,6 +345,28 @@ paths:
               schema:
                 $ref: '#/components/schemas/SessionDetail'
           description: ''
+  /api/v1/sessions/{session_id}/media-token:
+    post:
+      operationId: sessions_media_token_create
+      description: A fresh LiveKit join token to rejoin a call after a drop.
+      parameters:
+      - in: path
+        name: session_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - sessions
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaToken'
+          description: ''
 components:
   schemas:
     ApiError:
@@ -469,6 +491,16 @@ components:
       required:
       - label
       - slug
+    MediaToken:
+      type: object
+      properties:
+        media_token:
+          type: string
+        media_url:
+          type: string
+      required:
+      - media_token
+      - media_url
     MyProfile:
       type: object
       properties:
@@ -574,6 +606,10 @@ components:
           type: array
           items:
             type: string
+        shared_languages:
+          type: array
+          items:
+            type: string
         verified:
           type: boolean
       required:
@@ -581,6 +617,7 @@ components:
       - city
       - first_name
       - shared_interests
+      - shared_languages
       - verified
     ProviderEnum:
       enum:

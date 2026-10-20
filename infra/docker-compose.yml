@@ -43,7 +43,9 @@ services:
 
   livekit:
     image: livekit/livekit-server:v1.8.4
-    command: ["--config", "/etc/livekit.yaml", "--node-ip", "127.0.0.1"]
+    # The IP LiveKit tells clients to send media to: 127.0.0.1 for the emulator and the
+    # call tests; your Mac's LAN IP for a phone on Wi-Fi (see README).
+    command: ["--config", "/etc/livekit.yaml", "--node-ip", "${LIVEKIT_NODE_IP:-127.0.0.1}"]
     env_file: .env
     volumes: [./livekit.yaml:/etc/livekit.yaml:ro]
     ports: ["7880:7880", "7881:7881", "7882:7882/udp"]

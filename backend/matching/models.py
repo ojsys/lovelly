@@ -31,6 +31,8 @@ class MatchSession(UUIDModel):
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
     )
     room_name = models.CharField(max_length=64, unique=True)
+    # Voice call switched to video by agreement (FR-14).
+    upgraded_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         indexes = [

@@ -26,6 +26,7 @@ class Peer {
     this.age,
     this.city = '',
     this.sharedInterests = const [],
+    this.sharedLanguages = const [],
     this.verified = false,
   });
 
@@ -34,6 +35,7 @@ class Peer {
     age: (json['age'] as num?)?.toInt(),
     city: json['city'] as String? ?? '',
     sharedInterests: [...?(json['shared_interests'] as List?)?.cast<String>()],
+    sharedLanguages: [...?(json['shared_languages'] as List?)?.cast<String>()],
     verified: json['verified'] as bool? ?? false,
   );
 
@@ -41,6 +43,7 @@ class Peer {
   final int? age;
   final String city;
   final List<String> sharedInterests;
+  final List<String> sharedLanguages;
   final bool verified;
 
   String get initial =>
@@ -106,6 +109,7 @@ class MatchState {
     this.peer,
     this.roomName,
     this.mediaToken,
+    this.mediaUrl,
     this.messages = const [],
     this.peerTyping = false,
     this.endReason,
@@ -120,6 +124,7 @@ class MatchState {
   final Peer? peer;
   final String? roomName;
   final String? mediaToken;
+  final String? mediaUrl;
   final List<ChatMessage> messages;
   final bool peerTyping;
 
@@ -136,6 +141,7 @@ class MatchState {
     Peer? peer,
     String? roomName,
     String? mediaToken,
+    String? mediaUrl,
     List<ChatMessage>? messages,
     bool? peerTyping,
     String? endReason,
@@ -150,6 +156,7 @@ class MatchState {
     peer: peer ?? this.peer,
     roomName: roomName ?? this.roomName,
     mediaToken: mediaToken ?? this.mediaToken,
+    mediaUrl: mediaUrl ?? this.mediaUrl,
     messages: messages ?? this.messages,
     peerTyping: peerTyping ?? this.peerTyping,
     endReason: endReason ?? this.endReason,
@@ -252,6 +259,7 @@ class MatchController extends Notifier<MatchState> {
           peer: Peer.fromJson(e['peer'] as Map<String, dynamic>),
           roomName: e['room_name'] as String?,
           mediaToken: e['media_token'] as String?,
+          mediaUrl: e['media_url'] as String?,
         );
       case 'match.widened' when state.phase == MatchPhase.searching:
         state = state.copyWith(widened: true);

@@ -33,6 +33,17 @@ abstract final class KColors {
   /// Coral at 13 % (Matching rings).
   static const coralSoft = Color(0x22FF6B4A);
 
+  /// Voice call accent (05) and its 13 % tint.
+  static const lilacSoft = Color(0x22B9A7FF);
+
+  /// Call overlays (04): scrims over video, glass chips and buttons.
+  static const scrimTop = Color(0x8C0F0E13);
+  static const scrimBottom = Color(0xB30F0E13);
+  static const glass = Color(0x29F4F1EA);
+  static const glassDark = Color(0x990F0E13);
+  static const textOnVideo = Color(0xFFD6D2DE);
+  static const white = Color(0xFFFFFFFF);
+
   /// Bottom navigation bar background.
   static const navBar = Color(0xFF131218);
 
@@ -101,6 +112,14 @@ abstract final class KType {
     fontWeight: FontWeight.w800,
     fontSize: 30,
     letterSpacing: -0.6,
+  );
+
+  /// Voice call icebreaker question (19 px).
+  static const icebreaker = TextStyle(
+    fontFamily: KFonts.display,
+    fontWeight: FontWeight.w700,
+    fontSize: 19,
+    height: 1.25,
   );
 
   /// Home "Start matching" card.

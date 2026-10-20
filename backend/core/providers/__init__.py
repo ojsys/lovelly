@@ -15,7 +15,10 @@ _REGISTRY = {
     },
     "liveness": {"fake": "core.providers.liveness.FakeLivenessProvider"},
     "moderation": {"fake": "core.providers.moderation.FakeModerationProvider"},
-    "media": {"fake": "core.providers.media.FakeMediaProvider"},
+    "media": {
+        "fake": "core.providers.media.FakeMediaProvider",
+        "livekit": "core.providers.media.LiveKitMediaProvider",
+    },
     "store_receipts": {"fake": "core.providers.store_receipts.FakeStoreReceiptsProvider"},
     "paystack": {"fake": "core.providers.paystack.FakePaystackProvider"},
 }

@@ -26,6 +26,7 @@ from core.realtime import batched, send_to_user
 from core.redis import get_redis
 from safety.models import Block
 
+from . import calls
 from .models import MatchSession
 from .pairing import WIDEN_AFTER_SECONDS, Ticket, pick_pairs
 
@@ -190,6 +191,7 @@ def _summaries(pairs: list[tuple[str, str]]) -> dict[tuple[str, str], dict]:
     ids = {uid for pair in pairs for uid in pair}
     users = {str(u.id): u for u in User.objects.filter(id__in=ids).select_related("profile")}
     interests: dict[str, dict[str, str]] = {uid: {} for uid in ids}
+    languages = {uid: {lang.lower() for lang in users[uid].profile.languages} for uid in users}
     for ui in UserInterest.objects.filter(user_id__in=ids).select_related("interest"):
         interests[str(ui.user_id)][ui.interest_id] = ui.interest.label
     today = timezone.now().date()
@@ -204,6 +206,7 @@ def _summaries(pairs: list[tuple[str, str]]) -> dict[tuple[str, str], dict]:
             "age": age_on(peer.dob, today) if peer.dob else None,
             "city": peer.profile.city,
             "shared_interests": shared,
+            "shared_languages": sorted(languages[peer_id] & languages[viewer]),
             "verified": peer.profile.is_verified,
         }
     return out
@@ -211,14 +214,6 @@ def _summaries(pairs: list[tuple[str, str]]) -> dict[tuple[str, str], dict]:
 
 def peer_summary(user_id, peer_id) -> dict:
     return _summaries([(str(user_id), str(peer_id))])[(str(user_id), str(peer_id))]
-
-
-def _media_token(session: MatchSession, user_id) -> str | None:
-    if session.mode == MatchSession.Mode.TEXT:
-        return None
-    from core.providers import get_provider
-
-    return get_provider("media").join_token(session.room_name, str(user_id), ttl_seconds=60)
 
 
 def _start_sessions(pairs: list[tuple[Ticket, Ticket]], now: float) -> list[MatchSession]:
@@ -255,7 +250,8 @@ def _start_sessions(pairs: list[tuple[Ticket, Ticket]], now: float) -> list[Matc
                     "mode": session.mode,
                     "peer": summaries[(me.user_id, peer.user_id)],
                     "room_name": session.room_name,
-                    "media_token": _media_token(session, me.user_id),
+                    "media_token": calls.media_token(session, me.user_id),
+                    "media_url": calls.media_url() if session.mode != "text" else None,
                 },
             )
     return sessions
@@ -374,6 +370,10 @@ def end_session(session_id, user, reason: str, now=None) -> MatchSession | None:
     session = MatchSession.objects.filter(id=session_id).first()
     if not updated or session is None:
         return None  # already ended
+    try:
+        calls.close_room(session)
+    except Exception:
+        logger.exception("could not close room for session %s", session.id)
     peer_id = session.peer_of(user.id)
     peer_reason = {"next": "peer_next", "peer_left": "peer_left", "blocked": "peer_left"}.get(
         reason, "peer_left"

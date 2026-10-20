@@ -1,6 +1,6 @@
 swagger_parser:
   schema_path: api/openapi.yaml
-  output_directory: lib/api/generated
+  output_directory: lib/src/generated
   name: korram
   language: dart
   json_serializer: json_serializable

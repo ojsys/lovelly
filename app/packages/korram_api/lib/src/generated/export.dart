@@ -19,6 +19,7 @@ export 'models/chat_message.dart';
 export 'models/gender_enum.dart';
 export 'models/health.dart';
 export 'models/interest.dart';
+export 'models/media_token.dart';
 export 'models/my_profile.dart';
 export 'models/next_step_enum.dart';
 export 'models/online_count.dart';

@@ -11,6 +11,7 @@ Peer _$PeerFromJson(Map<String, dynamic> json) => Peer(
   age: (json['age'] as num?)?.toInt(),
   city: json['city'] as String,
   sharedInterests: (json['shared_interests'] as List<dynamic>).map((e) => e as String).toList(),
+  sharedLanguages: (json['shared_languages'] as List<dynamic>).map((e) => e as String).toList(),
   verified: json['verified'] as bool,
 );
 
@@ -19,5 +20,6 @@ Map<String, dynamic> _$PeerToJson(Peer instance) => <String, dynamic>{
   'age': instance.age,
   'city': instance.city,
   'shared_interests': instance.sharedInterests,
+  'shared_languages': instance.sharedLanguages,
   'verified': instance.verified,
 };

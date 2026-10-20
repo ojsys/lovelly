@@ -43,7 +43,24 @@ make lint
 
 `make test-e2e` runs the app's real API layer against the running stack (codes are read
 from the fake SMS provider's log lines). After changing the API, run `make api-client` to
-regenerate the Dart client from the OpenAPI schema; CI fails if they drift.
+regenerate the Dart client (`app/packages/korram_api`, its own package so the code
+generators don't share dependency versions with the app); CI fails if they drift.
+
+`make test-calls` runs the M3 call acceptance: two headless LiveKit participants in the
+LiveKit container's network namespace, on `tc netem`-shaped 4G and 3G links, with mute,
+camera-off and 5 s / 15 s outages.
+
+### Calls on a real phone (dev)
+
+LiveKit tells clients which IP to send media to (`127.0.0.1` by default: right for the
+emulator and the call tests). For a phone on the same Wi-Fi as your Mac:
+
+1. In `infra/.env` set `LIVEKIT_NODE_IP=<mac-lan-ip>` and
+   `LIVEKIT_URL=ws://<mac-lan-ip>:7880`, then `make up`.
+2. `cd app && flutter run --dart-define=API_BASE_URL=http://<mac-lan-ip>:8100`
+
+On mobile data behind carrier NAT, calls need TURN (LiveKit's built-in TURN on 443/TLS);
+that's configured with hosting, not in local dev (docs/questions.md #24).
 
 ### Dev flags
 

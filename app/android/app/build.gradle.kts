@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "com.korram.korram"
     compileSdk = 36 // flutter_secure_storage 10 needs 36 (Flutter 3.32 defaults to 35)
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "27.0.12077973" // required by livekit_client, flutter_webrtc and other plugins
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

@@ -5,7 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../auth/session.dart';
 import '../features/home/home_screen.dart';
 import '../features/match/chat_screen.dart';
-import '../features/match/connected_screen.dart';
+import '../features/call/video_call_screen.dart';
+import '../features/call/voice_call_screen.dart';
 import '../features/match/searching_screen.dart';
 import '../features/onboarding/basics_screen.dart';
 import '../features/onboarding/otp_screen.dart';
@@ -121,9 +122,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: Routes.chat,
         builder: (context, state) => ChatScreen(sessionId: state.pathParameters['id']!),
       ),
-      // M3 replaces these with the call screens (04, 05).
-      GoRoute(path: Routes.videoCall, builder: (context, state) => const ConnectedScreen()),
-      GoRoute(path: Routes.voiceCall, builder: (context, state) => const ConnectedScreen()),
+      GoRoute(path: Routes.videoCall, builder: (context, state) => const VideoCallScreen()),
+      GoRoute(path: Routes.voiceCall, builder: (context, state) => const VoiceCallScreen()),
       for (final MapEntry(key: path, value: (number, title, milestone)) in _pending.entries)
         GoRoute(
           path: path,

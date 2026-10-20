@@ -24,3 +24,6 @@ STORAGES = {
 
 # Persistent connections from websocket test threads would block dropping the test DB.
 DATABASES["default"]["CONN_MAX_AGE"] = 0  # noqa: F405
+
+# Tests never talk to real outside providers, whatever the environment says.
+PROVIDERS = {kind: "fake" for kind in PROVIDERS}  # noqa: F405

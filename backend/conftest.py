@@ -61,6 +61,7 @@ def events(monkeypatch):
 
     monkeypatch.setattr("matching.service.send_to_user", record)
     monkeypatch.setattr("chat.services.send_to_user", record)
+    monkeypatch.setattr("matching.calls.send_to_user", record)
 
     class Events(list):
         def of(self, user, event_type=None):

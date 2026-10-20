@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:korram/features/home/home_screen.dart';
 import 'package:korram/features/match/chat_screen.dart';
-import 'package:korram/features/match/connected_screen.dart';
+import 'package:korram/features/call/voice_call_screen.dart';
 import 'package:korram/features/match/match_controller.dart';
 import 'package:korram/features/match/searching_screen.dart';
 import 'package:korram/platform/permissions.dart';
@@ -124,7 +124,7 @@ void main() {
       final app = await searching(tester, mode: 'Voice');
       app.realtime.emit(matchFound(mode: 'voice'));
       await settle(tester);
-      expect(find.byType(ConnectedScreen), findsOneWidget);
+      expect(find.byType(VoiceCallScreen), findsOneWidget);
     });
 
     testWidgets('a refused join goes back home with the reason', (tester) async {
@@ -217,31 +217,6 @@ void main() {
       await settle(tester);
       expect(app.realtime.sent.last, {'type': 'session.end', 'session_id': 's1'});
       expect(find.byType(HomeScreen), findsOneWidget);
-    });
-  });
-
-  group('Calls (interim, until M3)', () {
-    Future<TestApp> connected(WidgetTester tester) async {
-      final app = await searching(tester, mode: 'Video');
-      app.realtime.emit(matchFound(mode: 'video'));
-      await settle(tester);
-      return app;
-    }
-
-    testWidgets('FR-12: Next goes straight back to searching', (tester) async {
-      final app = await connected(tester);
-      await tester.tap(find.text('Next person'));
-      await settle(tester);
-      expect(app.realtime.sent.last, {'type': 'session.next', 'session_id': 's1'});
-      expect(find.byType(SearchingScreen), findsOneWidget);
-    });
-
-    testWidgets('when the other person presses Next, you are re-queued too', (tester) async {
-      final app = await connected(tester);
-      app.realtime.emit({'type': 'session.ended', 'session_id': 's1', 'reason': 'peer_next'});
-      await settle(tester);
-      expect(app.realtime.sent.last, {'type': 'queue.join', 'mode': 'video', 'filters': {}});
-      expect(find.byType(SearchingScreen), findsOneWidget);
     });
   });
 

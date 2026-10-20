@@ -10,6 +10,7 @@ class PeerSerializer(serializers.Serializer):
     age = serializers.IntegerField(allow_null=True)
     city = serializers.CharField(allow_blank=True)
     shared_interests = serializers.ListField(child=serializers.CharField())
+    shared_languages = serializers.ListField(child=serializers.CharField())
     verified = serializers.BooleanField()
 
 
@@ -32,3 +33,8 @@ class SessionDetailSerializer(serializers.Serializer):
     ended_at = serializers.DateTimeField(allow_null=True)
     end_reason = serializers.CharField(allow_blank=True)
     messages = ChatMessageSerializer(many=True)
+
+
+class MediaTokenSerializer(serializers.Serializer):
+    media_token = serializers.CharField()
+    media_url = serializers.CharField()

@@ -42,11 +42,11 @@ jobs:
           DATABASE_URL: postgres://korram:korram@localhost:5432/korram
           REDIS_URL: redis://localhost:6379/0
       # The Dart client is generated from app/api/openapi.yaml; fail if the API changed
-      # without regenerating it (app/tool/gen_api.sh).
+      # without regenerating it (make api-client).
       - name: OpenAPI schema matches the app's copy
         run: |
           uv run python manage.py spectacular --validate --fail-on-warn --file /tmp/openapi.yaml
-          diff -u ../app/api/openapi.yaml /tmp/openapi.yaml
+          diff -u ../app/packages/korram_api/api/openapi.yaml /tmp/openapi.yaml
         env:
           DJANGO_SETTINGS_MODULE: korram.settings.test
 
@@ -62,7 +62,7 @@ jobs:
           flutter-version: "3.32.0"
           channel: stable
       - run: flutter pub get
-      - run: dart format --output=none --set-exit-if-changed -l 100 lib test
+      - run: dart format --output=none --set-exit-if-changed -l 100 lib test packages/korram_api/lib
       - run: flutter analyze
       # Goldens are rendered on macOS (text rasterisation differs on Linux); e2e needs the
       # dev stack and is skipped by default (dart_test.yaml).
