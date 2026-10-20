@@ -91,3 +91,12 @@
     message preview?
 31. **Firebase project** for push: Android + iOS apps, an APNs key, and a backend service
     account.
+32. **What a coin pack gives** (MN-1): is "550 · +50 bonus" 550 in total or 600? See
+    plans/M6.md, decision 1.
+33. **Invites on iOS** (MN-3): no install referrer; count only already-installed opens, or
+    add an invite-code field? And a monthly cap on invite rewards? See plans/M6.md, decision 3.
+34. **Refunds after spending:** allow a negative balance? See plans/M6.md, decision 5.
+35. **Store accounts** for in-app purchases: Play Console app + products + service account +
+    Pub/Sub topic; App Store Connect app + products + In-App Purchase key.
+36. **Gifts and the daily cap** (MN-9): do gifts count toward `spent_today`? See plans/M6.md,
+    decision 7.
