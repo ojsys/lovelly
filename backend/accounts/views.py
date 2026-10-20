@@ -1,5 +1,6 @@
 from dataclasses import asdict
 
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser
@@ -111,3 +112,28 @@ class VerificationView(APIView):
     @extend_schema(responses={200: s.VerificationStateSerializer})
     def get(self, request):
         return Response(_state_body(request.user))
+
+
+class MyProfileView(APIView):
+    """Read-only summary for Home and Matching; editing arrives with Profile (M5)."""
+
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(responses=s.MyProfileSerializer)
+    def get(self, request):
+        user = request.user
+        profile = onboarding._profile(user)
+        interests = [
+            {"slug": ui.interest.slug, "label": ui.interest.label}
+            for ui in user.interests.select_related("interest")
+        ]
+        return Response(
+            {
+                "first_name": profile.first_name,
+                "age": onboarding.age_on(user.dob, timezone.now().date()) if user.dob else None,
+                "city": profile.city,
+                "interests": interests,
+                "languages": profile.languages,
+                "is_verified": profile.is_verified,
+            }
+        )

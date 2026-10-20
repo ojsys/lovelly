@@ -151,3 +151,33 @@ class DeniedPhone(UUIDModel):
     phone_hash = models.CharField(max_length=64, unique=True)
     reason = models.CharField(max_length=40)
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+class Interest(models.Model):
+    """Server-controlled interest catalogue (FR-19), edited in admin."""
+
+    slug = models.SlugField(primary_key=True, max_length=40)
+    label = models.CharField(max_length=40)
+
+    class Meta:
+        ordering = ["label"]
+
+    def __str__(self):
+        return self.label
+
+
+class UserInterest(models.Model):
+    """At most 5 per user, checked in the service layer (PRD data model)."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="interests"
+    )
+    interest = models.ForeignKey(Interest, on_delete=models.CASCADE, related_name="+")
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "interest"], name="unique_user_interest")
+        ]
+
+    def __str__(self):
+        return f"{self.user_id}: {self.interest_id}"

@@ -101,4 +101,48 @@ void main() {
     );
     await golden(tester, 'review');
   });
+
+  testWidgets('02 Home', (tester) async {
+    await pumpApp(tester, setUp: (app) => app.verified());
+    await tester.pump(const Duration(milliseconds: 100));
+    await golden(tester, 'home');
+  });
+
+  Future<TestApp> searching(WidgetTester tester) async {
+    final app = await pumpApp(tester, setUp: (app) => app.verified());
+    await tester.tap(find.bySemanticsLabel(RegExp('^Start matching')));
+    for (var i = 0; i < 8; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    return app;
+  }
+
+  testWidgets('03 Matching', (tester) async {
+    await searching(tester);
+    await golden(tester, 'matching');
+  });
+
+  testWidgets('06 Chat', (tester) async {
+    final app = await searching(tester);
+    app.realtime.emit(matchFound());
+    for (var i = 0; i < 8; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    final script = [
+      ('m1', 'Hey! Arsenal or Chelsea? Choose wisely', 'peer'),
+      ('m2', 'Arsenal, obviously. You?', 'me'),
+      ('m3', 'Chelsea fan in pain. What do you do for work?', 'peer'),
+      ('m4', 'Software developer in Enugu. You?', 'me'),
+      ('m5', 'Product designer in Accra! We should talk on voice', 'peer'),
+    ];
+    for (final (id, body, sender) in script) {
+      app.realtime.emit(chatMessage(id, body, sender: sender));
+    }
+    app.realtime.emit({'type': 'chat.seen', 'session_id': 's1', 'message_id': 'm4'});
+    app.realtime.emit({'type': 'chat.typing', 'session_id': 's1'});
+    for (var i = 0; i < 8; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    await golden(tester, 'chat');
+  });
 }

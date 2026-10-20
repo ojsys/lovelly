@@ -8,7 +8,7 @@ import 'package:korram/features/onboarding/permissions_screen.dart';
 import 'package:korram/features/onboarding/phone_verification.dart';
 import 'package:korram/features/onboarding/review_screen.dart';
 import 'package:korram/features/onboarding/selfie_screen.dart';
-import 'package:korram/features/placeholder/placeholder_screen.dart';
+import 'package:korram/features/home/home_screen.dart';
 import 'package:korram/platform/permissions.dart';
 
 import 'helpers/fakes.dart';
@@ -268,14 +268,13 @@ void main() {
       expect(enabled(tester, 'Start meeting people'), isTrue);
 
       await tapText(tester, 'Start meeting people');
-      expect(find.byType(PlaceholderScreen), findsOneWidget);
-      expect(find.text('Home — pick a mode'), findsOneWidget);
+      expect(find.byType(HomeScreen), findsOneWidget);
     });
 
     testWidgets('FR-5: text chat only skips camera and mic', (tester) async {
       final app = await toPermissions(tester);
       await tapText(tester, 'Text chat only for now');
-      expect(find.text('Home — pick a mode'), findsOneWidget);
+      expect(find.byType(HomeScreen), findsOneWidget);
       expect(app.store.flags['permissions_done'], isTrue);
     });
 
@@ -303,7 +302,7 @@ void main() {
         app.repo.state = vstate(next: NextStepEnum.done, selfie: SelfieEnum.passed);
       },
     );
-    expect(find.text('Home — pick a mode'), findsOneWidget);
+    expect(find.byType(HomeScreen), findsOneWidget);
   });
 
   testWidgets('a rejected review offers support', (tester) async {

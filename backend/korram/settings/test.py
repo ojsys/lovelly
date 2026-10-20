@@ -9,6 +9,9 @@ os.environ.setdefault("S3_SECRET_KEY", "test")
 
 from .base import *  # noqa: E402, F403
 
+# Tests flush Redis, so always use a separate database (15), never the dev data in 0.
+REDIS_URL = REDIS_URL.rsplit("/", 1)[0] + "/15"  # noqa: F405
+
 PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
 CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
 CELERY_TASK_ALWAYS_EAGER = True
@@ -18,3 +21,6 @@ STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.InMemoryStorage"},
     "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
 }
+
+# Persistent connections from websocket test threads would block dropping the test DB.
+DATABASES["default"]["CONN_MAX_AGE"] = 0  # noqa: F405

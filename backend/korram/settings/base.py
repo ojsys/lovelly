@@ -64,6 +64,10 @@ WSGI_APPLICATION = "korram.wsgi.application"
 ASGI_APPLICATION = "korram.asgi.application"
 
 DATABASES = {"default": env.db("DATABASE_URL")}
+# Reuse connections: opening one (with password auth) per query or per websocket event is
+# far too slow under load. Health checks drop connections the server closed.
+DATABASES["default"]["CONN_MAX_AGE"] = env.int("DB_CONN_MAX_AGE", default=60)
+DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
 
 AUTH_USER_MODEL = "accounts.User"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -96,6 +100,10 @@ CELERY_BROKER_URL = REDIS_URL
 CELERY_RESULT_BACKEND = REDIS_URL
 CELERY_TASK_ALWAYS_EAGER = False
 CELERY_BEAT_SCHEDULE = {
+    "purge-stranger-messages": {
+        "task": "chat.tasks.purge_stranger_messages",
+        "schedule": 60 * 60 * 6,
+    },
     "purge-verified-selfies": {
         "task": "accounts.tasks.purge_verified_selfies",
         "schedule": 60 * 60 * 6,
@@ -141,6 +149,9 @@ FAKE_LIVENESS = env("FAKE_LIVENESS", default="pass")
 # Google / Apple sign-in (FR-2). Audiences the ID tokens must be issued for.
 GOOGLE_CLIENT_IDS = env.list("GOOGLE_CLIENT_IDS", default=[])
 APPLE_CLIENT_IDS = env.list("APPLE_CLIENT_IDS", default=[])
+
+# SF-8 chat filter slur list: placeholder until a curated list exists (questions.md #20).
+CHAT_SLUR_LIST = env.list("CHAT_SLUR_LIST", default=["slurplaceholder"])
 
 # Onboarding rules (PRD FR-1, FR-3, FR-4; NFR Privacy).
 OTP_LENGTH = 6

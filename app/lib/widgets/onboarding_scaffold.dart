@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../theme/icons.dart';
 import '../theme/tokens.dart';
 
 /// Layout shared by onboarding screens 14–17: back button + 4-step bar, content, and a
@@ -90,7 +91,7 @@ class KBackButton extends StatelessWidget {
           onTap: onPressed,
           child: const SizedBox.square(
             dimension: 44,
-            child: Icon(Icons.arrow_back_rounded, size: 20, color: KColors.text),
+            child: Center(child: KIconView(KIcon.back, size: 20, color: KColors.text)),
           ),
         ),
       ),

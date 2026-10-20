@@ -9,6 +9,7 @@ import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
 import '../models/basics_request.dart';
+import '../models/my_profile.dart';
 import '../models/verification_state.dart';
 
 part 'me_client.g.dart';
@@ -19,6 +20,10 @@ abstract class MeClient {
 
   @PUT('/api/v1/me/basics')
   Future<VerificationState> meBasicsUpdate({@Body() required BasicsRequest body});
+
+  /// Read-only summary for Home and Matching; editing arrives with Profile (M5).
+  @GET('/api/v1/me/profile')
+  Future<MyProfile> meProfileRetrieve();
 
   @MultiPart()
   @POST('/api/v1/me/selfie')

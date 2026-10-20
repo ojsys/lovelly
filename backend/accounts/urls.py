@@ -11,4 +11,5 @@ urlpatterns = [
     path("me/basics", views.BasicsView.as_view(), name="me-basics"),
     path("me/selfie", views.SelfieView.as_view(), name="me-selfie"),
     path("me/verification", views.VerificationView.as_view(), name="me-verification"),
+    path("me/profile", views.MyProfileView.as_view(), name="me-profile"),
 ]

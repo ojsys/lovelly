@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/widgets.dart';
 import 'package:korram/api/api.dart';
 import 'package:korram/auth/onboarding_repository.dart';
@@ -5,6 +8,7 @@ import 'package:korram/auth/token_store.dart';
 import 'package:korram/platform/permissions.dart';
 import 'package:korram/platform/selfie_camera.dart';
 import 'package:korram/platform/social_sign_in.dart';
+import 'package:korram/realtime/realtime_client.dart';
 
 class FakeTokenStore implements TokenStore {
   ({String access, String refresh})? tokens;
@@ -142,3 +146,79 @@ class FakeSocialSignIn implements SocialSignIn {
   @override
   Future<String> idToken(ProviderEnum provider) async => 'fake:${provider.json}';
 }
+
+/// An unsigned JWT whose payload carries `user_id` (the app reads its own id from it).
+String fakeJwt(String userId) {
+  String part(Map<String, Object> m) =>
+      base64Url.encode(utf8.encode(jsonEncode(m))).replaceAll('=', '');
+  return '${part({'alg': 'none'})}.${part({'user_id': userId})}.sig';
+}
+
+/// Records what the app sends and lets tests push server events.
+class FakeRealtimeClient extends RealtimeClient {
+  FakeRealtimeClient() : super(store: FakeTokenStore(), refreshToken: () async {});
+
+  final sent = <RealtimeEvent>[];
+  final _events = StreamController<RealtimeEvent>.broadcast();
+  final _connection = StreamController<bool>.broadcast();
+
+  @override
+  Stream<RealtimeEvent> get events => _events.stream;
+
+  @override
+  Stream<bool> get connection => _connection.stream;
+
+  @override
+  Future<void> start() async {}
+
+  @override
+  void send(RealtimeEvent event) => sent.add(event);
+
+  void emit(RealtimeEvent event) => _events.add(event);
+
+  void reconnected() => _connection.add(true);
+
+  List<String> get types => [for (final e in sent) e['type'] as String];
+}
+
+Map<String, dynamic> matchFound({
+  String mode = 'text',
+  String session = 's1',
+  String name = 'Kwame',
+  List<String> shared = const ['Football', 'Tech'],
+}) => {
+  'type': 'match.found',
+  'session_id': session,
+  'mode': mode,
+  'peer': {
+    'first_name': name,
+    'age': 27,
+    'city': 'Accra',
+    'shared_interests': shared,
+    'verified': true,
+  },
+  'room_name': 'room',
+  'media_token': mode == 'text' ? null : 'tok',
+};
+
+Map<String, dynamic> chatMessage(
+  String id,
+  String body, {
+  String sender = 'peer',
+  String session = 's1',
+  bool flagged = false,
+  String reason = '',
+}) => {
+  'type': 'chat.message',
+  'session_id': session,
+  'message': {
+    'id': id,
+    'sender_id': sender,
+    'body': body,
+    'kind': 'text',
+    'sent_at': DateTime(2026, 10, 20, 14, 14).toUtc().toIso8601String(),
+    'seen_at': null,
+    'flagged': flagged,
+    'flag_reason': reason,
+  },
+};

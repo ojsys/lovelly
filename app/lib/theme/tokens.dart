@@ -28,6 +28,22 @@ abstract final class KColors {
   /// Link hover/pressed.
   static const coralPressed = Color(0xFFFF8D73);
 
+  static const transparent = Color(0x00000000);
+
+  /// Coral at 13 % (Matching rings).
+  static const coralSoft = Color(0x22FF6B4A);
+
+  /// Bottom navigation bar background.
+  static const navBar = Color(0xFF131218);
+
+  /// Avatar placeholders (initials) and their text.
+  static const avatarPlum = Color(0xFF2A2233);
+  static const avatarPlumText = Color(0xFFD9D3E6);
+  static const avatarIndigo = Color(0xFF262036);
+
+  /// Ink on an accent card at 12 % (Home "Video chat" tag).
+  static const onCoralTint = Color(0x1F1A0E0B);
+
   /// Text on disabled buttons (background is [surface2]).
   static const disabledText = Color(0xFF8A8597);
 
@@ -77,6 +93,23 @@ abstract final class KType {
     fontSize: 34,
     height: 1.05,
     letterSpacing: -0.8,
+  );
+
+  /// Matching screen title (30 px).
+  static const searchTitle = TextStyle(
+    fontFamily: KFonts.display,
+    fontWeight: FontWeight.w800,
+    fontSize: 30,
+    letterSpacing: -0.6,
+  );
+
+  /// Home "Start matching" card.
+  static const startCard = TextStyle(
+    fontFamily: KFonts.display,
+    fontWeight: FontWeight.w800,
+    fontSize: 38,
+    height: 1,
+    letterSpacing: -1,
   );
   static const wordmark = TextStyle(
     fontFamily: KFonts.display,
@@ -144,6 +177,9 @@ abstract final class KType {
     fontSize: 12,
     height: 1.5,
   );
+
+  /// Message time and status (11 px).
+  static const meta = TextStyle(fontFamily: KFonts.body, fontWeight: FontWeight.w400, fontSize: 11);
 
   /// Uppercase section labels ("6-DIGIT CODE", "WHAT HAPPENED?").
   static const label = TextStyle(

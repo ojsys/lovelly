@@ -3,6 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../auth/session.dart';
+import '../features/home/home_screen.dart';
+import '../features/match/chat_screen.dart';
+import '../features/match/connected_screen.dart';
+import '../features/match/searching_screen.dart';
 import '../features/onboarding/basics_screen.dart';
 import '../features/onboarding/otp_screen.dart';
 import '../features/onboarding/permissions_screen.dart';
@@ -12,18 +16,12 @@ import '../features/onboarding/selfie_screen.dart';
 import '../features/onboarding/splash_screen.dart';
 import '../features/placeholder/placeholder_screen.dart';
 import '../features/welcome/welcome_screen.dart';
+import '../widgets/main_shell.dart';
 import 'routes.dart';
 
 /// Screens not built yet, keyed by route: (canvas number, design title, milestone).
 const _pending = <String, (String, String, String)>{
-  Routes.home: ('02', 'Home — pick a mode', 'M2'),
-  Routes.searching: ('03', 'Matching', 'M2'),
-  Routes.chat: ('06', 'Stranger chat', 'M2'),
-  Routes.videoCall: ('04', 'Video call', 'M3'),
-  Routes.voiceCall: ('05', 'Voice call', 'M3'),
   Routes.report: ('08', 'Safety — report', 'M4'),
-  Routes.friends: ('07', 'Friends & inbox', 'M5'),
-  Routes.profileEdit: ('09', 'Profile & interests', 'M5'),
   Routes.coins: ('10', 'Coin store', 'M6'),
   Routes.gifts: ('11', 'In-call gifts', 'M6'),
   Routes.plus: ('12', 'Korram Plus', 'M7'),
@@ -86,6 +84,46 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: Routes.permissions, builder: (context, state) => const PermissionsScreen()),
       GoRoute(path: Routes.review, builder: (context, state) => const ReviewScreen()),
       GoRoute(path: Routes.removed, builder: (context, state) => const RemovedScreen()),
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, shell) => MainShell(shell: shell),
+        branches: [
+          StatefulShellBranch(
+            routes: [GoRoute(path: Routes.home, builder: (context, state) => const HomeScreen())],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.friends,
+                builder: (context, state) => const PlaceholderScreen(
+                  number: '07',
+                  title: 'Friends & inbox',
+                  milestone: 'M5',
+                ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.profileEdit,
+                builder: (context, state) => const PlaceholderScreen(
+                  number: '09',
+                  title: 'Profile & interests',
+                  milestone: 'M5',
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+      GoRoute(path: Routes.searching, builder: (context, state) => const SearchingScreen()),
+      GoRoute(
+        path: Routes.chat,
+        builder: (context, state) => ChatScreen(sessionId: state.pathParameters['id']!),
+      ),
+      // M3 replaces these with the call screens (04, 05).
+      GoRoute(path: Routes.videoCall, builder: (context, state) => const ConnectedScreen()),
+      GoRoute(path: Routes.voiceCall, builder: (context, state) => const ConnectedScreen()),
       for (final MapEntry(key: path, value: (number, title, milestone)) in _pending.entries)
         GoRoute(
           path: path,

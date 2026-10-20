@@ -70,3 +70,17 @@ class ApiErrorSerializer(serializers.Serializer):
     code = serializers.CharField()
     detail = serializers.CharField()
     retry_after = serializers.IntegerField(required=False)
+
+
+class InterestSerializer(serializers.Serializer):
+    slug = serializers.CharField()
+    label = serializers.CharField()
+
+
+class MyProfileSerializer(serializers.Serializer):
+    first_name = serializers.CharField()
+    age = serializers.IntegerField(allow_null=True)
+    city = serializers.CharField(allow_blank=True)
+    interests = InterestSerializer(many=True)
+    languages = serializers.ListField(child=serializers.CharField())
+    is_verified = serializers.BooleanField()

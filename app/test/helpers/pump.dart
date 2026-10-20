@@ -1,12 +1,15 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:korram/api/api.dart';
 import 'package:korram/app.dart';
 import 'package:korram/auth/onboarding_repository.dart';
 import 'package:korram/auth/token_store.dart';
+import 'package:korram/features/home/home_data.dart';
 import 'package:korram/platform/permissions.dart';
 import 'package:korram/platform/selfie_camera.dart';
 import 'package:korram/platform/social_sign_in.dart';
+import 'package:korram/realtime/realtime_client.dart';
 
 import 'fakes.dart';
 
@@ -15,10 +18,34 @@ class TestApp {
   final repo = FakeOnboardingRepository();
   final permissions = FakePermissionGateway();
   final camera = FakeSelfieCamera();
+  final realtime = FakeRealtimeClient();
+  int online = 12480;
+  MyProfile profile = const MyProfile(
+    firstName: 'Ada',
+    age: 27,
+    city: 'Enugu',
+    interests: [
+      Interest(slug: 'afrobeats', label: 'Afrobeats'),
+      Interest(slug: 'football', label: 'Football'),
+      Interest(slug: 'tech', label: 'Tech'),
+    ],
+    languages: ['english'],
+    isVerified: true,
+  );
   late ProviderContainer container;
 
-  /// Signs the fake device in, landing on the step [repo.state] says.
-  void signedIn() => store.tokens = (access: 'a', refresh: 'r');
+  /// Signs the fake device in (as user "me"), landing on the step [repo.state] says.
+  void signedIn() => store.tokens = (access: fakeJwt('me'), refresh: 'r');
+
+  /// Signed in, verified and past the permissions step: lands on Home.
+  void verified() {
+    signedIn();
+    store.flags['permissions_done'] = true;
+    repo.state = vstate(next: NextStepEnum.done, selfie: SelfieEnum.passed);
+    permissions.grants
+      ..[DevicePermission.camera] = GrantState.granted
+      ..[DevicePermission.microphone] = GrantState.granted;
+  }
 }
 
 /// Pumps the full app with fakes, by default at the canvas frame size (390 × 844).
@@ -40,6 +67,9 @@ Future<TestApp> pumpApp(
         permissionGatewayProvider.overrideWithValue(app.permissions),
         selfieCameraProvider.overrideWith((ref) => app.camera),
         socialSignInProvider.overrideWithValue(FakeSocialSignIn()),
+        realtimeClientProvider.overrideWithValue(app.realtime),
+        myProfileProvider.overrideWith((ref) async => app.profile),
+        onlineCountProvider.overrideWith((ref) => Stream.value(app.online)),
       ],
       child: const KorramApp(),
     ),

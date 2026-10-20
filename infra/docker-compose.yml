@@ -68,6 +68,19 @@ services:
       retries: 30
       start_period: 10s
 
+  # Production-style API (uvicorn, several workers, DEBUG off) for load tests:
+  #   docker compose --profile load up -d api-load
+  #   docker compose exec api python manage.py loadtest --url ws://api-load:8000/ws/
+  api-load:
+    <<: *backend
+    profiles: ["load"]
+    command: ["uvicorn", "korram.asgi:application", "--host", "0.0.0.0", "--port", "8000", "--workers", "4", "--log-level", "warning"]
+    environment:
+      DJANGO_SETTINGS_MODULE: korram.settings.prod
+    depends_on:
+      api:
+        condition: service_healthy
+
   worker:
     <<: *backend
     command: ["celery", "-A", "korram", "worker", "-l", "info"]

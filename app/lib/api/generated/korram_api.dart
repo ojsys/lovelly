@@ -5,8 +5,11 @@
 import 'package:dio/dio.dart';
 
 import 'clients/auth_client.dart';
+import 'clients/blocks_client.dart';
 import 'clients/health_client.dart';
+import 'clients/match_client.dart';
 import 'clients/me_client.dart';
+import 'clients/sessions_client.dart';
 
 /// Korram API `v1.0.0`
 class KorramApi {
@@ -18,12 +21,21 @@ class KorramApi {
   static String get version => '1.0.0';
 
   AuthClient? _auth;
+  BlocksClient? _blocks;
   HealthClient? _health;
+  MatchClient? _match;
   MeClient? _me;
+  SessionsClient? _sessions;
 
   AuthClient get auth => _auth ??= AuthClient(_dio, baseUrl: _baseUrl);
 
+  BlocksClient get blocks => _blocks ??= BlocksClient(_dio, baseUrl: _baseUrl);
+
   HealthClient get health => _health ??= HealthClient(_dio, baseUrl: _baseUrl);
 
+  MatchClient get match => _match ??= MatchClient(_dio, baseUrl: _baseUrl);
+
   MeClient get me => _me ??= MeClient(_dio, baseUrl: _baseUrl);
+
+  SessionsClient get sessions => _sessions ??= SessionsClient(_dio, baseUrl: _baseUrl);
 }

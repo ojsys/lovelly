@@ -60,5 +60,16 @@ Manual selfie reviews are approved or rejected in Django admin at
 http://localhost:8100/django-admin/ (create a login with
 `docker compose -f infra/docker-compose.yml exec api python manage.py createsuperuser`).
 
+### Matching load test (M2)
+
+```sh
+docker compose -f infra/docker-compose.yml --profile load up -d api-load   # uvicorn, 4 workers
+docker compose -f infra/docker-compose.yml exec api \
+  python manage.py loadtest --users 500 --duration 180 --url ws://api-load:8000/ws/
+```
+
+It fails if any blocked pair is matched or the median wait is 10 s or more. Run it on a
+machine with free memory: swapping causes multi-second stalls that look like server bugs.
+
 App golden images (`app/test/goldens/`) are rendered on macOS. After an intended UI change,
 run `flutter test --update-goldens --tags golden`.
