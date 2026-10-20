@@ -110,3 +110,12 @@
     page on Korram's domain that sends Android users to the Play Store with
     `referrer=invite%3D<CODE>` and opens the app when it is already installed (app links /
     universal links). Which domain?
+38. **Regions for the paid filter** (FR-8): country from the phone number, Nearby = same
+    Nigerian state (a new State field on the profile)? See plans/M7.md, decision 1.
+39. **Auto top-up with app-store billing** (MN-10): stores need the user to confirm each
+    purchase, so "automatic" only works with a saved card (Paystack). See plans/M7.md,
+    decision 2.
+40. **Rematch entry point** (FR-7): no design shows where to rematch. See plans/M7.md,
+    decision 4.
+41. **Live translation and ads** (MN-6): not in the build plan; translation needs speech and
+    translation providers, and the app has no ads. Are ads planned? See plans/M7.md, decision 5.
