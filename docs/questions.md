@@ -73,3 +73,12 @@
     way to type during a call. Dropped unless you want in-call text.
 24. **TURN for mobile networks.** Nigerian 4G is mostly behind carrier NAT; calls need a TURN
     server (LiveKit's built-in TURN on 443/TLS). This goes with the hosting question (#5).
+
+## Raised in M4 planning
+
+25. **Report in text chat.** The Chat design (06) has no report button, but the app stores
+    require report and block in every chat. M4 adds a shield button to the chat header.
+26. **Moderator two-factor sign-in** before launch (not in the PRD).
+27. **SF-9 referral process:** who reports suspected child sexual abuse material, to which
+    authority (and NCMEC?), and how fast. For counsel.
+28. **Sampling rate vs the 2 s blur target.** See plans/M4.md, decision 1.
