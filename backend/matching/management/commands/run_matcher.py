@@ -5,7 +5,7 @@ import time
 from django.core.management.base import BaseCommand
 from django.db import close_old_connections
 
-from matching import service
+from matching import friend_calls, service
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +32,7 @@ class Command(BaseCommand):
                 pairs = service.run_tick()
                 matched = time.monotonic()
                 swept = service.sweep_disconnects()
+                friend_calls.sweep_missed()
                 took = time.monotonic() - started
                 if pairs or took > TICK_SECONDS:
                     # Split timing: matching vs ending dropped sessions (which calls LiveKit).

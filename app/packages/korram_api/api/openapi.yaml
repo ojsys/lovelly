@@ -181,6 +181,106 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/chats/{chat_id}/messages:
+    get:
+      operationId: chats_messages_retrieve
+      description: 'FR-15: saved history with a friend, newest first; `before` pages
+        back.'
+      parameters:
+      - in: query
+        name: before
+        schema:
+          type: string
+        description: 'ISO time: older than this'
+      - in: path
+        name: chat_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - chats
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatHistory'
+          description: ''
+  /api/v1/friends:
+    get:
+      operationId: friends_retrieve
+      tags:
+      - friends
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Friends'
+          description: ''
+  /api/v1/friends/requests:
+    post:
+      operationId: friends_requests_create
+      tags:
+      - friends
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FriendRequestCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FriendRequest'
+          description: ''
+  /api/v1/friends/requests/{request_id}/accept:
+    post:
+      operationId: friends_requests_accept_create
+      parameters:
+      - in: path
+        name: request_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - friends
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FriendRequest'
+          description: ''
+  /api/v1/friends/requests/{request_id}/decline:
+    post:
+      operationId: friends_requests_decline_create
+      parameters:
+      - in: path
+        name: request_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - friends
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/v1/health:
     get:
       operationId: health_retrieve
@@ -194,6 +294,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Health'
+          description: ''
+  /api/v1/interests:
+    get:
+      operationId: interests_list
+      description: The server-controlled interest list (FR-19).
+      tags:
+      - interests
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Interest'
           description: ''
   /api/v1/match/online-count:
     get:
@@ -248,6 +365,39 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: ''
+  /api/v1/me/devices:
+    post:
+      operationId: me_devices_create
+      description: 'FR-17: register (or move) this install''s push token.'
+      tags:
+      - me
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+    delete:
+      operationId: me_devices_destroy
+      description: 'Sign-out: stop pushes to this install.'
+      parameters:
+      - in: query
+        name: fcm_token
+        schema:
+          type: string
+        required: true
+      tags:
+      - me
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/v1/me/notices/{notice_id}/seen:
     post:
       operationId: me_notices_seen_create
@@ -265,11 +415,53 @@ paths:
       responses:
         '204':
           description: No response body
-  /api/v1/me/profile:
-    get:
-      operationId: me_profile_retrieve
-      description: Read-only summary for Home and Matching; editing arrives with Profile
-        (M5).
+  /api/v1/me/photos:
+    post:
+      operationId: me_photos_create
+      tags:
+      - me
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PhotoUploadRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyProfile'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+  /api/v1/me/photos/{photo_id}:
+    delete:
+      operationId: me_photos_destroy
+      parameters:
+      - in: path
+        name: photo_id
+        schema:
+          type: string
+        required: true
       tags:
       - me
       security:
@@ -280,6 +472,76 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MyProfile'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+  /api/v1/me/profile:
+    get:
+      operationId: me_profile_retrieve
+      description: 'FR-19: the signed-in user''s profile.'
+      tags:
+      - me
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyProfile'
+          description: ''
+    patch:
+      operationId: me_profile_partial_update
+      description: 'FR-19: the signed-in user''s profile.'
+      tags:
+      - me
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyProfile'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
           description: ''
   /api/v1/me/selfie:
     post:
@@ -495,6 +757,21 @@ components:
       description: |-
         * `sms` - sms
         * `voice` - voice
+    ChatHistory:
+      type: object
+      properties:
+        friend:
+          $ref: '#/components/schemas/FriendSummary'
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatMessage'
+        more:
+          type: boolean
+      required:
+      - friend
+      - messages
+      - more
     ChatMessage:
       type: object
       properties:
@@ -528,6 +805,114 @@ components:
       - seen_at
       - sender_id
       - sent_at
+    DeviceRequest:
+      type: object
+      properties:
+        platform:
+          $ref: '#/components/schemas/PlatformEnum'
+        fcm_token:
+          type: string
+          minLength: 1
+          maxLength: 512
+      required:
+      - fcm_token
+      - platform
+    FriendRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+      required:
+      - id
+      - status
+    FriendRequestCreateRequest:
+      type: object
+      properties:
+        session_id:
+          type: string
+          format: uuid
+          description: Ask the other person in this session
+      required:
+      - session_id
+    FriendRequestRow:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        sender:
+          $ref: '#/components/schemas/FriendSummary'
+        met_on:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - created_at
+      - id
+      - met_on
+      - sender
+    FriendRow:
+      type: object
+      properties:
+        chat_id:
+          type: string
+          format: uuid
+        friend:
+          $ref: '#/components/schemas/FriendSummary'
+        online:
+          type: boolean
+        last_message:
+          allOf:
+          - $ref: '#/components/schemas/LastMessage'
+          nullable: true
+        unread:
+          type: integer
+      required:
+      - chat_id
+      - friend
+      - last_message
+      - online
+      - unread
+    FriendSummary:
+      type: object
+      properties:
+        first_name:
+          type: string
+        age:
+          type: integer
+          nullable: true
+        city:
+          type: string
+        verified:
+          type: boolean
+        photo_url:
+          type: string
+          nullable: true
+      required:
+      - age
+      - city
+      - first_name
+      - photo_url
+      - verified
+    Friends:
+      type: object
+      properties:
+        friends:
+          type: array
+          items:
+            $ref: '#/components/schemas/FriendRow'
+        requests:
+          type: array
+          items:
+            $ref: '#/components/schemas/FriendRequestRow'
+      required:
+      - friends
+      - requests
     GenderEnum:
       enum:
       - woman
@@ -561,6 +946,23 @@ components:
       required:
       - label
       - slug
+    LastMessage:
+      type: object
+      properties:
+        body:
+          type: string
+        kind:
+          type: string
+        mine:
+          type: boolean
+        sent_at:
+          type: string
+          format: date-time
+      required:
+      - body
+      - kind
+      - mine
+      - sent_at
     MediaToken:
       type: object
       properties:
@@ -581,6 +983,8 @@ components:
           nullable: true
         city:
           type: string
+        bio:
+          type: string
         interests:
           type: array
           items:
@@ -589,15 +993,21 @@ components:
           type: array
           items:
             type: string
+        photos:
+          type: array
+          items:
+            $ref: '#/components/schemas/Photo'
         is_verified:
           type: boolean
       required:
       - age
+      - bio
       - city
       - first_name
       - interests
       - is_verified
       - languages
+      - photos
     NextStepEnum:
       enum:
       - phone
@@ -679,6 +1089,32 @@ components:
       required:
       - code
       - phone
+    PatchedProfileUpdateRequest:
+      type: object
+      description: FR-19 limits are checked in the service layer (accounts.services.profile).
+      properties:
+        first_name:
+          type: string
+          minLength: 1
+        bio:
+          type: string
+        city:
+          type: string
+        languages:
+          type: array
+          items:
+            type: string
+            minLength: 1
+        interests:
+          type: array
+          items:
+            type: string
+            minLength: 1
+        photo_order:
+          type: array
+          items:
+            type: string
+            minLength: 1
     Peer:
       type: object
       properties:
@@ -706,6 +1142,32 @@ components:
       - shared_interests
       - shared_languages
       - verified
+    Photo:
+      type: object
+      properties:
+        id:
+          type: string
+        url:
+          type: string
+      required:
+      - id
+      - url
+    PhotoUploadRequest:
+      type: object
+      properties:
+        photo:
+          type: string
+          format: binary
+      required:
+      - photo
+    PlatformEnum:
+      enum:
+      - android
+      - ios
+      type: string
+      description: |-
+        * `android` - android
+        * `ios` - ios
     ProviderEnum:
       enum:
       - google
@@ -747,6 +1209,10 @@ components:
         session_id:
           type: string
           format: uuid
+        chat_id:
+          type: string
+          format: uuid
+          description: Report a friend from their chat
         reason:
           $ref: '#/components/schemas/ReasonEnum'
         block:
@@ -754,7 +1220,6 @@ components:
           default: true
       required:
       - reason
-      - session_id
     SelfieEnum:
       enum:
       - none

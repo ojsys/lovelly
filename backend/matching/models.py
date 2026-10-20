@@ -33,6 +33,10 @@ class MatchSession(UUIDModel):
     room_name = models.CharField(max_length=64, unique=True)
     # Voice call switched to video by agreement (FR-14).
     upgraded_at = models.DateTimeField(null=True, blank=True)
+    # Direct call between friends (FR-16); empty for random matches.
+    friendship = models.ForeignKey(
+        "chat.Friendship", on_delete=models.SET_NULL, null=True, blank=True, related_name="calls"
+    )
 
     class Meta:
         indexes = [

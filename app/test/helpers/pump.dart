@@ -3,11 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:korram/api/api.dart';
 import 'package:korram/app.dart';
+import 'package:korram/config/clock.dart';
 import 'package:korram/auth/onboarding_repository.dart';
 import 'package:korram/auth/token_store.dart';
 import 'package:korram/features/call/call_controller.dart';
 import 'package:korram/features/call/call_engine.dart';
+import 'package:korram/features/friends/friends_repository.dart';
+import 'package:korram/features/friends/profile_screen.dart';
 import 'package:korram/features/home/home_data.dart';
+import 'package:korram/platform/push.dart';
 import 'package:korram/platform/device_id.dart';
 import 'package:korram/platform/permissions.dart';
 import 'package:korram/platform/selfie_camera.dart';
@@ -24,11 +28,16 @@ class TestApp {
   final realtime = FakeRealtimeClient();
   final engine = FakeCallEngine();
   final freshTokens = <String>[];
+  final friends = FakeFriendsRepository();
+  final push = FakePushService();
+  String? pickedPhoto = '/tmp/picked.jpg';
   int online = 12480;
   MyProfile profile = const MyProfile(
     firstName: 'Ada',
     age: 27,
     city: 'Enugu',
+    bio: 'Builder by day, amateur chef by night.',
+    photos: [],
     interests: [
       Interest(slug: 'afrobeats', label: 'Afrobeats'),
       Interest(slug: 'football', label: 'Football'),
@@ -74,6 +83,10 @@ Future<TestApp> pumpApp(
         socialSignInProvider.overrideWithValue(FakeSocialSignIn()),
         realtimeClientProvider.overrideWithValue(app.realtime),
         deviceIdSourceProvider.overrideWithValue(FakeDeviceIdSource()),
+        friendsRepositoryProvider.overrideWithValue(app.friends),
+        clockProvider.overrideWithValue(() => DateTime(2026, 10, 20, 14, 14)),
+        pushServiceProvider.overrideWithValue(app.push),
+        photoPickerProvider.overrideWithValue(() async => app.pickedPhoto),
         callEngineProvider.overrideWithValue(app.engine),
         mediaTokenFetcherProvider.overrideWithValue((id) async {
           app.freshTokens.add(id);

@@ -10,13 +10,22 @@ part 'report_request_request.g.dart';
 
 @JsonSerializable()
 class ReportRequestRequest {
-  const ReportRequestRequest({required this.sessionId, required this.reason, this.block = true});
+  const ReportRequestRequest({
+    required this.reason,
+    this.block = true,
+    this.sessionId,
+    this.chatId,
+  });
 
   factory ReportRequestRequest.fromJson(Map<String, Object?> json) =>
       _$ReportRequestRequestFromJson(json);
 
   @JsonKey(name: 'session_id')
-  final String sessionId;
+  final String? sessionId;
+
+  /// Report a friend from their chat
+  @JsonKey(name: 'chat_id')
+  final String? chatId;
   final ReasonEnum reason;
   final bool block;
 

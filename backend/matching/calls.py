@@ -88,9 +88,12 @@ def request_reveal(session_id, user: User) -> bool:
     agreed = r.smembers(key)
     peer_id = session.peer_of(user.id)
     if str(peer_id) in agreed:
+        from accounts.services.profile import main_photo_url
+
         for uid in (session.user_a_id, session.user_b_id):
-            # Main photos (signed URLs) are added when profile photos exist (M5).
-            send_to_user(uid, "reveal.accept", {"session_id": str(session.id), "photo_url": None})
+            # Each side gets the *other* person's main photo (FR-13).
+            photo = main_photo_url(session.peer_of(uid))
+            send_to_user(uid, "reveal.accept", {"session_id": str(session.id), "photo_url": photo})
         return True
     send_to_user(peer_id, "reveal.request", {"session_id": str(session.id)})
     return False

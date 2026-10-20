@@ -9,7 +9,7 @@ from chat import services as chat
 from core.exceptions import ApiError
 from core.ratelimit import limit
 from core.realtime import user_group
-from matching import calls
+from matching import calls, friend_calls
 from matching import service as matching
 from matching.models import MatchSession
 
@@ -54,13 +54,26 @@ def _handle(user_id, event: dict) -> dict | None:
             matching.end_session(session.id, user, "next" if kind == "session.next" else "end")
             return None
         case "chat.message":
-            chat.send_message(event.get("session_id"), user, event.get("body", ""))
+            chat.send_message(
+                event.get("session_id"), user, event.get("body", ""), chat_id=event.get("chat_id")
+            )
             return None
         case "chat.seen":
-            chat.mark_seen(event.get("session_id"), user, event.get("message_id"))
+            chat.mark_seen(
+                event.get("session_id"), user, event.get("message_id"), chat_id=event.get("chat_id")
+            )
             return None
         case "chat.typing":
-            chat.typing(event.get("session_id"), user)
+            chat.typing(event.get("session_id"), user, chat_id=event.get("chat_id"))
+            return None
+        case "call.invite":
+            friend_calls.invite(user, event.get("chat_id"), event.get("mode"))
+            return None
+        case "call.accept":
+            friend_calls.accept(user, event.get("invite_id"))
+            return None
+        case "call.decline" | "call.cancel":
+            friend_calls.decline(user, event.get("invite_id"), cancel=kind == "call.cancel")
             return None
         case "reveal.request" | "reveal.accept":
             calls.request_reveal(event.get("session_id"), user)

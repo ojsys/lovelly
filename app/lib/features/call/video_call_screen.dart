@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../theme/icons.dart';
 import '../../theme/tokens.dart';
+import '../friends/friends_controller.dart';
 import '../match/match_controller.dart';
 import 'call_controller.dart';
 import 'call_engine.dart';
@@ -242,7 +243,9 @@ class _VideoCallScreenState extends ConsumerState<VideoCallScreen> with CallScre
                           foreground: engine.cameraOn ? KColors.text : KColors.background,
                           onPressed: controller.toggleCamera,
                         ),
-                        // Gift (M6) and Add friend (M5) join this row in their milestones.
+                        // Gift arrives with coins (M6).
+                        if (match.chatId == null && call.sessionId != null)
+                          _AddFriendButton(sessionId: call.sessionId!),
                         CallButton(
                           icon: KIcon.close,
                           label: 'End call',
@@ -252,39 +255,41 @@ class _VideoCallScreenState extends ConsumerState<VideoCallScreen> with CallScre
                         ),
                       ],
                     ),
-                    const SizedBox(height: 18),
-                    Semantics(
-                      button: true,
-                      label: 'Next person',
-                      excludeSemantics: true,
-                      child: Material(
-                        color: KColors.coral,
-                        borderRadius: BorderRadius.circular(KRadius.field),
-                        child: InkWell(
+                    if (match.chatId == null) ...[
+                      const SizedBox(height: 18),
+                      Semantics(
+                        button: true,
+                        label: 'Next person',
+                        excludeSemantics: true,
+                        child: Material(
+                          color: KColors.coral,
                           borderRadius: BorderRadius.circular(KRadius.field),
-                          onTap: controller.next,
-                          child: SizedBox(
-                            height: 60,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'Next person',
-                                  style: KType.buttonLarge.copyWith(color: KColors.onCoral),
-                                ),
-                                const SizedBox(width: 10),
-                                const KIconView(
-                                  KIcon.arrowRight,
-                                  size: 20,
-                                  color: KColors.onCoral,
-                                  stroke: 2.4,
-                                ),
-                              ],
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(KRadius.field),
+                            onTap: controller.next,
+                            child: SizedBox(
+                              height: 60,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Next person',
+                                    style: KType.buttonLarge.copyWith(color: KColors.onCoral),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  const KIconView(
+                                    KIcon.arrowRight,
+                                    size: 20,
+                                    color: KColors.onCoral,
+                                    stroke: 2.4,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),
@@ -307,4 +312,31 @@ class _GlassChip extends StatelessWidget {
     decoration: BoxDecoration(color: KColors.glass, borderRadius: BorderRadius.circular(10)),
     child: Text(label, style: KType.small.copyWith(height: 1.2, fontWeight: FontWeight.w500)),
   );
+}
+
+/// FR-14: ask to be friends from the call; turns mint once sent.
+class _AddFriendButton extends ConsumerWidget {
+  const _AddFriendButton({required this.sessionId});
+
+  final String sessionId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final sent = ref.watch(friendRequestsSentProvider).contains(sessionId);
+    return CallButton(
+      icon: KIcon.addFriend,
+      label: sent ? 'Friend request sent' : 'Add as friend',
+      pressed: sent,
+      background: sent ? KColors.mint : KColors.glass,
+      foreground: sent ? KColors.background : KColors.text,
+      onPressed: sent
+          ? null
+          : () async {
+              final error = await ref.read(friendRequestsSentProvider.notifier).add(sessionId);
+              if (error != null && context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+              }
+            },
+    );
+  }
 }

@@ -117,3 +117,8 @@ def test_privacy_raw_selfies_deleted_30_days_after_pass(api, ready):
     v.refresh_from_db()
     assert v.images == [] and not any(default_storage.exists(k) for k in keys)
     assert Profile.objects.get(user=ready).is_verified
+
+
+def test_fr4_passing_selfie_enrolls_the_face_for_main_photos(api, ready):
+    selfie(api)
+    assert Profile.objects.get(user=ready).face_template.startswith("fake-template:")

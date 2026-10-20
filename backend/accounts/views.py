@@ -1,7 +1,6 @@
 from dataclasses import asdict
 
-from django.utils import timezone
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -9,7 +8,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from . import serializers as s
-from .services import devices, onboarding, otp, phones
+from .models import Interest
+from .services import devices, onboarding, otp, phones, profile, push
 
 ERRORS = {400: s.ApiErrorSerializer, 403: s.ApiErrorSerializer, 429: s.ApiErrorSerializer}
 
@@ -120,25 +120,73 @@ class VerificationView(APIView):
 
 
 class MyProfileView(APIView):
-    """Read-only summary for Home and Matching; editing arrives with Profile (M5)."""
+    """FR-19: the signed-in user's profile."""
 
     permission_classes = [IsAuthenticated]
 
     @extend_schema(responses=s.MyProfileSerializer)
     def get(self, request):
-        user = request.user
-        profile = onboarding._profile(user)
-        interests = [
-            {"slug": ui.interest.slug, "label": ui.interest.label}
-            for ui in user.interests.select_related("interest")
-        ]
-        return Response(
-            {
-                "first_name": profile.first_name,
-                "age": onboarding.age_on(user.dob, timezone.now().date()) if user.dob else None,
-                "city": profile.city,
-                "interests": interests,
-                "languages": profile.languages,
-                "is_verified": profile.is_verified,
-            }
+        return Response(profile.as_dict(request.user))
+
+    @extend_schema(
+        request=s.ProfileUpdateSerializer, responses={200: s.MyProfileSerializer, **ERRORS}
+    )
+    def patch(self, request):
+        data = s.ProfileUpdateSerializer(data=request.data, partial=True)
+        data.is_valid(raise_exception=True)
+        return Response(profile.update(request.user, data.validated_data))
+
+
+class PhotosView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser]
+
+    @extend_schema(
+        request={"multipart/form-data": s.PhotoUploadSerializer},
+        responses={201: s.MyProfileSerializer, **ERRORS},
+    )
+    def post(self, request):
+        data = s.PhotoUploadSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        return Response(profile.add_photo(request.user, data.validated_data["photo"]), status=201)
+
+
+class PhotoDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(responses={200: s.MyProfileSerializer, **ERRORS})
+    def delete(self, request, photo_id):
+        return Response(profile.delete_photo(request.user, photo_id))
+
+
+class InterestsView(APIView):
+    """The server-controlled interest list (FR-19)."""
+
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(responses=s.InterestSerializer(many=True))
+    def get(self, request):
+        return Response([{"slug": i.slug, "label": i.label} for i in Interest.objects.all()])
+
+
+class DevicesView(APIView):
+    """FR-17: register (or move) this install's push token."""
+
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(request=s.DeviceSerializer, responses={204: None})
+    def post(self, request):
+        data = s.DeviceSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        push.register(
+            request.user, data.validated_data["platform"], data.validated_data["fcm_token"]
         )
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @extend_schema(
+        parameters=[OpenApiParameter("fcm_token", str, required=True)], responses={204: None}
+    )
+    def delete(self, request):
+        """Sign-out: stop pushes to this install."""
+        push.unregister(request.user, request.query_params.get("fcm_token", ""))
+        return Response(status=status.HTTP_204_NO_CONTENT)

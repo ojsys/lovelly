@@ -77,10 +77,37 @@ class InterestSerializer(serializers.Serializer):
     label = serializers.CharField()
 
 
+class PhotoSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    url = serializers.CharField()
+
+
 class MyProfileSerializer(serializers.Serializer):
     first_name = serializers.CharField()
     age = serializers.IntegerField(allow_null=True)
     city = serializers.CharField(allow_blank=True)
+    bio = serializers.CharField(allow_blank=True)
     interests = InterestSerializer(many=True)
     languages = serializers.ListField(child=serializers.CharField())
+    photos = PhotoSerializer(many=True)
     is_verified = serializers.BooleanField()
+
+
+class ProfileUpdateSerializer(serializers.Serializer):
+    """FR-19 limits are checked in the service layer (accounts.services.profile)."""
+
+    first_name = serializers.CharField(required=False)
+    bio = serializers.CharField(required=False, allow_blank=True)
+    city = serializers.CharField(required=False, allow_blank=True)
+    languages = serializers.ListField(child=serializers.CharField(), required=False)
+    interests = serializers.ListField(child=serializers.CharField(), required=False)
+    photo_order = serializers.ListField(child=serializers.CharField(), required=False)
+
+
+class PhotoUploadSerializer(serializers.Serializer):
+    photo = serializers.FileField()
+
+
+class DeviceSerializer(serializers.Serializer):
+    platform = serializers.ChoiceField(choices=["android", "ios"])
+    fcm_token = serializers.CharField(max_length=512)

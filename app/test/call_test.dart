@@ -120,10 +120,10 @@ void main() {
       expect(find.text('Report Tobi'), findsOneWidget);
     });
 
-    testWidgets('gift and add-friend wait for their milestones', (tester) async {
+    testWidgets('gift waits for coins (M6); add friend is here (FR-14)', (tester) async {
       await inCall(tester, 'video');
       expect(label('Send a gift'), findsNothing);
-      expect(label('Add as friend'), findsNothing);
+      expect(label('Add as friend'), findsOneWidget);
     });
   });
 

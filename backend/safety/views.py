@@ -35,7 +35,8 @@ class BlockDetailView(APIView):
 
 
 class ReportRequestSerializer(serializers.Serializer):
-    session_id = serializers.UUIDField()
+    session_id = serializers.UUIDField(required=False)
+    chat_id = serializers.UUIDField(required=False, help_text="Report a friend from their chat")
     reason = serializers.ChoiceField(choices=Report.Reason.choices)
     block = serializers.BooleanField(default=True)
 
@@ -52,7 +53,12 @@ class ReportsView(APIView):
     def post(self, request):
         data = ReportRequestSerializer(data=request.data)
         data.is_valid(raise_exception=True)
-        report = services.create_report(request.user, **data.validated_data)
+        v = data.validated_data
+        if not (v.get("session_id") or v.get("chat_id")):
+            raise serializers.ValidationError({"session_id": "Give a session_id or chat_id."})
+        report = services.create_report(
+            request.user, v.get("session_id"), v["reason"], v["block"], chat_id=v.get("chat_id")
+        )
         return Response(
             {"id": report.id, "blocked": data.validated_data["block"]},
             status=status.HTTP_201_CREATED,

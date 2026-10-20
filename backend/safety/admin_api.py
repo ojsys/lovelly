@@ -19,6 +19,7 @@ from accounts.services import onboarding
 from accounts.services.onboarding import age_on
 from core.exceptions import ApiError
 from core.ratelimit import limit
+from core.storage_urls import signed_url
 
 from . import evidence, services
 from .models import ModerationAction, Report
@@ -206,7 +207,7 @@ class VerificationsView(ConsoleView):
                     "created_at": v.created_at,
                     "user": user_summary(v.user),
                     "images": [
-                        evidence.signed_url(default_storage, key)
+                        signed_url(default_storage, key)
                         for key in (latest.images if latest else [])
                     ],
                 }

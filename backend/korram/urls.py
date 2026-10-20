@@ -2,6 +2,13 @@ from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView
 
+from chat.views import (
+    ChatMessagesView,
+    FriendRequestAcceptView,
+    FriendRequestDeclineView,
+    FriendRequestsView,
+    FriendsView,
+)
 from core.views import HealthView
 from matching.views import MediaTokenView, OnlineCountView, SessionDetailView
 from safety.views import (
@@ -22,6 +29,11 @@ api_v1 = [
     path("blocks", BlocksView.as_view(), name="blocks"),
     path("blocks/<uuid:block_id>", BlockDetailView.as_view(), name="block-detail"),
     path("reports", ReportsView.as_view(), name="reports"),
+    path("friends", FriendsView.as_view(), name="friends"),
+    path("friends/requests", FriendRequestsView.as_view(), name="friend-requests"),
+    path("friends/requests/<uuid:request_id>/accept", FriendRequestAcceptView.as_view()),
+    path("friends/requests/<uuid:request_id>/decline", FriendRequestDeclineView.as_view()),
+    path("chats/<uuid:chat_id>/messages", ChatMessagesView.as_view(), name="chat-messages"),
     path("me/status", MyStatusView.as_view(), name="me-status"),
     path("me/notices/<uuid:notice_id>/seen", NoticeSeenView.as_view(), name="notice-seen"),
 ]

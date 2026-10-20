@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../router/routes.dart';
 import '../theme/icons.dart';
 import '../theme/tokens.dart';
 
@@ -35,7 +36,10 @@ class MainShell extends StatelessWidget {
                     excludeSemantics: true,
                     child: InkWell(
                       borderRadius: BorderRadius.circular(KRadius.md),
-                      onTap: () => shell.goBranch(i, initialLocation: i == shell.currentIndex),
+                      // Profile (09) opens full screen, as designed.
+                      onTap: () => i == 2
+                          ? GoRouter.of(context).push(Routes.profileEdit)
+                          : shell.goBranch(i, initialLocation: i == shell.currentIndex),
                       child: SizedBox(
                         height: 48,
                         child: Column(

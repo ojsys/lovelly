@@ -12,4 +12,8 @@ urlpatterns = [
     path("me/selfie", views.SelfieView.as_view(), name="me-selfie"),
     path("me/verification", views.VerificationView.as_view(), name="me-verification"),
     path("me/profile", views.MyProfileView.as_view(), name="me-profile"),
+    path("me/photos", views.PhotosView.as_view(), name="me-photos"),
+    path("me/photos/<str:photo_id>", views.PhotoDetailView.as_view(), name="me-photo"),
+    path("me/devices", views.DevicesView.as_view(), name="me-devices"),
+    path("interests", views.InterestsView.as_view(), name="interests"),
 ]

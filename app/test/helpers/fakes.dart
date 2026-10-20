@@ -6,6 +6,8 @@ import 'package:korram/api/api.dart';
 import 'package:korram/auth/onboarding_repository.dart';
 import 'package:korram/auth/token_store.dart';
 import 'package:korram/features/call/call_engine.dart';
+import 'package:korram/features/friends/friends_repository.dart';
+import 'package:korram/platform/push.dart';
 import 'package:korram/platform/device_id.dart';
 import 'package:korram/platform/permissions.dart';
 import 'package:korram/platform/selfie_camera.dart';
@@ -119,8 +121,13 @@ class FakeOnboardingRepository implements OnboardingRepository {
   Future<void> noticeSeen(String id) async => calls.add('noticeSeen $id');
 
   @override
-  Future<void> report(String sessionId, ReasonEnum reason, {required bool block}) async {
-    calls.add('report $sessionId ${reason.json} block=$block');
+  Future<void> report(
+    String? sessionId,
+    ReasonEnum reason, {
+    required bool block,
+    String? chatId,
+  }) async {
+    calls.add('report ${sessionId ?? 'chat:$chatId'} ${reason.json} block=$block');
     if (reportError case final e?) throw e;
   }
 
@@ -315,4 +322,120 @@ class FakeCallEngine extends CallEngine {
 class FakeDeviceIdSource implements DeviceIdSource {
   @override
   Future<String?> deviceId() async => 'test-device-0001';
+}
+
+FriendSummary friendSummary(String name, {String city = 'Accra'}) =>
+    FriendSummary(firstName: name, age: 27, city: city, verified: true, photoUrl: null);
+
+FriendRow friendRow(
+  String chatId,
+  String name, {
+  bool online = false,
+  int unread = 0,
+  String? last,
+}) => FriendRow(
+  chatId: chatId,
+  friend: friendSummary(name),
+  online: online,
+  lastMessage: last == null
+      ? null
+      : LastMessage(body: last, kind: 'text', mine: false, sentAt: DateTime.now()),
+  unread: unread,
+);
+
+class FakeFriendsRepository implements FriendsRepository {
+  final calls = <String>[];
+  Friends friendsData = const Friends(friends: [], requests: []);
+  ChatHistory history_ = ChatHistory(
+    friend: friendSummary('Kwame'),
+    messages: const [],
+    more: false,
+  );
+  MyProfile profileData = const MyProfile(
+    firstName: 'Ada',
+    age: 27,
+    city: 'Enugu',
+    bio: 'Builder by day.',
+    interests: [Interest(slug: 'afrobeats', label: 'Afrobeats')],
+    languages: ['english'],
+    photos: [],
+    isVerified: true,
+  );
+  ApiFailure? photoError;
+  ApiFailure? requestError;
+
+  @override
+  Future<Friends> friends() async => friendsData;
+
+  @override
+  Future<void> request(String sessionId) async {
+    calls.add('request $sessionId');
+    if (requestError case final e?) throw e;
+  }
+
+  @override
+  Future<void> accept(String requestId) async => calls.add('accept $requestId');
+
+  @override
+  Future<void> decline(String requestId) async => calls.add('decline $requestId');
+
+  @override
+  Future<ChatHistory> history(String chatId, {String? before}) async {
+    calls.add('history $chatId${before == null ? '' : ' before'}');
+    return history_;
+  }
+
+  @override
+  Future<MyProfile> profile() async => profileData;
+
+  @override
+  Future<MyProfile> updateProfile(PatchedProfileUpdateRequest body) async {
+    calls.add('update ${body.toJson()}');
+    return profileData;
+  }
+
+  @override
+  Future<MyProfile> addPhoto(String path) async {
+    calls.add('addPhoto $path');
+    if (photoError case final e?) throw e;
+    return profileData;
+  }
+
+  @override
+  Future<MyProfile> deletePhoto(String id) async {
+    calls.add('deletePhoto $id');
+    return profileData;
+  }
+
+  List<Interest>? catalogue;
+
+  @override
+  Future<List<Interest>> interests() async =>
+      catalogue ??
+      const [
+        Interest(slug: 'afrobeats', label: 'Afrobeats'),
+        Interest(slug: 'football', label: 'Football'),
+        Interest(slug: 'tech', label: 'Tech'),
+        Interest(slug: 'poetry', label: 'Poetry'),
+        Interest(slug: 'food', label: 'Food'),
+        Interest(slug: 'movies', label: 'Movies'),
+      ];
+
+  @override
+  Future<void> registerDevice(String platform, String token) async =>
+      calls.add('registerDevice $platform $token');
+}
+
+class FakePushService implements PushService {
+  final opened_ = StreamController<Map<String, String>>.broadcast();
+  bool started = false;
+
+  @override
+  Stream<Map<String, String>> get opened => opened_.stream;
+
+  @override
+  Future<void> start(Future<void> Function(String platform, String token) register) async {
+    started = true;
+    await register('android', 'fcm-test-token');
+  }
 }

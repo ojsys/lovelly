@@ -6,7 +6,10 @@ import 'package:dio/dio.dart';
 
 import 'clients/auth_client.dart';
 import 'clients/blocks_client.dart';
+import 'clients/chats_client.dart';
+import 'clients/friends_client.dart';
 import 'clients/health_client.dart';
+import 'clients/interests_client.dart';
 import 'clients/match_client.dart';
 import 'clients/me_client.dart';
 import 'clients/reports_client.dart';
@@ -23,7 +26,10 @@ class KorramApi {
 
   AuthClient? _auth;
   BlocksClient? _blocks;
+  ChatsClient? _chats;
+  FriendsClient? _friends;
   HealthClient? _health;
+  InterestsClient? _interests;
   MatchClient? _match;
   MeClient? _me;
   ReportsClient? _reports;
@@ -33,7 +39,13 @@ class KorramApi {
 
   BlocksClient get blocks => _blocks ??= BlocksClient(_dio, baseUrl: _baseUrl);
 
+  ChatsClient get chats => _chats ??= ChatsClient(_dio, baseUrl: _baseUrl);
+
+  FriendsClient get friends => _friends ??= FriendsClient(_dio, baseUrl: _baseUrl);
+
   HealthClient get health => _health ??= HealthClient(_dio, baseUrl: _baseUrl);
+
+  InterestsClient get interests => _interests ??= InterestsClient(_dio, baseUrl: _baseUrl);
 
   MatchClient get match => _match ??= MatchClient(_dio, baseUrl: _baseUrl);
 

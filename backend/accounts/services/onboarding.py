@@ -225,6 +225,12 @@ def submit_selfie(user: User, front, left) -> OnboardingState:
     ]
     verification.save(update_fields=["images"])
 
+    if result.passed and not underage:
+        # Face template for matching main photos later (FR-4; raw selfies go after 30 days).
+        Profile.objects.filter(user=user).update(
+            face_template=get_provider("liveness").enroll(poses[0])
+        )
+
     if underage:
         # SF-3: looks under 18 -> suspend until a human reviews it.
         user.status = User.Status.SUSPENDED

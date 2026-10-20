@@ -196,7 +196,7 @@ void main() {
       await tester.tap(find.text('Arsenal or Chelsea? Choose wisely'));
       await settle(tester);
       expect(app.realtime.sent.last['body'], 'Arsenal or Chelsea? Choose wisely');
-      expect(find.text('Add as friend'), findsNothing);
+      expect(find.text('Add as friend'), findsOneWidget); // FR-14 (M5)
     });
 
     testWidgets('when the other person leaves, you choose what is next', (tester) async {

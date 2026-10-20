@@ -224,7 +224,9 @@ mixin CallScreenLifecycle<T extends ConsumerStatefulWidget> on ConsumerState<T> 
       } else if (next.phase == MatchPhase.ended && next.endReason == 'moderation') {
         context.pushReplacement(Routes.safetyEnded); // SF-2
       } else if (next.phase == MatchPhase.idle) {
-        context.go(Routes.home);
+        // Friend calls go back to their chat; random calls go home.
+        final chatId = prev?.chatId;
+        context.go(chatId != null ? '/friends/chat/$chatId' : Routes.home);
       }
     });
     ref.listen(callControllerProvider, (prev, next) {

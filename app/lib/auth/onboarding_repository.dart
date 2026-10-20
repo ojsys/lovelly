@@ -53,9 +53,19 @@ class OnboardingRepository {
   Future<void> noticeSeen(String id) => _call(() => _api.me.meNoticesSeenCreate(noticeId: id));
 
   /// SF-4: report the other person in a session; optionally block them too.
-  Future<void> report(String sessionId, ReasonEnum reason, {required bool block}) => _call(
+  Future<void> report(
+    String? sessionId,
+    ReasonEnum reason, {
+    required bool block,
+    String? chatId,
+  }) => _call(
     () => _api.reports.reportsCreate(
-      body: ReportRequestRequest(sessionId: sessionId, reason: reason, block: block),
+      body: ReportRequestRequest(
+        sessionId: sessionId,
+        chatId: chatId,
+        reason: reason,
+        block: block,
+      ),
     ),
   );
 

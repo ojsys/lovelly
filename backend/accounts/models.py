@@ -78,6 +78,9 @@ class Profile(models.Model):
     photos = ArrayField(models.CharField(max_length=255), default=list, blank=True)
     is_verified = models.BooleanField(default=False)
     verified_at = models.DateTimeField(null=True, blank=True)
+    # Liveness provider's face template from the passed selfie: main photos are matched
+    # against it (FR-4), so raw selfies can still be deleted after 30 days.
+    face_template = models.CharField(max_length=255, blank=True)
 
     def __str__(self):
         return self.first_name or str(self.user)
@@ -211,3 +214,21 @@ class DeniedDevice(UUIDModel):
 
     def __str__(self):
         return self.device_hash[:8]
+
+
+class DeviceToken(UUIDModel):
+    """PRD: Data model / DeviceToken. One per app install (FR-17)."""
+
+    class Platform(models.TextChoices):
+        ANDROID = "android", "Android"
+        IOS = "ios", "iOS"
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="device_tokens"
+    )
+    platform = models.CharField(max_length=8, choices=Platform.choices)
+    fcm_token = models.CharField(max_length=512, unique=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.platform} token for {self.user_id}"

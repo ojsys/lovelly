@@ -17,9 +17,14 @@ import '../match/match_controller.dart';
 /// Opened in place of the call or chat (pushReplacement), so it stays on screen after the
 /// session ends; Cancel goes back to the call.
 class ReportScreen extends ConsumerStatefulWidget {
-  const ReportScreen({super.key, required this.sessionId});
+  const ReportScreen({super.key, this.sessionId, this.chatId, this.friendName});
 
-  final String sessionId;
+  /// A stranger session (call or chat)…
+  final String? sessionId;
+
+  /// …or a friend chat (pushed on top of it; Cancel just closes).
+  final String? chatId;
+  final String? friendName;
 
   @override
   ConsumerState<ReportScreen> createState() => _ReportScreenState();
@@ -45,17 +50,25 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => ref.read(callControllerProvider.notifier).pause(),
-    );
+    if (widget.chatId == null) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => ref.read(callControllerProvider.notifier).pause(),
+      );
+    }
   }
 
-  String get _name => _match.peer?.firstName ?? 'them';
+  String get _name => widget.friendName ?? _match.peer?.firstName ?? 'them';
+
+  bool get _friend => widget.chatId != null;
 
   void _cancel() {
+    if (_friend) {
+      context.pop();
+      return;
+    }
     ref.read(callControllerProvider.notifier).resume();
     context.pushReplacement(switch (_match.mode) {
-      MatchMode.text => '/chat/${widget.sessionId}',
+      MatchMode.text => '/chat/${widget.sessionId!}',
       MatchMode.voice => Routes.voiceCall,
       MatchMode.video => Routes.videoCall,
     });
@@ -66,7 +79,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
     try {
       await ref
           .read(onboardingRepositoryProvider)
-          .report(widget.sessionId, _reason!, block: _block);
+          .report(widget.sessionId, _reason!, block: _block, chatId: widget.chatId);
       setState(() {
         _sent = true;
         _error = null;
@@ -90,7 +103,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
-        _sent ? context.go(Routes.home) : _cancel();
+        _sent ? context.go(_friend ? Routes.friends : Routes.home) : _cancel();
       },
       child: Scaffold(
         backgroundColor: KColors.cameraBackground,
@@ -102,7 +115,9 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
               child: Align(
                 alignment: Alignment.topCenter,
                 child: Text(
-                  _match.mode == MatchMode.text ? 'Chat paused' : 'Call paused — video hidden',
+                  _friend || _match.mode == MatchMode.text
+                      ? 'Chat paused'
+                      : 'Call paused — video hidden',
                   style: KType.body.copyWith(color: KColors.cameraText),
                 ),
               ),
@@ -149,7 +164,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
     Text('Report $_name', style: KType.sheetTitle),
     const SizedBox(height: 6),
     Text(
-      'The ${_match.mode == MatchMode.text ? 'chat' : 'call'} is paused and hidden. '
+      'The ${_friend || _match.mode == MatchMode.text ? 'chat' : 'call'} is paused and hidden. '
       '$_name won’t know who reported them. Our team reviews every report.',
       style: KType.body.copyWith(height: 1.5, color: KColors.muted),
     ),
@@ -264,18 +279,24 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
         const SizedBox(height: 14),
         SizedBox(
           width: double.infinity,
-          child: FilledButton(onPressed: _meetSomeoneNew, child: const Text('Meet someone new')),
+          child: _friend
+              ? FilledButton(
+                  onPressed: () => context.go(Routes.friends),
+                  child: const Text('Back to friends'),
+                )
+              : FilledButton(onPressed: _meetSomeoneNew, child: const Text('Meet someone new')),
         ),
         const SizedBox(height: 14),
-        TextButton(
-          onPressed: () => context.go(Routes.home),
-          style: TextButton.styleFrom(
-            foregroundColor: KColors.text,
-            minimumSize: const Size(0, 44),
-            textStyle: KType.button,
+        if (!_friend)
+          TextButton(
+            onPressed: () => context.go(Routes.home),
+            style: TextButton.styleFrom(
+              foregroundColor: KColors.text,
+              minimumSize: const Size(0, 44),
+              textStyle: KType.button,
+            ),
+            child: const Text('Back to home'),
           ),
-          child: const Text('Back to home'),
-        ),
       ],
     ),
   );

@@ -104,3 +104,17 @@ def test_reports_are_rate_limited(video_session, events):
 def test_cannot_report_someone_elses_session(video_session, make_user):
     s, _, _ = video_session
     assert report(make_user("Eve"), s).status_code == 404
+
+
+@pytest.mark.django_db(transaction=True)
+def test_friends_can_be_reported_from_their_chat(friends_pair, events):
+    f, a, b, _ = friends_pair
+    send_message(None, b, "send me your bank details", chat_id=f.id)
+    res = client(a).post(
+        "/api/v1/reports", {"chat_id": str(f.id), "reason": "scam", "block": True}, format="json"
+    )
+    assert res.status_code == 201
+    loaded = evidence.load(Report.objects.get())
+    assert loaded["transcript"][-1]["body"] == "send me your bank details"
+    f.refresh_from_db()
+    assert f.status == "declined"  # blocked: friendship over (SF-5)

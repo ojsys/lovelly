@@ -11,6 +11,10 @@ abstract final class Routes {
   static const removed = '/onboarding/removed'; // under-18 account removed (no design)
   static const suspended = '/suspended'; // SF-6 (no design)
   static const safetyEnded = '/match/ended'; // SF-2 (no design)
+  static const friendChat = '/friends/chat/:chatId';
+  static const friendReport = '/friends/chat/:chatId/report';
+  static const calling = '/friends/calling'; // outgoing friend call (no design)
+  static const incomingCall = '/call/incoming'; // FR-16 (no design)
   static const home = '/home';
   static const searching = '/match/searching';
   static const videoCall = '/call/video';

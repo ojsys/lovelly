@@ -163,14 +163,15 @@ class _VoiceCallScreenState extends ConsumerState<VoiceCallScreen> with CallScre
                                   : KColors.text,
                               onPressed: controller.requestVideo,
                             ),
-                            CallButton(
-                              icon: KIcon.arrowRight,
-                              label: 'Next person',
-                              size: 56,
-                              background: KColors.lilac,
-                              foreground: KColors.onCoral,
-                              onPressed: controller.next,
-                            ),
+                            if (ref.watch(matchControllerProvider).chatId == null)
+                              CallButton(
+                                icon: KIcon.arrowRight,
+                                label: 'Next person',
+                                size: 56,
+                                background: KColors.lilac,
+                                foreground: KColors.onCoral,
+                                onPressed: controller.next,
+                              ),
                             CallButton(
                               icon: KIcon.close,
                               label: 'End call',

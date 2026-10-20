@@ -162,7 +162,11 @@ PROVIDERS = {
     "media": env("PROVIDER_MEDIA", default="fake"),
     "store_receipts": env("PROVIDER_STORE_RECEIPTS", default="fake"),
     "paystack": env("PROVIDER_PAYSTACK", default="fake"),
+    "push": env("PROVIDER_PUSH", default="fake"),
 }
+# FCM HTTP v1 (PROVIDER_PUSH=fcm): project id and the service-account key as JSON.
+FCM_PROJECT_ID = env("FCM_PROJECT_ID", default="")
+FCM_CREDENTIALS_JSON = env("FCM_CREDENTIALS_JSON", default="")
 
 # FakeLivenessProvider outcome: pass | fail | underage (drives the M1 acceptance demo).
 FAKE_LIVENESS = env("FAKE_LIVENESS", default="pass")

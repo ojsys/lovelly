@@ -7,12 +7,12 @@ session and user; a report copies what's there into the private `evidence` bucke
 import json
 import time
 
-from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import storages
 
 from chat.models import Message
 from core.redis import get_redis
+from core.storage_urls import signed_url
 
 WINDOW_SECONDS = 30
 MAX_FRAMES = 40  # 1 frame/s for 30 s plus slack
@@ -47,13 +47,15 @@ def storage():
     return storages["evidence"]
 
 
-def capture(report) -> str:
-    """Copies frames (both people) and the transcript into the evidence bucket."""
+def capture(report, friendship=None) -> str:
+    """Copies frames (both people) and the transcript into the evidence bucket.
+
+    For a friend-chat report, the transcript is the friend chat's last 200 messages."""
     prefix = f"reports/{report.id}"
     session = report.session
     store = storage()
     frames = []
-    if session is not None:
+    if session is not None and friendship is None:
         for role, uid in (("reported", report.reported_id), ("reporter", report.reporter_id)):
             if uid is None:
                 continue
@@ -71,6 +73,17 @@ def capture(report) -> str:
         ]
     else:
         transcript = []
+    if friendship is not None:
+        recent = Message.objects.filter(friendship=friendship).order_by("-sent_at")[:200]
+        transcript = [
+            {
+                "sender": "reported" if m.sender_id == report.reported_id else "reporter",
+                "body": m.body,
+                "sent_at": m.sent_at.isoformat(),
+                "flagged": m.flagged,
+            }
+            for m in reversed(recent)
+        ]
     manifest = {"frames": frames, "transcript": transcript}
     store.save(f"{prefix}/manifest.json", ContentFile(json.dumps(manifest).encode()))
     return prefix
@@ -86,25 +99,6 @@ def load(report) -> dict:
     for frame in manifest["frames"]:
         frame["url"] = signed_url(store, frame.pop("key"))
     return manifest
-
-
-def signed_url(store, key: str, expires: int = 300) -> str:
-    """A browser-reachable signed URL (S3), or the storage's own URL (tests)."""
-    bucket = getattr(store, "bucket_name", None)
-    if bucket is None:
-        return store.url(key)
-    import boto3
-
-    client = boto3.client(
-        "s3",
-        endpoint_url=settings.S3_PUBLIC_ENDPOINT_URL,
-        aws_access_key_id=store.access_key,
-        aws_secret_access_key=store.secret_key,
-        region_name="us-east-1",
-    )
-    return client.generate_presigned_url(
-        "get_object", Params={"Bucket": bucket, "Key": key}, ExpiresIn=expires
-    )
 
 
 def delete(report) -> None:

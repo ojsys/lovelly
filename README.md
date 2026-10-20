@@ -83,9 +83,12 @@ that's configured with hosting, not in local dev (docs/questions.md #24).
 | `infra/.env` | `PROVIDER_SMS`, `PROVIDER_IDENTITY`, … | `fake` until real providers are chosen |
 | `flutter run --dart-define` | `API_BASE_URL` | default `http://10.0.2.2:8100` (Android emulator) / `http://127.0.0.1:8100` |
 | `flutter run --dart-define` | `SOCIAL_SIGN_IN` | `fake` (default), `real`, `off` |
+| `infra/.env` | `PROVIDER_PUSH` | `fake` (default: pushes are logged) / `fcm` with `FCM_PROJECT_ID` and `FCM_CREDENTIALS_JSON` (service-account key) |
+| `flutter run --dart-define` | `PUSH` | unset (default: no Firebase) / `fcm` (needs `google-services.json` / `GoogleService-Info.plist`) |
 
 In development the phone code is printed in the API logs:
 `docker compose -f infra/docker-compose.yml logs api | grep "fake sms code"`.
+Pushes to friends who are offline are logged the same way: `grep "fake push to"`.
 Manual selfie reviews are approved or rejected in Django admin at
 http://localhost:8100/django-admin/ (create a login with
 `docker compose -f infra/docker-compose.yml exec api python manage.py createsuperuser`).

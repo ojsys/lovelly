@@ -187,4 +187,104 @@ void main() {
     }
     await golden(tester, 'report');
   });
+
+  testWidgets('07 Friends', (tester) async {
+    DateTime at(int day, int h, int m) => DateTime(2026, 10, day, h, m);
+    FriendRow row(
+      String name,
+      DateTime sent,
+      String last, {
+      bool mine = false,
+      String kind = 'text',
+      int unread = 0,
+      bool online = false,
+    }) => FriendRow(
+      chatId: name,
+      friend: friendSummary(name),
+      online: online,
+      lastMessage: LastMessage(body: last, kind: kind, mine: mine, sentAt: sent),
+      unread: unread,
+    );
+    await pumpApp(
+      tester,
+      setUp: (app) {
+        app.verified();
+        app.friends.friendsData = Friends(
+          friends: [
+            row('Kwame', at(20, 14, 13), 'We should talk on voice', unread: 2, online: true),
+            row('Zainab', at(20, 13, 2), 'Sent you a voice note', unread: 1, online: true),
+            row(
+              'Tobi',
+              at(19, 18, 40),
+              'See you at the next Felabration',
+              mine: true,
+              online: true,
+            ),
+            row('Amara', at(12, 20, 5), 'Missed video call · 4 min', kind: 'system'),
+            row('Ife', at(11, 9, 30), 'That jollof argument is not over', online: true),
+          ],
+          requests: [
+            for (final n in ['Chidi', 'Bola'])
+              FriendRequestRow(
+                id: n,
+                sender: friendSummary(n),
+                metOn: 'video',
+                createdAt: at(20, 14, 9),
+              ),
+          ],
+        );
+      },
+    );
+    await tester.tap(find.bySemanticsLabel('Friends'));
+    await tester.pumpAndSettle();
+    await golden(tester, 'friends');
+  });
+
+  testWidgets('09 Profile', (tester) async {
+    await pumpApp(
+      tester,
+      setUp: (app) {
+        app.verified();
+        app.friends.catalogue = [
+          for (final l in [
+            'Afrobeats',
+            'Football',
+            'Tech',
+            'Cooking',
+            'Nollywood',
+            'Fashion',
+            'Travel',
+            'Gaming',
+            'Poetry',
+            'Startups',
+            'Fitness',
+            'Anime',
+            'Church music',
+            'Photography',
+          ])
+            Interest(slug: l.toLowerCase(), label: l),
+        ];
+        app.friends.profileData = const MyProfile(
+          firstName: 'Ada',
+          age: 27,
+          city: 'Enugu',
+          bio: 'Builder by day, amateur chef by night. Ask me about my egusi.',
+          interests: [
+            Interest(slug: 'afrobeats', label: 'Afrobeats'),
+            Interest(slug: 'football', label: 'Football'),
+            Interest(slug: 'tech', label: 'Tech'),
+          ],
+          languages: ['english', 'igbo', 'pidgin'],
+          photos: [
+            Photo(id: 'p1', url: 'https://photos.test/1.jpg'),
+            Photo(id: 'p2', url: 'https://photos.test/2.jpg'),
+          ],
+          isVerified: true,
+        );
+      },
+    );
+    await tester.tap(find.bySemanticsLabel('Profile'));
+    await tester.pumpAndSettle();
+    await golden(tester, 'profile');
+  });
 }

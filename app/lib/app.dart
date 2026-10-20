@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'router/router.dart';
 import 'theme/theme.dart';
+import 'widgets/app_events.dart';
 
 class KorramApp extends ConsumerWidget {
   const KorramApp({super.key});
@@ -14,6 +15,7 @@ class KorramApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: buildKorramTheme(),
       routerConfig: ref.watch(routerProvider),
+      builder: (context, child) => AppEvents(child: child ?? const SizedBox.shrink()),
     );
   }
 }

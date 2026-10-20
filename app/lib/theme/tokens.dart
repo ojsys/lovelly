@@ -49,6 +49,17 @@ abstract final class KColors {
   static const sheet = Color(0xFF15141B);
   static const coralSelected = Color(0xFF2A1D1A);
 
+  /// Initial-avatar backgrounds (Friends, 07), picked by name.
+  static const avatarPalette = [
+    Color(0xFF2E4A44),
+    Color(0xFF3B3156),
+    Color(0xFF4A3428),
+    Color(0xFF2E3A56),
+    Color(0xFF44402A),
+    Color(0xFF563131),
+    Color(0xFF2A4456),
+  ];
+
   /// Bottom navigation bar background.
   static const navBar = Color(0xFF131218);
 

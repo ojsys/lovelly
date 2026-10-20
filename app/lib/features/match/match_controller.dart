@@ -61,6 +61,7 @@ class ChatMessage {
     this.seen = false,
     this.flagged = false,
     this.flagReason = '',
+    this.system = false,
   });
 
   factory ChatMessage.fromJson(Map<String, dynamic> json, String myId) => ChatMessage(
@@ -71,6 +72,7 @@ class ChatMessage {
     seen: json['seen_at'] != null,
     flagged: json['flagged'] as bool? ?? false,
     flagReason: json['flag_reason'] as String? ?? '',
+    system: json['kind'] == 'system',
   );
 
   final String id;
@@ -81,6 +83,9 @@ class ChatMessage {
   final bool flagged;
   final String flagReason;
 
+  /// "Missed video call" and similar lines (not typed by anyone).
+  final bool system;
+
   ChatMessage copyWith({bool? seen}) => ChatMessage(
     id: id,
     mine: mine,
@@ -89,6 +94,7 @@ class ChatMessage {
     seen: seen ?? this.seen,
     flagged: flagged,
     flagReason: flagReason,
+    system: system,
   );
 }
 
@@ -111,6 +117,7 @@ class MatchState {
     this.roomName,
     this.mediaToken,
     this.mediaUrl,
+    this.chatId,
     this.messages = const [],
     this.peerTyping = false,
     this.endReason,
@@ -126,6 +133,9 @@ class MatchState {
   final String? roomName;
   final String? mediaToken;
   final String? mediaUrl;
+
+  /// Set for a direct call between friends (FR-16); null for random matches.
+  final String? chatId;
   final List<ChatMessage> messages;
   final bool peerTyping;
 
@@ -158,6 +168,7 @@ class MatchState {
     roomName: roomName ?? this.roomName,
     mediaToken: mediaToken ?? this.mediaToken,
     mediaUrl: mediaUrl ?? this.mediaUrl,
+    chatId: chatId,
     messages: messages ?? this.messages,
     peerTyping: peerTyping ?? this.peerTyping,
     endReason: endReason ?? this.endReason,
@@ -261,6 +272,7 @@ class MatchController extends Notifier<MatchState> {
           roomName: e['room_name'] as String?,
           mediaToken: e['media_token'] as String?,
           mediaUrl: e['media_url'] as String?,
+          chatId: e['chat_id'] as String?,
         );
       case 'match.widened' when state.phase == MatchPhase.searching:
         state = state.copyWith(widened: true);
@@ -302,6 +314,10 @@ class MatchController extends Notifier<MatchState> {
         // SF-2: ended by the moderation agent or a moderator. Never auto-requeue.
         state = state.copyWith(phase: MatchPhase.ended, endReason: reason, peerTyping: false);
       default: // peer_next | peer_left
+        if (state.chatId != null) {
+          state = MatchState(mode: state.mode); // friend call over: back to the chat
+          return;
+        }
         if (state.mode == MatchMode.text) {
           // Text: show "<name> left" and let the user choose (M2 decision 1).
           state = state.copyWith(phase: MatchPhase.ended, endReason: reason, peerTyping: false);

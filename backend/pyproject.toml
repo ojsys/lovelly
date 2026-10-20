@@ -21,6 +21,8 @@ dependencies = [
     "livekit-api>=1.0",
     "pillow>=11",
     "livekit>=1.0",
+    "google-auth>=2.30",
+    "requests>=2.32",
 ]
 
 [dependency-groups]

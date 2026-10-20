@@ -21,6 +21,10 @@ _REGISTRY = {
     },
     "store_receipts": {"fake": "core.providers.store_receipts.FakeStoreReceiptsProvider"},
     "paystack": {"fake": "core.providers.paystack.FakePaystackProvider"},
+    "push": {
+        "fake": "core.providers.push.FakePushProvider",
+        "fcm": "core.providers.push.FCMPushProvider",
+    },
 }
 
 

@@ -31,10 +31,13 @@ def _own_session(user: User, session_id) -> MatchSession:
 
 
 def _block(user: User, peer_id) -> Block:
+    from chat.friends import end_for_block
+
     try:
         block, _ = Block.objects.get_or_create(blocker=user, blocked_id=peer_id)
     except IntegrityError:
         block = Block.objects.get(blocker=user, blocked_id=peer_id)
+    end_for_block(user.id, peer_id)  # SF-5: no more friend chat either
     return block
 
 
@@ -56,9 +59,29 @@ def unblock(user: User, block_id) -> None:
 # --- Reports (SF-4) ----------------------------------------------------------------------
 
 
-def create_report(user: User, session_id, reason: str, block: bool) -> Report:
-    """User report from screen 08: evidence saved, session ended, optional block."""
+def create_report(user: User, session_id, reason: str, block: bool, chat_id=None) -> Report:
+    """User report from screen 08: evidence saved, session ended, optional block.
+
+    From a friend chat (`chat_id`) the report points at the session where they met and the
+    evidence is the friend chat (app-store rule: report in every chat)."""
     limit(f"report:{user.id}", REPORTS_PER_HOUR, 3600, "You've sent a lot of reports. Try later.")
+    if chat_id:
+        from chat.friends import accepted_friendship
+
+        friendship = accepted_friendship(user, chat_id)
+        peer_id = friendship.other(user.id)
+        report = Report(
+            reporter=user,
+            reported_id=peer_id,
+            session=friendship.met_in,
+            reason=reason,
+            severity=Report.SEVERITY[reason],
+        )
+        report.evidence_uri = evidence.capture(report, friendship=friendship)
+        report.save()
+        if block:
+            _block(user, peer_id)
+        return report
     session = _own_session(user, session_id)
     peer_id = session.peer_of(user.id)
     report = Report(

@@ -5,6 +5,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
 import 'interest.dart';
+import 'photo.dart';
 
 part 'my_profile.g.dart';
 
@@ -14,8 +15,10 @@ class MyProfile {
     required this.firstName,
     required this.age,
     required this.city,
+    required this.bio,
     required this.interests,
     required this.languages,
+    required this.photos,
     required this.isVerified,
   });
 
@@ -25,8 +28,10 @@ class MyProfile {
   final String firstName;
   final int? age;
   final String city;
+  final String bio;
   final List<Interest> interests;
   final List<String> languages;
+  final List<Photo> photos;
   @JsonKey(name: 'is_verified')
   final bool isVerified;
 

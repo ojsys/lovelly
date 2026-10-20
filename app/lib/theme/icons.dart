@@ -32,6 +32,8 @@ enum KIcon {
   videoOff(
     '<path d="M15 10l5-3v10l-5-3"/><rect x="3" y="6" width="12" height="12" rx="3"/><path d="M3 3l18 18"/>',
   ),
+  plus('<path d="M12 5v14"/><path d="M5 12h14"/>'),
+  search('<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>'),
   addFriend(
     '<circle cx="9" cy="8" r="4"/><path d="M2 21c1-4 4-6 7-6s6 2 7 6"/><path d="M19 8v6"/><path d="M16 11h6"/>',
   );

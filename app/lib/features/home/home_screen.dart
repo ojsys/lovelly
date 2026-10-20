@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../config/clock.dart';
 import '../../router/routes.dart';
 import '../../theme/icons.dart';
 import '../../theme/tokens.dart';
@@ -61,7 +62,7 @@ class HomeScreen extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            _greeting(DateTime.now()),
+                            _greeting(ref.watch(clockProvider)()),
                             style: KType.caption.copyWith(color: KColors.muted),
                           ),
                           const SizedBox(height: 2),

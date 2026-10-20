@@ -6,6 +6,8 @@ from datetime import date
 import pytest
 from django.utils import timezone
 
+from core.realtime import json_safe
+
 _phones = itertools.count(1000)
 
 
@@ -57,13 +59,16 @@ def events(monkeypatch):
     sent = []
 
     def record(user_id, event_type, payload):
-        sent.append((str(user_id), event_type, payload))
+        # What the real send puts on the wire (fails on anything JSON can't carry).
+        sent.append((str(user_id), event_type, json_safe(payload)))
 
     monkeypatch.setattr("matching.service.send_to_user", record)
     monkeypatch.setattr("chat.services.send_to_user", record)
     monkeypatch.setattr("matching.calls.send_to_user", record)
     monkeypatch.setattr("safety.services.send_to_user", record)
     monkeypatch.setattr("safety.moderation.send_to_user", record)
+    monkeypatch.setattr("chat.friends.send_to_user", record)
+    monkeypatch.setattr("matching.friend_calls.send_to_user", record)
 
     class Events(list):
         def of(self, user, event_type=None):
@@ -114,3 +119,28 @@ def moderator(db):
     user.save()
     user.groups.add(Group.objects.get_or_create(name="Moderators")[0])
     return user
+
+
+@pytest.fixture
+def pushes():
+    """Pushes the fake provider recorded (FR-17)."""
+    from core.providers.push import FakePushProvider
+
+    FakePushProvider.outbox.clear()
+    return FakePushProvider.outbox
+
+
+@pytest.fixture
+def friends_pair(make_user, redis_db, events):
+    """Two users who met in a text chat and became friends."""
+    from chat import friends
+    from matching import service
+
+    a, b = make_user("Ada"), make_user("Kwame")
+    service.join(a, "text")
+    service.join(b, "text")
+    (s,) = service.run_tick()
+    f = friends.request(a, s.id)
+    friends.accept(b, f.id)
+    f.refresh_from_db()
+    return f, a, b, s

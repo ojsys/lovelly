@@ -3,6 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../auth/session.dart';
+import '../features/friends/call_invite_screens.dart';
+import '../features/friends/friend_chat_screen.dart';
+import '../features/friends/friends_screen.dart';
+import '../features/friends/profile_screen.dart';
 import '../features/home/home_screen.dart';
 import '../features/match/chat_screen.dart';
 import '../features/call/video_call_screen.dart';
@@ -104,22 +108,8 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: Routes.friends,
-                builder: (context, state) => const PlaceholderScreen(
-                  number: '07',
-                  title: 'Friends & inbox',
-                  milestone: 'M5',
-                ),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: Routes.profileEdit,
-                builder: (context, state) => const PlaceholderScreen(
-                  number: '09',
-                  title: 'Profile & interests',
-                  milestone: 'M5',
+                builder: (context, state) => FriendsScreen(
+                  initialTab: state.uri.queryParameters['tab'] == 'requests' ? 1 : 0,
                 ),
               ),
             ],
@@ -127,6 +117,21 @@ final routerProvider = Provider<GoRouter>((ref) {
         ],
       ),
       GoRoute(path: Routes.searching, builder: (context, state) => const SearchingScreen()),
+      // 09 is full screen in the design (back + Save, no tab bar).
+      GoRoute(path: Routes.profileEdit, builder: (context, state) => const ProfileScreen()),
+      GoRoute(
+        path: Routes.friendChat,
+        builder: (context, state) => FriendChatScreen(chatId: state.pathParameters['chatId']!),
+      ),
+      GoRoute(
+        path: Routes.friendReport,
+        builder: (context, state) => ReportScreen(
+          chatId: state.pathParameters['chatId'],
+          friendName: state.uri.queryParameters['name'],
+        ),
+      ),
+      GoRoute(path: Routes.calling, builder: (context, state) => const OutgoingCallScreen()),
+      GoRoute(path: Routes.incomingCall, builder: (context, state) => const IncomingCallScreen()),
       GoRoute(
         path: Routes.chat,
         builder: (context, state) => ChatScreen(sessionId: state.pathParameters['id']!),

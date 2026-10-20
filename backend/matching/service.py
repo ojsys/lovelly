@@ -70,6 +70,12 @@ def touch_presence(user_id, now=None) -> None:
     _r().zadd("mq:presence", {str(user_id): now or time.time()})
 
 
+def is_online(user_id, now=None) -> bool:
+    """Has an open websocket (seen in the last minute)."""
+    seen = _r().zscore("mq:presence", str(user_id))
+    return seen is not None and (now or time.time()) - seen < PRESENCE_WINDOW_SECONDS
+
+
 def online_count(now=None) -> int:
     now = now or time.time()
     r = _r()
@@ -216,8 +222,12 @@ def peer_summary(user_id, peer_id) -> dict:
     return _summaries([(str(user_id), str(peer_id))])[(str(user_id), str(peer_id))]
 
 
-def _start_sessions(pairs: list[tuple[Ticket, Ticket]], now: float) -> list[MatchSession]:
-    """Creates the tick's sessions in bulk and sends match.found to both sides."""
+def _start_sessions(
+    pairs: list[tuple[Ticket, Ticket]], now: float, friendship=None
+) -> list[MatchSession]:
+    """Creates the tick's sessions in bulk and sends match.found to both sides.
+
+    `friendship` marks a direct call between friends (FR-16)."""
     if not pairs:
         return []
     sessions = MatchSession.objects.bulk_create(
@@ -227,16 +237,18 @@ def _start_sessions(pairs: list[tuple[Ticket, Ticket]], now: float) -> list[Matc
                 user_a_id=a.user_id,
                 user_b_id=b.user_id,
                 room_name=f"s_{uuid.uuid4().hex}",
+                friendship=friendship,
             )
             for a, b in pairs
         ]
     )
-    pipe = _r().pipeline()
-    for a, b in pairs:
-        for me, peer in ((a, b), (b, a)):
-            pipe.zadd(f"mq:recent:{me.user_id}", {peer.user_id: now})
-            pipe.expire(f"mq:recent:{me.user_id}", RECENT_SECONDS)
-    pipe.execute()
+    if friendship is None:  # FR-7's 24 h rule is about random matching, not friends
+        pipe = _r().pipeline()
+        for a, b in pairs:
+            for me, peer in ((a, b), (b, a)):
+                pipe.zadd(f"mq:recent:{me.user_id}", {peer.user_id: now})
+                pipe.expire(f"mq:recent:{me.user_id}", RECENT_SECONDS)
+        pipe.execute()
     summaries = _summaries(
         [(me.user_id, peer.user_id) for a, b in pairs for me, peer in ((a, b), (b, a))]
     )
@@ -255,6 +267,7 @@ def _start_sessions(pairs: list[tuple[Ticket, Ticket]], now: float) -> list[Matc
                     "room_name": session.room_name,
                     "media_token": calls.media_token(session, me.user_id),
                     "media_url": calls.media_url() if session.mode != "text" else None,
+                    "chat_id": str(friendship.id) if friendship else None,
                 },
             )
     return sessions
@@ -442,6 +455,8 @@ def purge_stranger_messages(now=None) -> int:
         Q(status__in=[Report.Status.OPEN, Report.Status.ESCALATED]) | Q(legal_hold=True)
     ).values("session_id")
     deleted, _ = (
-        Message.objects.filter(session__ended_at__lt=cutoff).exclude(session_id__in=held).delete()
+        Message.objects.filter(session__ended_at__lt=cutoff, friendship=None)
+        .exclude(session_id__in=held)
+        .delete()
     )
     return deleted
