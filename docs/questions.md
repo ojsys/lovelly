@@ -82,3 +82,12 @@
 27. **SF-9 referral process:** who reports suspected child sexual abuse material, to which
     authority (and NCMEC?), and how fast. For counsel.
 28. **Sampling rate vs the 2 s blur target.** See plans/M4.md, decision 1.
+
+## Raised in M5 planning
+
+29. **Friend calls** (FR-16): in-app ringing + push in M5; native call UI (CallKit /
+    ConnectionService) after the MVP?
+30. **Notification text on the lock screen:** generic ("Kwame sent you a message") or a
+    message preview?
+31. **Firebase project** for push: Android + iOS apps, an APNs key, and a backend service
+    account.
