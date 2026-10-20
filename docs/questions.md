@@ -64,3 +64,12 @@
 21. **Interest catalogue.** The server controls the list (FR-19). M2 seeds a starter set
     (Afrobeats, Football, Tech, Poetry, Food, …) that can be edited in admin. Supply the
     real list when ready.
+
+## Raised in M3 planning
+
+22. **Icebreaker questions** for the voice screen (05). M3 ships the design's question plus
+    ~30 drafted ones in the app. Supply the real list.
+23. **In-call chat.** The video design shows a chat bubble over the call, but no screen has a
+    way to type during a call. Dropped unless you want in-call text.
+24. **TURN for mobile networks.** Nigerian 4G is mostly behind carrier NAT; calls need a TURN
+    server (LiveKit's built-in TURN on 443/TLS). This goes with the hosting question (#5).
