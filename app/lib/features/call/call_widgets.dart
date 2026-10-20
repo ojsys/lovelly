@@ -221,6 +221,8 @@ mixin CallScreenLifecycle<T extends ConsumerStatefulWidget> on ConsumerState<T> 
     ref.listen(matchControllerProvider, (prev, next) {
       if (next.phase == MatchPhase.searching && prev?.phase == MatchPhase.matched) {
         context.pushReplacement(Routes.searching); // Next, by us or by them
+      } else if (next.phase == MatchPhase.ended && next.endReason == 'moderation') {
+        context.pushReplacement(Routes.safetyEnded); // SF-2
       } else if (next.phase == MatchPhase.idle) {
         context.go(Routes.home);
       }
@@ -273,7 +275,34 @@ mixin CallScreenLifecycle<T extends ConsumerStatefulWidget> on ConsumerState<T> 
     await ref.read(callControllerProvider.notifier).answerVideo(accept ?? false);
   }
 
+  /// SF-4: the report sheet replaces the call, so it survives the session ending.
   void openReport(String? sessionId) {
-    if (sessionId != null) context.push('/report/$sessionId'); // screen 08 arrives in M4
+    if (sessionId != null) context.pushReplacement('/report/$sessionId');
+  }
+}
+
+/// SF-2: covers the remote video once the moderation system steps in. Not in the canvas.
+class SafetyCover extends StatelessWidget {
+  const SafetyCover({super.key, required this.child, required this.active});
+
+  final Widget child;
+  final bool active;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!active) return child;
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        ImageFiltered(imageFilter: ImageFilter.blur(sigmaX: 60, sigmaY: 60), child: child),
+        const ColoredBox(color: KColors.reportScrim),
+        Center(
+          child: Semantics(
+            liveRegion: true,
+            child: Text('Paused for safety', style: KType.cardTitle.copyWith(color: KColors.text)),
+          ),
+        ),
+      ],
+    );
   }
 }

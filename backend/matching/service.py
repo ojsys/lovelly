@@ -240,6 +240,9 @@ def _start_sessions(pairs: list[tuple[Ticket, Ticket]], now: float) -> list[Matc
     summaries = _summaries(
         [(me.user_id, peer.user_id) for a, b in pairs for me, peer in ((a, b), (b, a))]
     )
+    for session in sessions:
+        if session.mode == MatchSession.Mode.VIDEO:
+            calls.watch(session)
     for session, (a, b) in zip(sessions, pairs, strict=True):
         for me, peer in ((a, b), (b, a)):
             send_to_user(
@@ -362,6 +365,7 @@ def end_session(session_id, user, reason: str, now=None) -> MatchSession | None:
     queue in the same mode.
     """
     now = now or time.time()
+    calls.stop_watching(session_id)
     updated = MatchSession.objects.filter(id=session_id, ended_at=None).update(
         ended_at=timezone.now(),
         end_reason=reason,
@@ -375,9 +379,12 @@ def end_session(session_id, user, reason: str, now=None) -> MatchSession | None:
     except Exception:
         logger.exception("could not close room for session %s", session.id)
     peer_id = session.peer_of(user.id)
-    peer_reason = {"next": "peer_next", "peer_left": "peer_left", "blocked": "peer_left"}.get(
-        reason, "peer_left"
-    )
+    peer_reason = {
+        "next": "peer_next",
+        "peer_left": "peer_left",
+        "blocked": "peer_left",
+        "moderation": "moderation",
+    }.get(reason, "peer_left")
     send_to_user(peer_id, "session.ended", {"session_id": str(session.id), "reason": peer_reason})
     send_to_user(user.id, "session.ended", {"session_id": str(session.id), "reason": reason})
     if reason == "next":
@@ -426,9 +433,15 @@ def _sweep_disconnects(now: float) -> int:
 
 
 def purge_stranger_messages(now=None) -> int:
-    """PRD data model: stranger messages are deleted after 7 days (report holds come in M4)."""
+    """PRD data model: stranger messages are deleted after 7 days unless a report holds them."""
     from chat.models import Message
+    from safety.models import Report
 
     cutoff = (now or timezone.now()) - timedelta(days=7)
-    deleted, _ = Message.objects.filter(session__ended_at__lt=cutoff).delete()
+    held = Report.objects.filter(
+        Q(status__in=[Report.Status.OPEN, Report.Status.ESCALATED]) | Q(legal_hold=True)
+    ).values("session_id")
+    deleted, _ = (
+        Message.objects.filter(session__ended_at__lt=cutoff).exclude(session_id__in=held).delete()
+    )
     return deleted

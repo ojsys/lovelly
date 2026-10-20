@@ -124,13 +124,30 @@ STORAGES = {
             "querystring_expire": 300,
         },
     },
+    # Report evidence (SF-4): separate private bucket, signed URLs for moderators only.
+    "evidence": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "endpoint_url": env("S3_ENDPOINT_URL"),
+            "access_key": env("S3_ACCESS_KEY"),
+            "secret_key": env("S3_SECRET_KEY"),
+            "bucket_name": env("S3_BUCKET_EVIDENCE", default="evidence"),
+            "default_acl": "private",
+            "querystring_auth": True,
+            "querystring_expire": 300,
+        },
+    },
     "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
 }
 S3_BUCKET_EVIDENCE = env("S3_BUCKET_EVIDENCE", default="evidence")
+# Where browsers reach object storage (signed URLs for the moderator console).
+S3_PUBLIC_ENDPOINT_URL = env("S3_PUBLIC_ENDPOINT_URL", default=env("S3_ENDPOINT_URL"))
 
 # LIVEKIT_URL is what apps connect to; LIVEKIT_API_URL is how Django reaches the server API.
 LIVEKIT_URL = env("LIVEKIT_URL", default="ws://localhost:7880")
 LIVEKIT_API_URL = env("LIVEKIT_API_URL", default="http://localhost:7880")
+# Where the moderation agent joins rooms (it runs next to LiveKit).
+LIVEKIT_AGENT_URL = env("LIVEKIT_AGENT_URL", default="ws://127.0.0.1:7880")
 # Join tokens only gate entry; a dropped call gets a fresh one (POST sessions/{id}/media-token).
 MEDIA_TOKEN_TTL_SECONDS = 10 * 60
 LIVEKIT_API_KEY = env("LIVEKIT_API_KEY", default="")
@@ -156,6 +173,9 @@ APPLE_CLIENT_IDS = env.list("APPLE_CLIENT_IDS", default=[])
 
 # SF-8 chat filter slur list: placeholder until a curated list exists (questions.md #20).
 CHAT_SLUR_LIST = env.list("CHAT_SLUR_LIST", default=["slurplaceholder"])
+
+# SF-2: nudity confidence at which a stream is cut and the call ended.
+MODERATION_NUDITY_THRESHOLD = env.float("MODERATION_NUDITY_THRESHOLD", default=0.85)
 
 # Onboarding rules (PRD FR-1, FR-3, FR-4; NFR Privacy).
 OTP_LENGTH = 6

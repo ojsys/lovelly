@@ -6,6 +6,7 @@ import 'package:korram/api/api.dart';
 import 'package:korram/auth/onboarding_repository.dart';
 import 'package:korram/auth/token_store.dart';
 import 'package:korram/features/call/call_engine.dart';
+import 'package:korram/platform/device_id.dart';
 import 'package:korram/platform/permissions.dart';
 import 'package:korram/platform/selfie_camera.dart';
 import 'package:korram/platform/social_sign_in.dart';
@@ -99,6 +100,28 @@ class FakeOnboardingRepository implements OnboardingRepository {
     calls.add('setBasics $firstName ${dob.toIso8601String().substring(0, 10)} ${gender.json}');
     if (basicsError case final e?) throw e;
     return state = vstate(next: NextStepEnum.selfie);
+  }
+
+  AccountStatus accountStatus = const AccountStatus(
+    status: StatusEnum.active,
+    suspendedUntil: null,
+    notices: [],
+  );
+  ApiFailure? reportError;
+
+  @override
+  Future<AccountStatus> status() async {
+    calls.add('status');
+    return accountStatus;
+  }
+
+  @override
+  Future<void> noticeSeen(String id) async => calls.add('noticeSeen $id');
+
+  @override
+  Future<void> report(String sessionId, ReasonEnum reason, {required bool block}) async {
+    calls.add('report $sessionId ${reason.json} block=$block');
+    if (reportError case final e?) throw e;
   }
 
   @override
@@ -287,4 +310,9 @@ class FakeCallEngine extends CallEngine {
     setLink(CallLink.lost);
     onLost?.call();
   }
+}
+
+class FakeDeviceIdSource implements DeviceIdSource {
+  @override
+  Future<String?> deviceId() async => 'test-device-0001';
 }

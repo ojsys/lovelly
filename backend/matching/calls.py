@@ -1,5 +1,7 @@
 """Voice and video calls: media tokens, photo reveal, voice → video (FR-10, FR-13, FR-14)."""
 
+import json
+
 from django.conf import settings
 from django.utils import timezone
 
@@ -13,6 +15,7 @@ from core.redis import get_redis
 from .models import MatchSession
 
 PENDING_UPGRADE_SECONDS = 60
+MODERATION_CHANNEL = "moderation:rooms"
 
 
 def sources_for(session: MatchSession) -> list[str]:
@@ -32,6 +35,20 @@ def media_token(session: MatchSession, user_id) -> str | None:
 
 def media_url() -> str:
     return get_provider("media").client_url
+
+
+def watch(session: MatchSession) -> None:
+    """Asks the moderation agent to sample this call's video (SF-2)."""
+    get_redis().publish(
+        MODERATION_CHANNEL,
+        json.dumps({"op": "start", "session_id": str(session.id), "room": session.room_name}),
+    )
+
+
+def stop_watching(session_id) -> None:
+    get_redis().publish(
+        MODERATION_CHANNEL, json.dumps({"op": "stop", "session_id": str(session_id)})
+    )
 
 
 def close_room(session: MatchSession) -> None:
@@ -108,6 +125,7 @@ def accept_upgrade(session_id, user: User) -> None:
     )
     for uid in (session.user_a_id, session.user_b_id):
         send_to_user(uid, "upgrade.accept", {"session_id": str(session.id)})
+    watch(session)  # video now flows: start sampling it
 
 
 def decline_upgrade(session_id, user: User) -> None:

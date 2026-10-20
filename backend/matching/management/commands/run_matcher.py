@@ -30,10 +30,19 @@ class Command(BaseCommand):
             try:
                 close_old_connections()
                 pairs = service.run_tick()
-                service.sweep_disconnects()
+                matched = time.monotonic()
+                swept = service.sweep_disconnects()
                 took = time.monotonic() - started
                 if pairs or took > TICK_SECONDS:
-                    logger.info("tick: %d pairs in %.0f ms", len(pairs), took * 1000)
+                    # Split timing: matching vs ending dropped sessions (which calls LiveKit).
+                    logger.info(
+                        "tick: %d pairs in %.0f ms (match %.0f ms, sweep %d in %.0f ms)",
+                        len(pairs),
+                        took * 1000,
+                        (matched - started) * 1000,
+                        swept,
+                        (time.monotonic() - matched) * 1000,
+                    )
             except Exception:
                 logger.exception("matcher tick failed")
             time.sleep(max(0.0, TICK_SECONDS - (time.monotonic() - started)))

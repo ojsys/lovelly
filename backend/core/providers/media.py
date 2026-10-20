@@ -31,6 +31,14 @@ class MediaProvider(ABC):
     def close_room(self, room_name: str) -> None:
         """Delete the room, disconnecting everyone in it."""
 
+    @abstractmethod
+    def agent_token(self, room_name: str, identity: str, ttl_seconds: int) -> str:
+        """Hidden, subscribe-only token for the moderation agent (SF-2)."""
+
+    @abstractmethod
+    def mute_track(self, room_name: str, identity: str, track_sid: str) -> None:
+        """Stop a published track for everyone, at once (SF-2 "blur the stream")."""
+
 
 class FakeMediaProvider(MediaProvider):
     """Records calls; tokens are readable strings."""
@@ -50,6 +58,13 @@ class FakeMediaProvider(MediaProvider):
 
     def close_room(self, room_name):
         self.log.append(("close", room_name))
+
+    def agent_token(self, room_name, identity, ttl_seconds):
+        self.log.append(("agent", room_name, identity))
+        return f"fake-agent-token:{room_name}"
+
+    def mute_track(self, room_name, identity, track_sid):
+        self.log.append(("mute", room_name, identity, track_sid))
 
 
 class LiveKitMediaProvider(MediaProvider):
@@ -114,9 +129,49 @@ class LiveKitMediaProvider(MediaProvider):
             # The room may never have been joined; LiveKit then has nothing to delete.
             logger.info("close_room %s: nothing to close", room_name)
 
-    def _api(self):
+    def agent_token(self, room_name, identity, ttl_seconds):
         from livekit import api
 
+        return (
+            api.AccessToken(settings.LIVEKIT_API_KEY, settings.LIVEKIT_API_SECRET)
+            .with_identity(identity)
+            .with_ttl(timedelta(seconds=ttl_seconds))
+            .with_grants(
+                api.VideoGrants(
+                    room_join=True,
+                    room=room_name,
+                    can_publish=False,
+                    can_publish_data=False,
+                    can_subscribe=True,
+                    hidden=True,
+                )
+            )
+            .to_jwt()
+        )
+
+    def mute_track(self, room_name, identity, track_sid):
+        from livekit import api
+
+        async def run():
+            async with self._api() as lk:
+                await lk.room.mute_published_track(
+                    api.MuteRoomTrackRequest(
+                        room=room_name, identity=identity, track_sid=track_sid, muted=True
+                    )
+                )
+
+        async_to_sync(run)()
+
+    def _api(self):
+        import aiohttp
+        from livekit import api
+
+        # Bounded: these run inside the matcher tick and moderation decisions, which must
+        # never stall on a slow LiveKit.
         return api.LiveKitAPI(
-            settings.LIVEKIT_API_URL, settings.LIVEKIT_API_KEY, settings.LIVEKIT_API_SECRET
+            settings.LIVEKIT_API_URL,
+            settings.LIVEKIT_API_KEY,
+            settings.LIVEKIT_API_SECRET,
+            timeout=aiohttp.ClientTimeout(total=3),
+            failover=False,
         )

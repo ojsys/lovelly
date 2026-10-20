@@ -25,6 +25,8 @@ class CallState {
     this.upgrade = Upgrade.none,
     this.icebreaker = 0,
     this.notice,
+    this.paused = false,
+    this.safetyBlur = false,
   });
 
   final String? sessionId;
@@ -42,6 +44,12 @@ class CallState {
   /// One-off message for a snackbar ("Tobi wants to stay on voice.").
   final String? notice;
 
+  /// SF-4: the report sheet is open — media hidden and muted on this device.
+  final bool paused;
+
+  /// SF-2: the moderation agent caught something; the remote video is fully blurred.
+  final bool safetyBlur;
+
   CallState copyWith({
     bool? video,
     DateTime? videoSince,
@@ -50,6 +58,8 @@ class CallState {
     int? icebreaker,
     String? notice,
     bool clearNotice = false,
+    bool? paused,
+    bool? safetyBlur,
   }) => CallState(
     sessionId: sessionId,
     startedAt: startedAt,
@@ -59,6 +69,8 @@ class CallState {
     upgrade: upgrade ?? this.upgrade,
     icebreaker: icebreaker ?? this.icebreaker,
     notice: clearNotice ? null : notice ?? this.notice,
+    paused: paused ?? this.paused,
+    safetyBlur: safetyBlur ?? this.safetyBlur,
   );
 }
 
@@ -142,6 +154,27 @@ class CallController extends Notifier<CallState> {
 
   void clearNotice() => state = state.copyWith(clearNotice: true);
 
+  // --- Report (SF-4): pause and hide the call while the sheet is open -------------------
+
+  bool _micBeforePause = true;
+  bool _cameraBeforePause = false;
+
+  Future<void> pause() async {
+    if (state.sessionId == null || state.paused) return;
+    _micBeforePause = _engine.micOn;
+    _cameraBeforePause = _engine.cameraOn;
+    state = state.copyWith(paused: true);
+    await _engine.setMic(false);
+    if (_engine.cameraOn) await _engine.setCamera(false);
+  }
+
+  Future<void> resume() async {
+    if (!state.paused) return;
+    state = state.copyWith(paused: false);
+    await _engine.setMic(_micBeforePause);
+    if (_cameraBeforePause) await _engine.setCamera(true);
+  }
+
   // --- Photo reveal (FR-13) ------------------------------------------------------------
 
   void reveal() {
@@ -191,6 +224,8 @@ class CallController extends Notifier<CallState> {
         state = state.copyWith(upgrade: Upgrade.incoming);
       case 'upgrade.decline':
         state = state.copyWith(upgrade: Upgrade.none, notice: '$peer wants to stay on voice.');
+      case 'moderation.blur':
+        state = state.copyWith(safetyBlur: true);
       case 'upgrade.accept':
         state = state.copyWith(video: true, videoSince: now(), upgrade: Upgrade.none);
         await _engine.setCamera(true);

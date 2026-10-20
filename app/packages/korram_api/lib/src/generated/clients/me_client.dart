@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
+import '../models/account_status.dart';
 import '../models/basics_request.dart';
 import '../models/my_profile.dart';
 import '../models/verification_state.dart';
@@ -21,6 +22,9 @@ abstract class MeClient {
   @PUT('/api/v1/me/basics')
   Future<VerificationState> meBasicsUpdate({@Body() required BasicsRequest body});
 
+  @POST('/api/v1/me/notices/{notice_id}/seen')
+  Future<void> meNoticesSeenCreate({@Path('notice_id') required String noticeId});
+
   /// Read-only summary for Home and Matching; editing arrives with Profile (M5).
   @GET('/api/v1/me/profile')
   Future<MyProfile> meProfileRetrieve();
@@ -31,6 +35,10 @@ abstract class MeClient {
     @Part(name: 'pose_front') required File poseFront,
     @Part(name: 'pose_left') required File poseLeft,
   });
+
+  /// Suspension and unseen notices (warnings) for the app (SF-6).
+  @GET('/api/v1/me/status')
+  Future<AccountStatus> meStatusRetrieve();
 
   @GET('/api/v1/me/verification')
   Future<VerificationState> meVerificationRetrieve();

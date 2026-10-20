@@ -8,6 +8,7 @@ import 'package:korram/auth/token_store.dart';
 import 'package:korram/features/call/call_controller.dart';
 import 'package:korram/features/call/call_engine.dart';
 import 'package:korram/features/home/home_data.dart';
+import 'package:korram/platform/device_id.dart';
 import 'package:korram/platform/permissions.dart';
 import 'package:korram/platform/selfie_camera.dart';
 import 'package:korram/platform/social_sign_in.dart';
@@ -72,6 +73,7 @@ Future<TestApp> pumpApp(
         selfieCameraProvider.overrideWith((ref) => app.camera),
         socialSignInProvider.overrideWithValue(FakeSocialSignIn()),
         realtimeClientProvider.overrideWithValue(app.realtime),
+        deviceIdSourceProvider.overrideWithValue(FakeDeviceIdSource()),
         callEngineProvider.overrideWithValue(app.engine),
         mediaTokenFetcherProvider.overrideWithValue((id) async {
           app.freshTokens.add(id);

@@ -16,3 +16,43 @@ body {
   color: var(--text);
   font: 15px/1.5 'DM Sans', system-ui, sans-serif;
 }
+
+* { box-sizing: border-box; }
+h1, h2, h3 { margin: 0; font-weight: 700; }
+button, input, textarea {
+  font: inherit; color: var(--text); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px;
+}
+button { cursor: pointer; min-height: 40px; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+button[aria-pressed="true"], button[aria-current="true"] { background: var(--text); color: var(--bg); }
+button.primary { background: #ff6b4a; color: #1a0e0b; border: 0; font-weight: 700; }
+button.danger-button { border-color: var(--danger); color: var(--danger); }
+label { display: flex; flex-direction: column; gap: 6px; color: var(--muted); font-size: 13px; }
+.shell { max-width: 1100px; margin: 0 auto; padding: 16px; }
+.shell > nav { padding: 8px 0 16px; border-bottom: 1px solid var(--line); margin-bottom: 16px; }
+.login { max-width: 360px; margin: 12vh auto; padding: 0 16px; }
+.login h1 { margin-bottom: 16px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; }
+.stack { display: flex; flex-direction: column; gap: 12px; }
+.row { display: flex; gap: 8px; align-items: center; }
+.row.between { justify-content: space-between; }
+.row.wrap { flex-wrap: wrap; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+.muted { color: var(--muted); }
+.danger { color: var(--danger); }
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 8px; border-bottom: 1px solid var(--line); }
+tr.clickable { cursor: pointer; }
+tr.clickable:hover, tr.clickable:focus { background: var(--surface); outline: none; }
+.sev { display: inline-block; min-width: 24px; text-align: center; border-radius: 6px; padding: 0 6px; font-weight: 700; }
+.sev-5 { background: var(--danger); color: #fff; }
+.sev-4 { background: #ff6b4a; color: #1a0e0b; }
+.sev-3 { background: #ffc94a; color: #1f1600; }
+.sev-2, .sev-1 { background: var(--line); }
+.frames { display: flex; gap: 8px; overflow-x: auto; }
+.frames img { height: 160px; border-radius: 10px; display: block; }
+.frames figure { margin: 0; }
+.frames figcaption { font-size: 12px; color: var(--muted); }
+.transcript { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.transcript .reported { color: #ffc94a; }

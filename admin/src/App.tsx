@@ -1,48 +1,43 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { session } from './api'
+import Audit from './pages/Audit'
+import Login from './pages/Login'
+import Queue from './pages/Queue'
+import ReportDetail from './pages/ReportDetail'
+import Verifications from './pages/Verifications'
 
-type Health = { status: string; db: boolean; redis: boolean }
-
-type State =
-  | { kind: 'loading' }
-  | { kind: 'ok'; health: Health }
-  | { kind: 'error'; message: string }
+type View = { page: 'queue' } | { page: 'report'; id: string } | { page: 'verifications' } | { page: 'audit' }
 
 export default function App() {
-  const [state, setState] = useState<State>({ kind: 'loading' })
+  const [signedIn, setSignedIn] = useState(() => session.get() !== null)
+  const [view, setView] = useState<View>({ page: 'queue' })
 
-  useEffect(() => {
-    fetch('/api/v1/health')
-      .then(async (res) => {
-        const health = (await res.json()) as Health
-        setState({ kind: 'ok', health })
-      })
-      .catch((err: Error) => setState({ kind: 'error', message: err.message }))
-  }, [])
+  if (!signedIn) return <Login onDone={() => setSignedIn(true)} />
+
+  const tab = (page: 'queue' | 'verifications' | 'audit', label: string) => (
+    <button aria-current={view.page === page || (page === 'queue' && view.page === 'report')}
+            onClick={() => setView({ page })}>
+      {label}
+    </button>
+  )
 
   return (
-    <main style={{ maxWidth: 560, margin: '64px auto', padding: '0 16px' }}>
-      <h1 style={{ fontSize: 24 }}>Korram moderation</h1>
-      <p style={{ color: 'var(--muted)' }}>The report queue arrives in M4.</p>
-      <section
-        aria-label="API health"
-        style={{
-          background: 'var(--surface)',
-          border: '1px solid var(--line)',
-          borderRadius: 16,
-          padding: 16,
-        }}
-      >
-        {state.kind === 'loading' && <p>Checking API…</p>}
-        {state.kind === 'error' && (
-          <p style={{ color: 'var(--danger)' }}>API unreachable: {state.message}</p>
-        )}
-        {state.kind === 'ok' && (
-          <p style={{ color: state.health.status === 'ok' ? 'var(--mint)' : 'var(--danger)' }}>
-            API {state.health.status} · database {state.health.db ? 'up' : 'down'} · redis{' '}
-            {state.health.redis ? 'up' : 'down'}
-          </p>
-        )}
-      </section>
-    </main>
+    <div className="shell">
+      <nav className="row between">
+        <strong>Korram moderation</strong>
+        <div className="row">
+          {tab('queue', 'Reports')}
+          {tab('verifications', 'Selfie reviews')}
+          {tab('audit', 'Audit log')}
+          <button onClick={() => { session.clear(); setSignedIn(false) }}>Sign out</button>
+        </div>
+      </nav>
+      <main>
+        {view.page === 'queue' && <Queue onOpen={(id) => setView({ page: 'report', id })} />}
+        {view.page === 'report' && <ReportDetail id={view.id} onBack={() => setView({ page: 'queue' })} />}
+        {view.page === 'verifications' && <Verifications />}
+        {view.page === 'audit' && <Audit />}
+      </main>
+    </div>
   )
 }

@@ -17,8 +17,10 @@ CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
 CELERY_TASK_ALWAYS_EAGER = True
 ALLOWED_HOSTS = ["localhost", "testserver"]
 CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
+MEDIA_URL = "/media/"
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.InMemoryStorage"},
+    "evidence": {"BACKEND": "django.core.files.storage.InMemoryStorage"},
     "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
 }
 

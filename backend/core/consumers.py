@@ -7,6 +7,7 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from accounts.models import User
 from chat import services as chat
 from core.exceptions import ApiError
+from core.ratelimit import limit
 from core.realtime import user_group
 from matching import calls
 from matching import service as matching
@@ -31,12 +32,17 @@ def _handle(user_id, event: dict) -> dict | None:
     user = _fresh(user_id)
     if not user.is_active:
         raise ApiError("account_removed", "This account was removed.", 403)
+    from safety.services import effective_status
+
+    if effective_status(user) == User.Status.SUSPENDED and event.get("type") != "ping":
+        raise ApiError("account_suspended", "Your account is suspended.", 403)
     kind = event.get("type")
     match kind:
         case "ping":
             matching.touch_presence(user.id)
             return {"type": "pong"}
         case "queue.join":
+            limit(f"join:{user.id}", 120, 3600)
             mode = event.get("mode")
             matching.join(user, mode, event.get("filters") or {})
             return {"type": "queue.joined", "mode": mode}
@@ -79,6 +85,12 @@ class RealtimeConsumer(AsyncJsonWebsocketConsumer):
         if not user.is_authenticated:
             await self.close(code=4401)
             return
+        client = (self.scope.get("client") or ["?"])[0]
+        try:
+            await sync_to_async(limit, thread_sensitive=False)(f"wsconnect:{client}", 30, 60)
+        except ApiError:
+            await self.close(code=4429)
+            return
         self.user_id = user.id
         self.group = user_group(user.id)
         await self.channel_layer.group_add(self.group, self.channel_name)
@@ -119,3 +131,5 @@ class RealtimeConsumer(AsyncJsonWebsocketConsumer):
     async def relay(self, message):
         """Server events pushed with core.realtime.send_to_user."""
         await self.send_json(message["event"])
+        if message["event"]["type"] == "account.closed":  # suspended or banned (SF-6)
+            await self.close(code=4403)

@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from . import serializers as s
-from .services import onboarding, otp, phones
+from .services import devices, onboarding, otp, phones
 
 ERRORS = {400: s.ApiErrorSerializer, 403: s.ApiErrorSerializer, 429: s.ApiErrorSerializer}
 
@@ -36,6 +36,7 @@ class OtpRequestView(APIView):
         data = s.OtpRequestSerializer(data=request.data)
         data.is_valid(raise_exception=True)
         phone = phones.normalize(data.validated_data["phone"])
+        devices.ensure_not_denied(request)
         resend_in = otp.request_code(phone, data.validated_data["channel"])
         return Response({"phone": phone, "masked": phones.masked(phone), "resend_in": resend_in})
 
@@ -50,9 +51,11 @@ class OtpVerifyView(APIView):
         data.is_valid(raise_exception=True)
         phone = phones.normalize(data.validated_data["phone"])
         otp.ensure_not_denied(phone)
+        devices.ensure_not_denied(request)
         otp.check_code(phone, data.validated_data["code"])
         current = request.user if request.user.is_authenticated else None
         user = onboarding.sign_in_with_phone(phone, current)
+        devices.record(user, request)
         return Response(_session(user))
 
 
@@ -64,9 +67,11 @@ class SocialSignInView(APIView):
     def post(self, request):
         data = s.SocialSignInSerializer(data=request.data)
         data.is_valid(raise_exception=True)
+        devices.ensure_not_denied(request)
         user = onboarding.sign_in_social(
             data.validated_data["provider"], data.validated_data["id_token"]
         )
+        devices.record(user, request)
         return Response(_session(user))
 
 

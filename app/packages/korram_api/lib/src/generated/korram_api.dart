@@ -9,6 +9,7 @@ import 'clients/blocks_client.dart';
 import 'clients/health_client.dart';
 import 'clients/match_client.dart';
 import 'clients/me_client.dart';
+import 'clients/reports_client.dart';
 import 'clients/sessions_client.dart';
 
 /// Korram API `v1.0.0`
@@ -25,6 +26,7 @@ class KorramApi {
   HealthClient? _health;
   MatchClient? _match;
   MeClient? _me;
+  ReportsClient? _reports;
   SessionsClient? _sessions;
 
   AuthClient get auth => _auth ??= AuthClient(_dio, baseUrl: _baseUrl);
@@ -36,6 +38,8 @@ class KorramApi {
   MatchClient get match => _match ??= MatchClient(_dio, baseUrl: _baseUrl);
 
   MeClient get me => _me ??= MeClient(_dio, baseUrl: _baseUrl);
+
+  ReportsClient get reports => _reports ??= ReportsClient(_dio, baseUrl: _baseUrl);
 
   SessionsClient get sessions => _sessions ??= SessionsClient(_dio, baseUrl: _baseUrl);
 }

@@ -177,4 +177,14 @@ void main() {
     }
     await golden(tester, 'voice_call');
   });
+
+  testWidgets('08 Report', (tester) async {
+    final app = await call(tester, 'video', 'Tobi');
+    app.engine.remote(video: true);
+    await tester.tap(find.bySemanticsLabel('Report or block'));
+    for (var i = 0; i < 8; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    await golden(tester, 'report');
+  });
 }

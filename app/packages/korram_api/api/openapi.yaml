@@ -248,6 +248,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: ''
+  /api/v1/me/notices/{notice_id}/seen:
+    post:
+      operationId: me_notices_seen_create
+      parameters:
+      - in: path
+        name: notice_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - me
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/v1/me/profile:
     get:
       operationId: me_profile_retrieve
@@ -308,6 +325,21 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: ''
+  /api/v1/me/status:
+    get:
+      operationId: me_status_retrieve
+      description: Suspension and unseen notices (warnings) for the app (SF-6).
+      tags:
+      - me
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountStatus'
+          description: ''
   /api/v1/me/verification:
     get:
       operationId: me_verification_retrieve
@@ -321,6 +353,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/VerificationState'
+          description: ''
+  /api/v1/reports:
+    post:
+      operationId: reports_create
+      description: 'SF-4: report the other person in a session (screen 08).'
+      tags:
+      - reports
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Report'
           description: ''
   /api/v1/sessions/{session_id}:
     get:
@@ -369,6 +422,23 @@ paths:
           description: ''
 components:
   schemas:
+    AccountStatus:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        suspended_until:
+          type: string
+          format: date-time
+          nullable: true
+        notices:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notice'
+      required:
+      - notices
+      - status
+      - suspended_until
     ApiError:
       type: object
       properties:
@@ -542,6 +612,23 @@ components:
         * `selfie` - selfie
         * `review` - review
         * `done` - done
+    Notice:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        kind:
+          type: string
+        title:
+          type: string
+        body:
+          type: string
+      required:
+      - body
+      - id
+      - kind
+      - title
     OnlineCount:
       type: object
       properties:
@@ -627,6 +714,47 @@ components:
       description: |-
         * `google` - Google
         * `apple` - Apple
+    ReasonEnum:
+      enum:
+      - minor
+      - nudity
+      - harassment
+      - scam
+      - fake
+      - other
+      type: string
+      description: |-
+        * `minor` - May be under 18
+        * `nudity` - Nudity or sexual content
+        * `harassment` - Harassment or hate
+        * `scam` - Scam or asking for money
+        * `fake` - Fake profile or impersonation
+        * `other` - Something else
+    Report:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        blocked:
+          type: boolean
+      required:
+      - blocked
+      - id
+    ReportRequestRequest:
+      type: object
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        reason:
+          $ref: '#/components/schemas/ReasonEnum'
+        block:
+          type: boolean
+          default: true
+      required:
+      - reason
+      - session_id
     SelfieEnum:
       enum:
       - none
@@ -708,6 +836,16 @@ components:
       required:
       - id_token
       - provider
+    StatusEnum:
+      enum:
+      - active
+      - suspended
+      - banned
+      type: string
+      description: |-
+        * `active` - active
+        * `suspended` - suspended
+        * `banned` - banned
     TokenRefresh:
       type: object
       properties:

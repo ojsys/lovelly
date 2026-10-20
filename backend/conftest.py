@@ -62,6 +62,8 @@ def events(monkeypatch):
     monkeypatch.setattr("matching.service.send_to_user", record)
     monkeypatch.setattr("chat.services.send_to_user", record)
     monkeypatch.setattr("matching.calls.send_to_user", record)
+    monkeypatch.setattr("safety.services.send_to_user", record)
+    monkeypatch.setattr("safety.moderation.send_to_user", record)
 
     class Events(list):
         def of(self, user, event_type=None):
@@ -73,3 +75,42 @@ def events(monkeypatch):
     out = Events()
     out.sent = sent
     return out
+
+
+def solid_jpeg(rgb=(40, 90, 60)) -> bytes:
+    """A plain JPEG frame. Magenta = fake 'explicit', cyan = fake 'under 18'."""
+    import io
+
+    from PIL import Image
+
+    out = io.BytesIO()
+    Image.new("RGB", (64, 48), rgb).save(out, "JPEG")
+    return out.getvalue()
+
+
+MAGENTA, CYAN = (255, 0, 255), (0, 255, 255)
+
+
+@pytest.fixture
+def video_session(make_user, redis_db, events):
+    from matching import service
+
+    a, b = make_user("Ada"), make_user("Tobi")
+    service.join(a, "video")
+    service.join(b, "video")
+    (s,) = service.run_tick()
+    s.refresh_from_db()
+    return s, a, b
+
+
+@pytest.fixture
+def moderator(db):
+    from django.contrib.auth.models import Group
+
+    from accounts.models import User
+
+    user = User.objects.create_user(phone="+2348099990000", password="console-pass")
+    user.is_staff = True
+    user.save()
+    user.groups.add(Group.objects.get_or_create(name="Moderators")[0])
+    return user

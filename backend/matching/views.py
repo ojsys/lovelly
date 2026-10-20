@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from accounts.permissions import IsVerified
 from chat.services import serialize
 from core.exceptions import ApiError
+from core.ratelimit import limit
 
 from . import service
 from .calls import fresh_token
@@ -50,4 +51,5 @@ class MediaTokenView(APIView):
 
     @extend_schema(request=None, responses=MediaTokenSerializer)
     def post(self, request, session_id):
+        limit(f"mediatoken:{request.user.id}", 30, 3600)
         return Response(fresh_token(session_id, request.user))

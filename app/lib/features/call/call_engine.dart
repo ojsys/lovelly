@@ -12,6 +12,7 @@ abstract class CallEngine extends ChangeNotifier {
   CallLink link = CallLink.idle;
   bool micOn = true;
   bool cameraOn = false;
+
   /// Voice starts on the earpiece like a phone call; video starts on the speaker.
   bool speakerOn = false;
   bool remoteVideoOn = false;

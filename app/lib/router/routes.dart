@@ -9,6 +9,8 @@ abstract final class Routes {
   static const permissions = '/onboarding/permissions';
   static const review = '/onboarding/review'; // selfie in manual review (no design)
   static const removed = '/onboarding/removed'; // under-18 account removed (no design)
+  static const suspended = '/suspended'; // SF-6 (no design)
+  static const safetyEnded = '/match/ended'; // SF-2 (no design)
   static const home = '/home';
   static const searching = '/match/searching';
   static const videoCall = '/call/video';

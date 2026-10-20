@@ -48,6 +48,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     gender = models.CharField(max_length=10, choices=Gender.choices, blank=True)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.ACTIVE)
     risk_score = models.IntegerField(default=0)
+    suspended_until = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     # Django admin access (staff/moderators); app users never get a usable password.
@@ -181,3 +182,32 @@ class UserInterest(models.Model):
 
     def __str__(self):
         return f"{self.user_id}: {self.interest_id}"
+
+
+class UserDevice(UUIDModel):
+    """Devices a user signed in from (X-Device-Id), so a ban can cover them (SF-6)."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="devices"
+    )
+    device_hash = models.CharField(max_length=64)
+    last_seen = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "device_hash"], name="unique_user_device")
+        ]
+
+    def __str__(self):
+        return f"{self.user_id}: {self.device_hash[:8]}"
+
+
+class DeniedDevice(UUIDModel):
+    """Devices of banned users; sign-up and sign-in from them are refused."""
+
+    device_hash = models.CharField(max_length=64, unique=True)
+    reason = models.CharField(max_length=40)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.device_hash[:8]

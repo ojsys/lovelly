@@ -16,13 +16,14 @@ import '../features/onboarding/review_screen.dart';
 import '../features/onboarding/selfie_screen.dart';
 import '../features/onboarding/splash_screen.dart';
 import '../features/placeholder/placeholder_screen.dart';
+import '../features/safety/account_screens.dart';
+import '../features/safety/report_screen.dart';
 import '../features/welcome/welcome_screen.dart';
 import '../widgets/main_shell.dart';
 import 'routes.dart';
 
 /// Screens not built yet, keyed by route: (canvas number, design title, milestone).
 const _pending = <String, (String, String, String)>{
-  Routes.report: ('08', 'Safety — report', 'M4'),
   Routes.coins: ('10', 'Coin store', 'M6'),
   Routes.gifts: ('11', 'In-call gifts', 'M6'),
   Routes.plus: ('12', 'Korram Plus', 'M7'),
@@ -38,6 +39,7 @@ const _allowed = <OnboardingStep, List<String>>{
   OnboardingStep.review: [Routes.review],
   OnboardingStep.permissions: [Routes.permissions],
   OnboardingStep.removed: [Routes.removed],
+  OnboardingStep.suspended: [Routes.suspended],
 };
 
 const _onboardingRoutes = {
@@ -50,6 +52,7 @@ const _onboardingRoutes = {
   Routes.permissions,
   Routes.review,
   Routes.removed,
+  Routes.suspended,
 };
 
 /// Keeps the user on the screen their onboarding state allows (SF-1: only verified users
@@ -85,8 +88,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: Routes.permissions, builder: (context, state) => const PermissionsScreen()),
       GoRoute(path: Routes.review, builder: (context, state) => const ReviewScreen()),
       GoRoute(path: Routes.removed, builder: (context, state) => const RemovedScreen()),
+      GoRoute(path: Routes.suspended, builder: (context, state) => const SuspendedScreen()),
+      GoRoute(path: Routes.safetyEnded, builder: (context, state) => const SafetyEndedScreen()),
+      GoRoute(
+        path: Routes.report,
+        builder: (context, state) => ReportScreen(sessionId: state.pathParameters['sessionId']!),
+      ),
       StatefulShellRoute.indexedStack(
-        builder: (context, state, shell) => MainShell(shell: shell),
+        builder: (context, state, shell) => NoticeListener(child: MainShell(shell: shell)),
         branches: [
           StatefulShellBranch(
             routes: [GoRoute(path: Routes.home, builder: (context, state) => const HomeScreen())],

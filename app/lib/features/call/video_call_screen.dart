@@ -55,19 +55,23 @@ class _VideoCallScreenState extends ConsumerState<VideoCallScreen> with CallScre
           builder: (context, _) => Stack(
             fit: StackFit.expand,
             children: [
-              // Remote feed, blurred for its first 5 seconds (FR-11).
-              BlurForFirstSeconds(
-                since: call.videoSince,
-                child: engine.remoteVideoOn
-                    ? engine.remoteVideo()
-                    : Center(
-                        child: Text(
-                          engine.link == CallLink.connected
-                              ? '${peer?.firstName ?? 'They'} turned their camera off'
-                              : 'Connecting…',
-                          style: KType.body.copyWith(color: KColors.cameraText),
+              // Remote feed, blurred for its first 5 seconds (FR-11); hidden while the
+              // report sheet is open (SF-4) or after a moderation hit (SF-2).
+              SafetyCover(
+                active: call.safetyBlur || call.paused,
+                child: BlurForFirstSeconds(
+                  since: call.videoSince,
+                  child: engine.remoteVideoOn
+                      ? engine.remoteVideo()
+                      : Center(
+                          child: Text(
+                            engine.link == CallLink.connected
+                                ? '${peer?.firstName ?? 'They'} turned their camera off'
+                                : 'Connecting…',
+                            style: KType.body.copyWith(color: KColors.cameraText),
+                          ),
                         ),
-                      ),
+                ),
               ),
               const Align(
                 alignment: Alignment.topCenter,

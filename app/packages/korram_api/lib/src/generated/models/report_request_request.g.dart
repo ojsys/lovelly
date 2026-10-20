@@ -1,0 +1,21 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'report_request_request.dart';
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+ReportRequestRequest _$ReportRequestRequestFromJson(Map<String, dynamic> json) =>
+    ReportRequestRequest(
+      sessionId: json['session_id'] as String,
+      reason: ReasonEnum.fromJson(json['reason'] as String),
+      block: json['block'] as bool? ?? true,
+    );
+
+Map<String, dynamic> _$ReportRequestRequestToJson(ReportRequestRequest instance) =>
+    <String, dynamic>{
+      'session_id': instance.sessionId,
+      'reason': instance.reason,
+      'block': instance.block,
+    };

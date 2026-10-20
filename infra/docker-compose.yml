@@ -91,6 +91,20 @@ services:
     <<: *backend
     command: ["celery", "-A", "korram", "beat", "-l", "info", "-s", "/tmp/celerybeat-schedule"]
 
+  # Samples video in live calls (SF-2). Shares LiveKit's network so it can reach media on
+  # 127.0.0.1 (LiveKit's advertised dev IP); it still reaches redis/postgres by name.
+  moderator:
+    <<: *backend
+    command: ["python", "manage.py", "run_moderator"]
+    network_mode: "service:livekit"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      livekit:
+        condition: service_started
+
   matcher:
     <<: *backend
     command: ["python", "manage.py", "run_matcher"]

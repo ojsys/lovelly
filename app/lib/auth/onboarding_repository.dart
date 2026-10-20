@@ -48,6 +48,17 @@ class OnboardingRepository {
     ),
   );
 
+  Future<AccountStatus> status() => _call(() => _api.me.meStatusRetrieve());
+
+  Future<void> noticeSeen(String id) => _call(() => _api.me.meNoticesSeenCreate(noticeId: id));
+
+  /// SF-4: report the other person in a session; optionally block them too.
+  Future<void> report(String sessionId, ReasonEnum reason, {required bool block}) => _call(
+    () => _api.reports.reportsCreate(
+      body: ReportRequestRequest(sessionId: sessionId, reason: reason, block: block),
+    ),
+  );
+
   Future<VerificationState> submitSelfie({required String front, required String left}) =>
       _call(() => _api.me.meSelfieCreate(poseFront: File(front), poseLeft: File(left)));
 }

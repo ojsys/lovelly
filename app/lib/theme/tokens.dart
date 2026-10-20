@@ -44,6 +44,11 @@ abstract final class KColors {
   static const textOnVideo = Color(0xFFD6D2DE);
   static const white = Color(0xFFFFFFFF);
 
+  /// Report sheet (08): scrim over the paused call, the sheet, and a selected reason.
+  static const reportScrim = Color(0xB80F0E13);
+  static const sheet = Color(0xFF15141B);
+  static const coralSelected = Color(0xFF2A1D1A);
+
   /// Bottom navigation bar background.
   static const navBar = Color(0xFF131218);
 
@@ -112,6 +117,14 @@ abstract final class KType {
     fontWeight: FontWeight.w800,
     fontSize: 30,
     letterSpacing: -0.6,
+  );
+
+  /// Bottom-sheet titles (Report, 26 px).
+  static const sheetTitle = TextStyle(
+    fontFamily: KFonts.display,
+    fontWeight: FontWeight.w800,
+    fontSize: 26,
+    letterSpacing: -0.5,
   );
 
   /// Voice call icebreaker question (19 px).

@@ -117,7 +117,7 @@ void main() {
       await inCall(tester, 'video');
       await tester.tap(label('Report or block'));
       await settle(tester);
-      expect(find.text('Safety — report'), findsOneWidget);
+      expect(find.text('Report Tobi'), findsOneWidget);
     });
 
     testWidgets('gift and add-friend wait for their milestones', (tester) async {

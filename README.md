@@ -29,7 +29,7 @@ cd app && flutter run               # Welcome screen
 |---|---|
 | API | http://localhost:8100/api/v1/ (OpenAPI schema at `/api/v1/schema/`) |
 | Websocket | ws://localhost:8100/ws/?token=<access JWT> |
-| Moderator console | http://localhost:5174 |
+| Moderator console | http://localhost:5174 (create a login: see below) |
 | MinIO console | http://localhost:9001 (credentials in `infra/.env`) |
 | LiveKit | ws://localhost:7880 |
 | Postgres / Redis | localhost:5433 / localhost:6380 (offset to avoid local installs) |
@@ -49,6 +49,19 @@ generators don't share dependency versions with the app); CI fails if they drift
 `make test-calls` runs the M3 call acceptance: two headless LiveKit participants in the
 LiveKit container's network namespace, on `tc netem`-shaped 4G and 3G links, with mute,
 camera-off and 5 s / 15 s outages.
+
+### Moderator console (M4)
+
+```sh
+docker compose -f infra/docker-compose.yml exec api \
+  python manage.py create_moderator +2348000000001 'a-strong-password'
+```
+
+Then sign in at http://localhost:5174 with that phone and password. The `moderator` Compose
+service is the moderation agent: a hidden participant in every video call that samples frames
+(1 s for the first 30 s, then 2 s) and acts on hits (SF-2, SF-3). With the fake provider,
+a magenta frame counts as explicit and a cyan frame as someone under 18. `make test-calls`
+includes the end-to-end check.
 
 ### Calls on a real phone (dev)
 

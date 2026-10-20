@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../api/api.dart';
+import '../../auth/session.dart';
 import '../../auth/token_store.dart';
 import '../../realtime/realtime_client.dart';
 
@@ -284,6 +285,10 @@ class MatchController extends Notifier<MatchState> {
         });
       case 'error':
         _onError(e);
+      case 'account.closed':
+        // SF-6: suspended or banned. The session screen takes over.
+        state = MatchState(mode: state.mode);
+        ref.read(sessionProvider.notifier).refresh();
     }
   }
 
@@ -293,6 +298,9 @@ class MatchController extends Notifier<MatchState> {
         break; // we pressed Next: already searching, and the server re-queued us
       case 'end' || 'blocked':
         if (state.phase == MatchPhase.matched) state = MatchState(mode: state.mode);
+      case 'moderation':
+        // SF-2: ended by the moderation agent or a moderator. Never auto-requeue.
+        state = state.copyWith(phase: MatchPhase.ended, endReason: reason, peerTyping: false);
       default: // peer_next | peer_left
         if (state.mode == MatchMode.text) {
           // Text: show "<name> left" and let the user choose (M2 decision 1).

@@ -53,6 +53,7 @@ class Peer:
         self.video_pub = None
         self.leaving = False
         self.rejoins = 0
+        self.inject = None  # RGBA bytes to send instead of the normal frames
         self._new_room()
 
     def _new_room(self):
@@ -77,6 +78,9 @@ class Peer:
         self.room.on("track_muted", lambda *_: self.events.append((time.monotonic(), "peer_muted")))
         self.room.on(
             "track_unmuted", lambda *_: self.events.append((time.monotonic(), "peer_unmuted"))
+        )
+        self.room.on(
+            "disconnected", lambda *_: self.events.append((time.monotonic(), "room_closed"))
         )
         self.room.on(
             "track_unpublished",
@@ -140,7 +144,7 @@ class Peer:
         n = 0
         while True:
             shade = (n * 8) % 256
-            buf = bytes([shade, 128, 255 - shade, 255]) * (W * H)
+            buf = self.inject or bytes([shade, 128, 255 - shade, 255]) * (W * H)
             source.capture_frame(rtc.VideoFrame(W, H, rtc.VideoBufferType.RGBA, buf))
             n += 1
             await asyncio.sleep(1 / FPS)
@@ -188,6 +192,10 @@ async def call_on(profile, tokens):
 
 async def main(tokens):
     netem(None)
+    # 0. SF-2 first, on a clean network: the agent shares LiveKit's network namespace,
+    #    so the shaped scenarios below would slow it down too.
+    await moderation(tokens)
+
     # 1. 4G and 3G
     a, b = await call_on("4g", tokens["video"])
     await a.leave()
@@ -253,6 +261,70 @@ async def main(tokens):
         print(f"      (camera refused: {type(e).__name__}: {e})")
     check("voice token cannot publish camera (FR-14)", refused)
     await voice.leave()
+
+
+MAGENTA = bytes([255, 0, 255, 255]) * (W * H)
+API = "http://api:8000"
+
+
+def console_report(session_id: str, creds: dict) -> dict | None:
+    import urllib.request
+
+    def call(path, body=None, token=None):
+        req = urllib.request.Request(
+            API + path,
+            data=json.dumps(body).encode() if body else None,
+            headers={
+                "Content-Type": "application/json",
+                **({"Authorization": f"Bearer {token}"} if token else {}),
+            },
+        )
+        with urllib.request.urlopen(req, timeout=10) as res:
+            return json.load(res)
+
+    token = call("/admin-api/auth/login", creds)["access"]
+    rows = call("/admin-api/reports?automatic=true", token=token)["results"]
+    for row in rows:
+        if row["session_id"] == session_id and row["reason"] == "nudity":
+            return call(f"/admin-api/reports/{row['id']}", token=token)
+    return None
+
+
+async def moderation(tokens):
+    t = tokens["moderation"]
+    a, b = Peer("A", t["a"]), Peer("B", t["b"])
+    await asyncio.wait_for(asyncio.gather(a.join(), b.join()), 30)
+    await asyncio.sleep(4)  # the agent joins and starts sampling
+    flowing_before = time.monotonic() - a.last_frame["video"] < 1
+    injected = time.monotonic()
+    b.inject = MAGENTA
+    hidden = None
+    while time.monotonic() < injected + 10:
+        cut = [
+            ts
+            for ts, e in a.events
+            if ts > injected and e in ("peer_muted", "peer_unpublished", "room_closed")
+        ]
+        if cut:
+            hidden = min(cut) - injected
+            break
+        await asyncio.sleep(0.05)
+    check(
+        "explicit test image hidden from the other person within 2 s (SF-2)",
+        flowing_before and hidden is not None and hidden <= 2,
+        f"hidden after {hidden:.2f}s" if hidden is not None else "not hidden within 10 s",
+    )
+    await asyncio.sleep(2)  # report + evidence written
+    detail = console_report(t["session"], tokens["console"])
+    frames = len(detail["evidence"]["frames"]) if detail else 0
+    check(
+        "automatic report in the moderator console with evidence",
+        detail is not None and frames > 0,
+        f"report {detail['id'][:8]}… with {frames} frames" if detail else "no report found",
+    )
+    for p in (a, b):
+        p.leaving = True
+        await p.leave()
 
 
 if __name__ == "__main__":

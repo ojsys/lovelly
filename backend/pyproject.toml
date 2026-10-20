@@ -19,6 +19,8 @@ dependencies = [
     "pyjwt[crypto]>=2.9",
     "uvicorn[standard]>=0.32",
     "livekit-api>=1.0",
+    "pillow>=11",
+    "livekit>=1.0",
 ]
 
 [dependency-groups]

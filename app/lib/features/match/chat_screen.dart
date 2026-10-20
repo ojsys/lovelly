@@ -87,6 +87,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               status: ended ? 'Left the chat' : (state.peerTyping ? 'typing…' : 'Online'),
               typing: state.peerTyping && !ended,
               onLeave: _leave,
+              onReport: ended ? null : () => context.pushReplacement('/report/${widget.sessionId}'),
               top: math.max(52, insets.top + 8),
             ),
             Expanded(
@@ -103,7 +104,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     const SizedBox(height: KSpacing.lg),
                     Center(
                       child: Text(
-                        '${peer.firstName} left the chat',
+                        state.endReason == 'moderation'
+                            ? 'This chat was ended for safety'
+                            : '${peer.firstName} left the chat',
                         style: KType.small.copyWith(color: KColors.muted),
                       ),
                     ),
@@ -153,12 +156,14 @@ class _Header extends StatelessWidget {
     required this.typing,
     required this.onLeave,
     required this.top,
+    this.onReport,
   });
 
   final Peer? peer;
   final String status;
   final bool typing;
   final VoidCallback onLeave;
+  final VoidCallback? onReport;
   final double top;
 
   @override
@@ -209,6 +214,25 @@ class _Header extends StatelessWidget {
         ),
         // Voice / video buttons are hidden for strangers until text → call is decided
         // (questions.md #18); friends get direct calls in M5.
+        // Report and block in every chat (app-store rule; not in the Chat design).
+        if (onReport != null)
+          Semantics(
+            button: true,
+            label: 'Report or block',
+            excludeSemantics: true,
+            child: Material(
+              color: KColors.surface,
+              shape: const CircleBorder(),
+              child: InkWell(
+                customBorder: const CircleBorder(),
+                onTap: onReport,
+                child: const SizedBox.square(
+                  dimension: 44,
+                  child: Center(child: KIconView(KIcon.shield, size: 20, color: KColors.text)),
+                ),
+              ),
+            ),
+          ),
       ],
     ),
   );

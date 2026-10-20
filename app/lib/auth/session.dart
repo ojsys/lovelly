@@ -6,13 +6,28 @@ import 'token_store.dart';
 
 /// Where the user is in onboarding. The server decides up to `done` (`next_step`);
 /// the permissions step (screen 17) is device-side and tracked locally.
-enum OnboardingStep { signedOut, phone, basics, selfie, review, permissions, done, removed }
+enum OnboardingStep {
+  signedOut,
+  phone,
+  basics,
+  selfie,
+  review,
+  permissions,
+  done,
+  removed,
+
+  /// SF-6: a moderator suspended the account (or SF-3 pending review after verification).
+  suspended,
+}
 
 class SessionState {
-  const SessionState(this.step, {this.verification});
+  const SessionState(this.step, {this.verification, this.status});
 
   final OnboardingStep step;
   final VerificationState? verification;
+
+  /// Account status and unseen notices (warnings), for verified users.
+  final AccountStatus? status;
 }
 
 const _permissionsDone = 'permissions_done';
@@ -31,7 +46,17 @@ class SessionController extends AsyncNotifier<SessionState> {
   Future<SessionState> _load() async {
     try {
       final verification = await _repo.verification();
-      return SessionState(await _stepFor(verification), verification: verification);
+      final step = await _stepFor(verification);
+      if (step == OnboardingStep.done || step == OnboardingStep.permissions) {
+        final status = await _repo.status();
+        final suspended = status.status == StatusEnum.suspended;
+        return SessionState(
+          suspended ? OnboardingStep.suspended : step,
+          verification: verification,
+          status: status,
+        );
+      }
+      return SessionState(step, verification: verification);
     } on ApiFailure catch (e) {
       if (e.status == 401 || e.status == 403) {
         await _store.clear();
@@ -58,6 +83,25 @@ class SessionController extends AsyncNotifier<SessionState> {
   Future<void> signedIn(Session session) async {
     await _store.writeTokens(access: session.access, refresh: session.refresh);
     await refresh();
+  }
+
+  /// Marks a notice (e.g. a warning) as seen so it shows only once.
+  Future<void> noticeSeen(String id) async {
+    await _repo.noticeSeen(id);
+    final current = state.value;
+    if (current?.status == null) return;
+    final s = current!.status!;
+    state = AsyncData(
+      SessionState(
+        current.step,
+        verification: current.verification,
+        status: AccountStatus(
+          status: s.status,
+          suspendedUntil: s.suspendedUntil,
+          notices: [...s.notices.where((n) => n.id != id)],
+        ),
+      ),
+    );
   }
 
   Future<void> finishPermissions() async {

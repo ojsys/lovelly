@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../auth/token_store.dart';
+import '../platform/device_id.dart';
 import '../config/app_config.dart';
 import 'package:korram_api/korram_api.dart';
 
@@ -37,6 +38,20 @@ class ApiFailure implements Exception {
 
   @override
   String toString() => 'ApiFailure($code: $detail)';
+}
+
+/// Adds X-Device-Id to every request (SF-6 device bans).
+class DeviceIdInterceptor extends Interceptor {
+  DeviceIdInterceptor(this._source);
+
+  final DeviceIdSource _source;
+
+  @override
+  Future<void> onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
+    final id = await _source.deviceId();
+    if (id != null) options.headers['X-Device-Id'] = id;
+    handler.next(options);
+  }
 }
 
 /// Attaches the access token and refreshes it once on a 401.
@@ -84,6 +99,7 @@ final dioProvider = Provider<Dio>((ref) {
     receiveTimeout: const Duration(seconds: 20),
   );
   final dio = Dio(options);
+  dio.interceptors.add(DeviceIdInterceptor(ref.watch(deviceIdSourceProvider)));
   dio.interceptors.add(
     AuthInterceptor(
       ref.watch(tokenStoreProvider),
