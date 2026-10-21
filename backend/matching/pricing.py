@@ -84,7 +84,7 @@ def quote(user: User, filters: dict | None, extra: int = 0, extra_kind: str = ""
 
 
 _REFUSALS = {
-    "payg_off": ("filters_locked", "Filters are part of Korram Plus or pay as you go.", 402),
+    "payg_off": ("filters_locked", "Filters are part of Lovelly Plus or pay as you go.", 402),
     "cap_reached": (
         "cap_reached",
         "You’ve reached today’s spend cap. Free matching still works.",

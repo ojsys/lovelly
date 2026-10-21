@@ -29,8 +29,8 @@ class StorePurchase {
     this.native,
   });
 
-  /// Korram Plus products (MN-6); everything else is a coin pack.
-  static const plusProducts = {'korram_plus', 'plus_week', 'plus_month', 'plus_year'};
+  /// Lovelly Plus products (MN-6); everything else is a coin pack.
+  static const plusProducts = {'lovelly_plus', 'plus_week', 'plus_month', 'plus_year'};
 
   bool get isSubscription => plusProducts.contains(productId);
 
@@ -59,7 +59,7 @@ abstract interface class StoreBilling {
 
   Stream<StorePurchase> get purchases;
 
-  /// Korram Plus prices keyed by plan ("week" | "month" | "year"), from the store (MN-6).
+  /// Lovelly Plus prices keyed by plan ("week" | "month" | "year"), from the store (MN-6).
   Future<Map<String, StoreProduct>> plans();
 
   /// Starts the store's subscription sheet for [plan]; the result arrives on [purchases].
@@ -127,7 +127,7 @@ class InAppPurchaseBilling implements StoreBilling {
 
   @override
   Future<Map<String, StoreProduct>> plans() async {
-    final ids = Platform.isIOS ? _applePlans.keys.toSet() : {'korram_plus'};
+    final ids = Platform.isIOS ? _applePlans.keys.toSet() : {'lovelly_plus'};
     final res = await _iap.queryProductDetails(ids);
     for (final d in res.productDetails) {
       if (d is GooglePlayProductDetails) {

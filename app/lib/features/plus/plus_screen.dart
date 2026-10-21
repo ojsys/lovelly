@@ -12,7 +12,7 @@ import '../friends/friends_repository.dart';
 import 'plus_controller.dart';
 import 'states.dart';
 
-/// 12 Korram Plus / pay as you go — design/screens/12-Premium.dc.html (MN-6, MN-7, MN-9).
+/// 12 Lovelly Plus / pay as you go — design/screens/12-Premium.dc.html (MN-6, MN-7, MN-9).
 class PlusScreen extends ConsumerStatefulWidget {
   const PlusScreen({super.key});
 
@@ -110,7 +110,7 @@ class _PlusScreenState extends ConsumerState<PlusScreen> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
-                      'KORRAM PLUS',
+                      'LOVELLY PLUS',
                       style: KType.label.copyWith(letterSpacing: 0.6, color: KColors.onGold),
                     ),
                   ),
@@ -177,8 +177,8 @@ class _PlusScreenState extends ConsumerState<PlusScreen> {
                             ? 'Pay as you go is on'
                             : 'Turn on pay as you go'
                       : state.isPlus
-                      ? 'You have Korram Plus'
-                      : 'Get Korram Plus · ${plan?.label ?? ''}',
+                      ? 'You have Lovelly Plus'
+                      : 'Get Lovelly Plus · ${plan?.label ?? ''}',
                   busy: state.buying,
                   onPressed: payg
                       ? (settings?.paygEnabled ?? false)

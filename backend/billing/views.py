@@ -58,7 +58,7 @@ class AppleWebhookView(_Webhook):
     store = "apple"
 
 
-# --- Korram Plus and spend settings (MN-6, MN-9, MN-10) ------------------------------------
+# --- Lovelly Plus and spend settings (MN-6, MN-9, MN-10) ------------------------------------
 
 
 class PlanSerializer(serializers.Serializer):
@@ -118,7 +118,7 @@ class PlansView(APIView):
 
 
 class PlusVerifyView(APIView):
-    """A Korram Plus purchase or Restore (MN-6)."""
+    """A Lovelly Plus purchase or Restore (MN-6)."""
 
     permission_classes = [IsVerified]
 

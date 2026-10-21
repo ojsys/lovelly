@@ -1,4 +1,4 @@
-# Putting Korram on GitHub
+# Putting Lovelly on GitHub
 
 The repo has never been pushed anywhere: it has no remote yet. This guide covers the decisions
 to make first, the push itself, and what to set up afterwards.
@@ -11,8 +11,8 @@ to make first, the push itself, and what to set up afterwards.
   push. They stay on your machine and are git-ignored.
 - **No real secrets anywhere in the history.**
   - `infra/.env` is ignored.
-  - `infra/.env.example` and `backend/korram/settings/test.py` hold only clearly labelled
-    dev and test values (`dev-only-insecure-…`, `korram-dev-secret`).
+  - `infra/.env.example` and `backend/lovelly/settings/test.py` hold only clearly labelled
+    dev and test values (`dev-only-insecure-…`, `lovelly-dev-secret`).
   - The scan looked for cloud keys, private keys, service-account JSON and tokens.
 - **CI runs clean:** every step in `.github/workflows/ci.yml` passes locally with the same
   tool versions CI uses (Flutter 3.32.0, uv 0.10.10, Node 22), so the first push should be
@@ -55,7 +55,7 @@ on every commit page, to everyone who can see the repo.
 
 ### Repo name and owner
 
-The suggested name is `korram`, under your account or a GitHub organisation if you'll have a
+The suggested name is `lovelly`, under your account or a GitHub organisation if you'll have a
 team. An organisation makes it easier to add people and move ownership later.
 
 ---
@@ -68,7 +68,7 @@ team. An organisation makes it easier to add people and move ownership later.
 brew install gh
 gh auth login                      # GitHub.com → HTTPS → log in with a browser
 cd ~/Desktop/korram
-gh repo create korram --private --source=. --remote=origin --push
+gh repo create lovelly --private --source=. --remote=origin --push
 ```
 
 That creates the repo, adds it as `origin`, and pushes `main`.
@@ -76,14 +76,14 @@ That creates the repo, adds it as `origin`, and pushes `main`.
 ### Option B — the website
 
 1. Go to https://github.com/new.
-2. Name it `korram` and choose **Private**.
+2. Name it `lovelly` and choose **Private**.
 3. **Don't** add a README, .gitignore or licence. The repo already has them, and an extra
    first commit on GitHub makes the push get rejected.
 4. Push from the terminal:
 
    ```sh
    cd ~/Desktop/korram
-   git remote add origin https://github.com/<you>/korram.git
+   git remote add origin https://github.com/<you>/lovelly.git
    git push -u origin main
    ```
 
@@ -184,6 +184,6 @@ gh pr create --fill             # or open a pull request on the website
 |---|---|
 | `! [rejected] main -> main (fetch first)` | The GitHub repo was created with a README or licence. Delete and recreate it empty, or run `git pull --rebase origin main` and push again. |
 | `Authentication failed` / `Password authentication is not supported` | Use a personal access token or `gh auth login`, not your account password. |
-| `remote: Permission to … denied` | The token can't write to this repo. Give it "Contents: Read and write" for `korram`. |
+| `remote: Permission to … denied` | The token can't write to this repo. Give it "Contents: Read and write" for `lovelly`. |
 | `GH013: Repository rule violations … secret detected` | Push protection found a key. Remove it from the commit, rotate the key, and push again. |
 | CI `app` job fails on goldens | It shouldn't run them (`--exclude-tags golden`). Check that `dart_test.yaml` still declares the `golden` and `e2e` tags. |

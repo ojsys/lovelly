@@ -73,7 +73,7 @@ def invite(user: User, chat_id, mode: str, now=None) -> str:
     notify(
         callee_id,
         Push(
-            "Korram",
+            "Lovelly",
             f"{caller['first_name']} is calling you ({mode})",
             {"type": "call", "invite_id": invite_id, "chat_id": str(f.id), "mode": mode},
         ),

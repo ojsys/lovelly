@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-/// Line icons from the Korram canvas (24 × 24, round caps). Paths copied from the designs.
+/// Line icons from the Lovelly canvas (24 × 24, round caps). Paths copied from the designs.
 enum KIcon {
   logo('<circle cx="8" cy="12" r="4"/><circle cx="16" cy="12" r="4"/>'),
   video('<path d="M15 10l5-3v10l-5-3"/><rect x="3" y="6" width="12" height="12" rx="3"/>'),

@@ -161,7 +161,7 @@ class PlusController extends Notifier<PlusState> {
           await _billing.finish(p);
           state = state.copyWith(
             buying: false,
-            notice: status.active ? 'Welcome to Korram Plus' : 'That subscription has ended.',
+            notice: status.active ? 'Welcome to Lovelly Plus' : 'That subscription has ended.',
           );
           await refresh();
         } on ApiFailure catch (e) {

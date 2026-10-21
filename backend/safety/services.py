@@ -163,7 +163,7 @@ def act(
             Notice.objects.create(
                 user=target,
                 kind="warning",
-                title="A warning from the Korram team",
+                title="A warning from the Lovelly team",
                 body=note
                 or "Your behaviour broke our Community Guidelines. "
                 "Another report could get your account suspended.",

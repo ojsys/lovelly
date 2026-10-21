@@ -19,7 +19,7 @@ abstract final class AppConfig {
 
 /// Placeholder links until the real pages exist (docs/questions.md).
 abstract final class Links {
-  static final terms = Uri.parse('https://example.com/korram/terms');
-  static final guidelines = Uri.parse('https://example.com/korram/community-guidelines');
-  static final support = Uri.parse('https://example.com/korram/support');
+  static final terms = Uri.parse('https://example.com/lovelly/terms');
+  static final guidelines = Uri.parse('https://example.com/lovelly/community-guidelines');
+  static final support = Uri.parse('https://example.com/lovelly/support');
 }

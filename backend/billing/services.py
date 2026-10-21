@@ -172,7 +172,7 @@ def refund(store: str, txn_id: str) -> None:
 
 
 def verify_plus(user: User, store: str, product_id: str, token: str) -> dict:
-    """The app's report of a Korram Plus purchase or restore (MN-6)."""
+    """The app's report of a Lovelly Plus purchase or restore (MN-6)."""
     if product_id not in plus.PLUS_PRODUCTS:
         raise ApiError("unknown_product", "That plan doesn’t exist.", 400)
     provider = get_provider("store_receipts")

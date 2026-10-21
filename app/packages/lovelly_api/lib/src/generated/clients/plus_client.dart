@@ -18,7 +18,7 @@ abstract class PlusClient {
   @GET('/api/v1/plus/plans')
   Future<List<Plan>> plusPlansList();
 
-  /// A Korram Plus purchase or Restore (MN-6).
+  /// A Lovelly Plus purchase or Restore (MN-6).
   @POST('/api/v1/plus/verify')
   Future<PlusStatus> plusVerifyCreate({@Body() required PlusVerifyRequestRequest body});
 }

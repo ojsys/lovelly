@@ -1,4 +1,4 @@
-package com.korram.korram
+package com.lovelly.lovelly
 
 import io.flutter.embedding.android.FlutterActivity
 

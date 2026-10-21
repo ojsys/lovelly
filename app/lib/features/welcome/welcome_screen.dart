@@ -149,7 +149,7 @@ class _Wordmark extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: 'korram',
+      label: 'lovelly',
       excludeSemantics: true,
       child: Row(
         children: [
@@ -164,7 +164,7 @@ class _Wordmark extends StatelessWidget {
             child: const CustomPaint(size: Size.square(20), painter: _LogoMarkPainter()),
           ),
           const SizedBox(width: 10),
-          Text('korram', style: KType.wordmark),
+          Text('lovelly', style: KType.wordmark),
         ],
       ),
     );

@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:korram/api/api.dart';
-import 'package:korram/features/onboarding/basics_screen.dart';
-import 'package:korram/features/onboarding/otp_screen.dart';
-import 'package:korram/features/onboarding/permissions_screen.dart';
-import 'package:korram/features/onboarding/phone_verification.dart';
-import 'package:korram/features/onboarding/review_screen.dart';
-import 'package:korram/features/onboarding/selfie_screen.dart';
-import 'package:korram/features/home/home_screen.dart';
-import 'package:korram/platform/permissions.dart';
+import 'package:lovelly/api/api.dart';
+import 'package:lovelly/features/onboarding/basics_screen.dart';
+import 'package:lovelly/features/onboarding/otp_screen.dart';
+import 'package:lovelly/features/onboarding/permissions_screen.dart';
+import 'package:lovelly/features/onboarding/phone_verification.dart';
+import 'package:lovelly/features/onboarding/review_screen.dart';
+import 'package:lovelly/features/onboarding/selfie_screen.dart';
+import 'package:lovelly/features/home/home_screen.dart';
+import 'package:lovelly/platform/permissions.dart';
 
 import 'helpers/fakes.dart';
 import 'helpers/pump.dart';
@@ -60,14 +60,14 @@ void main() {
       final app = await pumpApp(tester);
       app.repo.requestCodeError = const ApiFailure(
         'phone_denied',
-        "This number can't be used on Korram.",
+        "This number can't be used on Lovelly.",
       );
       await tapText(tester, 'Continue with phone number');
       await tester.enterText(find.byType(TextField), '8031234542');
       await tester.pump();
       await tapText(tester, 'Continue');
 
-      expect(find.text("This number can't be used on Korram."), findsOneWidget);
+      expect(find.text("This number can't be used on Lovelly."), findsOneWidget);
       expect(find.byType(OtpScreen), findsNothing);
     });
   });
@@ -173,7 +173,7 @@ void main() {
 
     testWidgets('FR-3: under 18 shows Account removed and signs out', (tester) async {
       final app = await toBasics(tester);
-      app.repo.basicsError = const ApiFailure('underage', 'Korram is for people 18 and over.');
+      app.repo.basicsError = const ApiFailure('underage', 'Lovelly is for people 18 and over.');
       await fill(tester, year: '2012');
       await tapText(tester, 'Continue');
       expect(find.byType(RemovedScreen), findsOneWidget);

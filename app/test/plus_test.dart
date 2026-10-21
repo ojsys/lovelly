@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:korram/features/friends/call_invite_screens.dart';
-import 'package:korram/features/match/searching_screen.dart';
-import 'package:korram/features/plus/charge_sheet.dart';
-import 'package:korram/features/plus/plus_screen.dart';
-import 'package:korram/features/wallet/coin_store_screen.dart';
+import 'package:lovelly/features/friends/call_invite_screens.dart';
+import 'package:lovelly/features/match/searching_screen.dart';
+import 'package:lovelly/features/plus/charge_sheet.dart';
+import 'package:lovelly/features/plus/plus_screen.dart';
+import 'package:lovelly/features/wallet/coin_store_screen.dart';
 
 import 'helpers/fakes.dart';
 import 'helpers/pump.dart';
@@ -50,7 +50,7 @@ Future<void> tapStart(WidgetTester tester) async {
 }
 
 void main() {
-  group('12 Korram Plus', () {
+  group('12 Lovelly Plus', () {
     testWidgets('locked filters open 12, with plans and store prices', (tester) async {
       await home(tester);
       await open12(tester);
@@ -59,7 +59,7 @@ void main() {
       expect(label('1 month, Most popular, ₦4,500'), findsOneWidget);
       // 36,000 a year against 12 × 4,500: the store's own prices.
       expect(label('12 months, Best value — save 33%, ₦36,000'), findsOneWidget);
-      expect(find.text('Get Korram Plus · 1 month'), findsOneWidget);
+      expect(find.text('Get Lovelly Plus · 1 month'), findsOneWidget);
       expect(find.text('Live translation included'), findsNothing); // M7 decision 5
     });
 
@@ -69,15 +69,15 @@ void main() {
       await reveal(tester, find.text('1 week'));
       await tester.tap(find.text('1 week'));
       await tester.pump();
-      await tester.tap(find.text('Get Korram Plus · 1 week'));
+      await tester.tap(find.text('Get Lovelly Plus · 1 week'));
       await settle(tester, 2);
       expect(app.billing.boughtPlans, ['week for me']);
-      app.billing.subscribed('korram_plus', 'sub-tok');
+      app.billing.subscribed('lovelly_plus', 'sub-tok');
       await settle(tester);
-      expect(app.plus.calls, contains('verifyPlus google korram_plus sub-tok'));
+      expect(app.plus.calls, contains('verifyPlus google lovelly_plus sub-tok'));
       expect(app.billing.finished, ['sub-tok']);
-      expect(find.text('Welcome to Korram Plus'), findsOneWidget);
-      expect(find.text('You have Korram Plus'), findsOneWidget);
+      expect(find.text('Welcome to Lovelly Plus'), findsOneWidget);
+      expect(find.text('You have Lovelly Plus'), findsOneWidget);
     });
 
     testWidgets('Restore asks the store again', (tester) async {

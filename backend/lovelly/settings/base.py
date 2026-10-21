@@ -43,7 +43,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "korram.urls"
+ROOT_URLCONF = "lovelly.urls"
 
 TEMPLATES = [
     {
@@ -60,8 +60,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "korram.wsgi.application"
-ASGI_APPLICATION = "korram.asgi.application"
+WSGI_APPLICATION = "lovelly.wsgi.application"
+ASGI_APPLICATION = "lovelly.asgi.application"
 
 DATABASES = {"default": env.db("DATABASE_URL")}
 # Reuse connections: opening one (with password auth) per query or per websocket event is
@@ -226,7 +226,7 @@ SIMPLE_JWT = {
 }
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "Korram API",
+    "TITLE": "Lovelly API",
     "VERSION": "1.0.0",
     "SCHEMA_PATH_PREFIX": "/api/v1/",
     # Separate request/response components, so read-only and file fields generate correctly.
@@ -264,7 +264,7 @@ LOGGING = {
 }
 
 # "Invite a friend" links (MN-3). Placeholder until the app has a domain with app links.
-INVITE_BASE_URL = env("INVITE_BASE_URL", default="https://example.com/korram/i")
+INVITE_BASE_URL = env("INVITE_BASE_URL", default="https://example.com/lovelly/i")
 
 # In-app purchases (MN-4), PROVIDER_STORE_RECEIPTS=real.
 PLAY_PACKAGE_NAME = env("PLAY_PACKAGE_NAME", default="")

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:korram/api/api.dart';
-import 'package:korram/features/call/video_call_screen.dart';
-import 'package:korram/features/home/home_screen.dart';
-import 'package:korram/features/match/chat_screen.dart';
-import 'package:korram/features/match/searching_screen.dart';
-import 'package:korram/features/safety/account_screens.dart';
-import 'package:korram/features/safety/report_screen.dart';
+import 'package:lovelly/api/api.dart';
+import 'package:lovelly/features/call/video_call_screen.dart';
+import 'package:lovelly/features/home/home_screen.dart';
+import 'package:lovelly/features/match/chat_screen.dart';
+import 'package:lovelly/features/match/searching_screen.dart';
+import 'package:lovelly/features/safety/account_screens.dart';
+import 'package:lovelly/features/safety/report_screen.dart';
 
 import 'helpers/fakes.dart';
 import 'helpers/pump.dart';
@@ -77,7 +77,7 @@ void main() {
       expect(app.repo.calls, contains('report s1 nudity block=true'));
       app.realtime.emit({'type': 'session.ended', 'session_id': 's1', 'reason': 'blocked'});
       await settle(tester);
-      expect(find.text('Thanks for keeping Korram safe'), findsOneWidget);
+      expect(find.text('Thanks for keeping Lovelly safe'), findsOneWidget);
       expect(find.text('Tobi is blocked and the report is with our safety team.'), findsOneWidget);
       await tester.tap(find.text('Meet someone new'));
       await settle(tester);
@@ -182,7 +182,7 @@ void main() {
               Notice(
                 id: 'n1',
                 kind: 'warning',
-                title: 'A warning from the Korram team',
+                title: 'A warning from the Lovelly team',
                 body: 'Be kind.',
               ),
             ],
@@ -190,11 +190,11 @@ void main() {
         },
       );
       await settle(tester, 3);
-      expect(find.text('A warning from the Korram team'), findsOneWidget);
+      expect(find.text('A warning from the Lovelly team'), findsOneWidget);
       await tester.tap(find.text('I understand'));
       await settle(tester, 3);
       expect(app.repo.calls, contains('noticeSeen n1'));
-      expect(find.text('A warning from the Korram team'), findsNothing);
+      expect(find.text('A warning from the Lovelly team'), findsNothing);
     });
 
     testWidgets('account.closed during a call goes to the suspended screen', (tester) async {

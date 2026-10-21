@@ -5,15 +5,15 @@ import 'router/router.dart';
 import 'theme/theme.dart';
 import 'widgets/app_events.dart';
 
-class KorramApp extends ConsumerWidget {
-  const KorramApp({super.key});
+class LovellyApp extends ConsumerWidget {
+  const LovellyApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp.router(
-      title: 'Korram',
+      title: 'Lovelly',
       debugShowCheckedModeBanner: false,
-      theme: buildKorramTheme(),
+      theme: buildLovellyTheme(),
       routerConfig: ref.watch(routerProvider),
       builder: (context, child) => AppEvents(child: child ?? const SizedBox.shrink()),
     );

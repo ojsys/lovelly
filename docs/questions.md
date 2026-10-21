@@ -11,6 +11,8 @@
 5. Self-hosted LiveKit or LiveKit Cloud at launch, and which hosting region is nearest Nigeria?
 6. Trademark search for "Korram" in Nigeria and the app stores ("Korrma", a trading app,
    already exists).
+   → **Superseded 2026-10-21:** the app is now called Lovelly (#43); the search is needed for
+   that name instead.
 7. Is the Nigeria Data Protection Act registration and DPIA done before beta?
 
 ## Gaps found comparing the PRD with the designs
@@ -128,3 +130,13 @@
     per IP (M1). Nigerian mobile networks put many users behind one IP (carrier-grade NAT), so
     a busy cell could hit it. Raise it and rely more on the per-number limits? Needs real
     traffic numbers.
+
+## Raised 2026-10-21
+
+43. **Rename from Korram to Lovelly.** The app, its code and its store IDs are now Lovelly
+    (Android `com.lovelly.lovelly`, iOS `com.lovelly.lovelly`, Plus product `lovelly_plus`).
+    Earlier entries and the milestone plans keep the old name as written at the time. Open:
+    trademark search for "Lovelly" in Nigeria and the app stores (replaces #6); the domain for
+    the invite page (#37); and whether the final bundle ID should use the company's reverse
+    domain rather than `com.lovelly`. Change the IDs before the first store upload, because
+    they can't be changed afterwards.

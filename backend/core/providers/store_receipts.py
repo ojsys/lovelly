@@ -32,7 +32,7 @@ class StoreTransaction:
 
 @dataclass(frozen=True)
 class StoreSubscription:
-    """Korram Plus as the store sees it now (MN-6)."""
+    """Lovelly Plus as the store sees it now (MN-6)."""
 
     store: str
     original_txn_id: str  # Apple original transaction id / Google purchase token
@@ -63,7 +63,7 @@ class StoreReceiptsProvider(ABC):
 
     @abstractmethod
     def verify_subscription(self, store: str, product_id: str, token: str) -> StoreSubscription:
-        """Checks a Korram Plus subscription with the store. Raises InvalidReceipt."""
+        """Checks a Lovelly Plus subscription with the store. Raises InvalidReceipt."""
 
     @abstractmethod
     def acknowledge(self, store: str, product_id: str, token: str) -> None:
@@ -355,7 +355,7 @@ class AppStore:
         except VerificationException as e:
             raise InvalidReceipt(f"Apple: {e}") from e
         if t.productId not in self.PLANS or not t.expiresDate:
-            raise InvalidReceipt("Apple: not a Korram Plus transaction")
+            raise InvalidReceipt("Apple: not a Lovelly Plus transaction")
         ends = datetime.fromtimestamp(t.expiresDate / 1000, UTC)
         if state is None:
             state = (

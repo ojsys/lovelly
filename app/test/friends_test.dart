@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:korram/api/api.dart';
-import 'package:korram/features/call/video_call_screen.dart';
-import 'package:korram/features/friends/call_invite_screens.dart';
-import 'package:korram/features/friends/friend_chat_screen.dart';
-import 'package:korram/features/friends/friends_screen.dart';
-import 'package:korram/features/friends/profile_screen.dart';
+import 'package:lovelly/api/api.dart';
+import 'package:lovelly/features/call/video_call_screen.dart';
+import 'package:lovelly/features/friends/call_invite_screens.dart';
+import 'package:lovelly/features/friends/friend_chat_screen.dart';
+import 'package:lovelly/features/friends/friends_screen.dart';
+import 'package:lovelly/features/friends/profile_screen.dart';
 
 import 'helpers/fakes.dart';
 import 'helpers/pump.dart';

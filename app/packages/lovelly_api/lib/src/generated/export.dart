@@ -93,4 +93,4 @@ export 'models/token_refresh_request.dart';
 export 'models/verification_state.dart';
 export 'models/wallet.dart';
 // Root client
-export 'korram_api.dart';
+export 'lovelly_api.dart';

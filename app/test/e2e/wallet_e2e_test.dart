@@ -11,10 +11,10 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:korram/auth/my_id.dart';
-import 'package:korram/features/match/match_controller.dart';
-import 'package:korram/features/wallet/wallet_repository.dart';
-import 'package:korram/realtime/realtime_client.dart';
+import 'package:lovelly/auth/my_id.dart';
+import 'package:lovelly/features/match/match_controller.dart';
+import 'package:lovelly/features/wallet/wallet_repository.dart';
+import 'package:lovelly/realtime/realtime_client.dart';
 
 import 'support.dart';
 

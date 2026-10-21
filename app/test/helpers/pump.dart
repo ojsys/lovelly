@@ -1,27 +1,27 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:korram/api/api.dart';
-import 'package:korram/app.dart';
-import 'package:korram/config/clock.dart';
-import 'package:korram/auth/onboarding_repository.dart';
-import 'package:korram/auth/token_store.dart';
-import 'package:korram/features/call/call_controller.dart';
-import 'package:korram/features/call/call_engine.dart';
-import 'package:korram/features/friends/friends_repository.dart';
-import 'package:korram/features/friends/profile_screen.dart';
-import 'package:korram/features/home/home_data.dart';
-import 'package:korram/features/plus/plus_repository.dart';
-import 'package:korram/features/wallet/coin_store_screen.dart';
-import 'package:korram/features/wallet/wallet_repository.dart';
-import 'package:korram/platform/invite_source.dart';
-import 'package:korram/platform/push.dart';
-import 'package:korram/platform/store_billing.dart';
-import 'package:korram/platform/device_id.dart';
-import 'package:korram/platform/permissions.dart';
-import 'package:korram/platform/selfie_camera.dart';
-import 'package:korram/platform/social_sign_in.dart';
-import 'package:korram/realtime/realtime_client.dart';
+import 'package:lovelly/api/api.dart';
+import 'package:lovelly/app.dart';
+import 'package:lovelly/config/clock.dart';
+import 'package:lovelly/auth/onboarding_repository.dart';
+import 'package:lovelly/auth/token_store.dart';
+import 'package:lovelly/features/call/call_controller.dart';
+import 'package:lovelly/features/call/call_engine.dart';
+import 'package:lovelly/features/friends/friends_repository.dart';
+import 'package:lovelly/features/friends/profile_screen.dart';
+import 'package:lovelly/features/home/home_data.dart';
+import 'package:lovelly/features/plus/plus_repository.dart';
+import 'package:lovelly/features/wallet/coin_store_screen.dart';
+import 'package:lovelly/features/wallet/wallet_repository.dart';
+import 'package:lovelly/platform/invite_source.dart';
+import 'package:lovelly/platform/push.dart';
+import 'package:lovelly/platform/store_billing.dart';
+import 'package:lovelly/platform/device_id.dart';
+import 'package:lovelly/platform/permissions.dart';
+import 'package:lovelly/platform/selfie_camera.dart';
+import 'package:lovelly/platform/social_sign_in.dart';
+import 'package:lovelly/realtime/realtime_client.dart';
 
 import 'fakes.dart';
 
@@ -111,10 +111,10 @@ Future<TestApp> pumpApp(
         myProfileProvider.overrideWith((ref) async => app.profile),
         onlineCountProvider.overrideWith((ref) => Stream.value(app.online)),
       ],
-      child: const KorramApp(),
+      child: const LovellyApp(),
     ),
   );
   await tester.pumpAndSettle();
-  app.container = ProviderScope.containerOf(tester.element(find.byType(KorramApp)));
+  app.container = ProviderScope.containerOf(tester.element(find.byType(LovellyApp)));
   return app;
 }

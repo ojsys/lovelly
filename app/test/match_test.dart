@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:korram/features/home/home_screen.dart';
-import 'package:korram/features/match/chat_screen.dart';
-import 'package:korram/features/call/voice_call_screen.dart';
-import 'package:korram/features/match/match_controller.dart';
-import 'package:korram/features/match/searching_screen.dart';
-import 'package:korram/platform/permissions.dart';
+import 'package:lovelly/features/home/home_screen.dart';
+import 'package:lovelly/features/match/chat_screen.dart';
+import 'package:lovelly/features/call/voice_call_screen.dart';
+import 'package:lovelly/features/match/match_controller.dart';
+import 'package:lovelly/features/match/searching_screen.dart';
+import 'package:lovelly/platform/permissions.dart';
 
 import 'helpers/fakes.dart';
 import 'helpers/pump.dart';

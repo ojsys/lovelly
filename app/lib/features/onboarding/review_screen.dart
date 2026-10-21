@@ -72,7 +72,7 @@ class RemovedScreen extends ConsumerWidget {
         OnboardingHeader(
           title: 'Account removed',
           lead: Text(
-            'Korram is only for people 18 and over, so we’ve removed this account and '
+            'Lovelly is only for people 18 and over, so we’ve removed this account and '
             'this phone number can’t be used to sign up.',
           ),
         ),

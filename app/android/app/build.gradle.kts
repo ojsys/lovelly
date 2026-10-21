@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.korram.korram"
+    namespace = "com.lovelly.lovelly"
     compileSdk = 36 // flutter_secure_storage 10 needs 36 (Flutter 3.32 defaults to 35)
     ndkVersion = "27.0.12077973" // required by livekit_client, flutter_webrtc and other plugins
 
@@ -21,7 +21,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.korram.korram"
+        applicationId = "com.lovelly.lovelly"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 26 // Android 8+ (PRD: App size and devices)

@@ -31,7 +31,7 @@ test-e2e:
 
 # Regenerate the Dart API client after backend API changes.
 api-client:
-	app/packages/korram_api/tool/gen_api.sh
+	app/packages/lovelly_api/tool/gen_api.sh
 
 # M3: two headless LiveKit participants on shaped 4G / 3G links (needs `make up`).
 test-calls:

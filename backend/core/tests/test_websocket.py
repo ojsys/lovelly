@@ -3,7 +3,7 @@ from channels.testing import WebsocketCommunicator
 from rest_framework_simplejwt.tokens import AccessToken
 
 from accounts.models import User
-from korram.asgi import application
+from lovelly.asgi import application
 
 pytestmark = [pytest.mark.django_db(transaction=True), pytest.mark.asyncio]
 

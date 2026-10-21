@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../auth/token_store.dart';
 import '../platform/device_id.dart';
 import '../config/app_config.dart';
-import 'package:korram_api/korram_api.dart';
+import 'package:lovelly_api/lovelly_api.dart';
 
-export 'package:korram_api/korram_api.dart';
+export 'package:lovelly_api/lovelly_api.dart';
 
 /// A server error with its stable `code` (see backend core/exceptions.py).
 class ApiFailure implements Exception {
@@ -17,7 +17,7 @@ class ApiFailure implements Exception {
   final int? retryAfter;
   final int? status;
 
-  static const network = ApiFailure('network', "Can't reach Korram. Check your connection.");
+  static const network = ApiFailure('network', "Can't reach Lovelly. Check your connection.");
 
   factory ApiFailure.from(Object error) {
     if (error is ApiFailure) return error;
@@ -77,7 +77,7 @@ class AuthInterceptor extends QueuedInterceptor {
       return handler.next(err);
     }
     try {
-      final fresh = await KorramApi(
+      final fresh = await LovellyApi(
         _refreshDio,
       ).auth.authRefreshCreate(body: TokenRefreshRequest(refresh: tokens.refresh));
       await _store.writeTokens(access: fresh.access, refresh: fresh.refresh);
@@ -110,7 +110,7 @@ final dioProvider = Provider<Dio>((ref) {
   return dio;
 });
 
-final apiProvider = Provider<KorramApi>((ref) => KorramApi(ref.watch(dioProvider)));
+final apiProvider = Provider<LovellyApi>((ref) => LovellyApi(ref.watch(dioProvider)));
 
 /// Fires when a refresh fails, so the session can sign out.
 final signedOutSignalProvider = NotifierProvider<SignedOutSignal, int>(SignedOutSignal.new);

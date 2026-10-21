@@ -1,5 +1,5 @@
-name: korram
-description: "Korram — random video, voice and text chats with verified people."
+name: lovelly
+description: "Lovelly — random video, voice and text chats with verified people."
 publish_to: 'none'
 version: 0.1.0
 
@@ -7,8 +7,8 @@ environment:
   sdk: ^3.8.0
 
 dependencies:
-  korram_api:
-    path: packages/korram_api
+  lovelly_api:
+    path: packages/lovelly_api
   camera: ^0.11.2+1
   dio: ^5.11.1
   flutter:

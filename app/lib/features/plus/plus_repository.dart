@@ -3,12 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../api/api.dart';
 import '../match/match_controller.dart' show MatchMode;
 
-/// Korram Plus, pay as you go and rematch (MN-6..MN-12, FR-7). Prices always come from the
+/// Lovelly Plus, pay as you go and rematch (MN-6..MN-12, FR-7). Prices always come from the
 /// server (coins) or the store (naira); the app never computes a cost.
 class PlusRepository {
   PlusRepository(this._api);
 
-  final KorramApi _api;
+  final LovellyApi _api;
 
   Future<T> _call<T>(Future<T> Function() request) async {
     try {

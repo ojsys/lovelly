@@ -1,3 +1,3 @@
-# korram
+# lovelly
 
 A new Flutter project.

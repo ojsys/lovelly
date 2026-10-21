@@ -2,22 +2,22 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/widgets.dart';
-import 'package:korram/api/api.dart';
-import 'package:korram/auth/onboarding_repository.dart';
-import 'package:korram/auth/token_store.dart';
-import 'package:korram/features/call/call_engine.dart';
-import 'package:korram/features/friends/friends_repository.dart';
-import 'package:korram/features/match/match_controller.dart' show MatchMode;
-import 'package:korram/features/plus/plus_repository.dart';
-import 'package:korram/features/wallet/wallet_repository.dart';
-import 'package:korram/platform/invite_source.dart';
-import 'package:korram/platform/push.dart';
-import 'package:korram/platform/store_billing.dart';
-import 'package:korram/platform/device_id.dart';
-import 'package:korram/platform/permissions.dart';
-import 'package:korram/platform/selfie_camera.dart';
-import 'package:korram/platform/social_sign_in.dart';
-import 'package:korram/realtime/realtime_client.dart';
+import 'package:lovelly/api/api.dart';
+import 'package:lovelly/auth/onboarding_repository.dart';
+import 'package:lovelly/auth/token_store.dart';
+import 'package:lovelly/features/call/call_engine.dart';
+import 'package:lovelly/features/friends/friends_repository.dart';
+import 'package:lovelly/features/match/match_controller.dart' show MatchMode;
+import 'package:lovelly/features/plus/plus_repository.dart';
+import 'package:lovelly/features/wallet/wallet_repository.dart';
+import 'package:lovelly/platform/invite_source.dart';
+import 'package:lovelly/platform/push.dart';
+import 'package:lovelly/platform/store_billing.dart';
+import 'package:lovelly/platform/device_id.dart';
+import 'package:lovelly/platform/permissions.dart';
+import 'package:lovelly/platform/selfie_camera.dart';
+import 'package:lovelly/platform/social_sign_in.dart';
+import 'package:lovelly/realtime/realtime_client.dart';
 
 class FakeTokenStore implements TokenStore {
   ({String access, String refresh})? tokens;
@@ -510,7 +510,7 @@ class FakeWalletRepository implements WalletRepository {
   @override
   Future<Invite> invite() async => const Invite(
     code: 'ADA23456',
-    link: 'https://example.com/korram/i/ADA23456',
+    link: 'https://example.com/lovelly/i/ADA23456',
     coins: 50,
     rewarded: 0,
   );
@@ -623,7 +623,7 @@ const plusPlans = [
     label: '1 week',
     sub: 'Try it out',
     appleProduct: 'plus_week',
-    googleProduct: 'korram_plus',
+    googleProduct: 'lovelly_plus',
     googleBasePlan: 'week',
   ),
   Plan(
@@ -631,7 +631,7 @@ const plusPlans = [
     label: '1 month',
     sub: 'Most popular',
     appleProduct: 'plus_month',
-    googleProduct: 'korram_plus',
+    googleProduct: 'lovelly_plus',
     googleBasePlan: 'month',
   ),
   Plan(
@@ -639,7 +639,7 @@ const plusPlans = [
     label: '12 months',
     sub: 'Best value',
     appleProduct: 'plus_year',
-    googleProduct: 'korram_plus',
+    googleProduct: 'lovelly_plus',
     googleBasePlan: 'year',
   ),
 ];

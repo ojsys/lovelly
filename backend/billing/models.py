@@ -57,7 +57,7 @@ class SpendSettings(UUIDModel):
 
 
 class Subscription(UUIDModel):
-    """PRD: Subscription (Korram Plus, MN-6). Kept in step with the stores' notifications."""
+    """PRD: Subscription (Lovelly Plus, MN-6). Kept in step with the stores' notifications."""
 
     class Plan(models.TextChoices):
         WEEK = "week", "1 week"

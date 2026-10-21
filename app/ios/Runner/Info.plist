@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Korram</string>
+	<string>Lovelly</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -13,7 +13,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>korram</string>
+	<string>lovelly</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -46,9 +46,9 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Korram uses your camera for the selfie check and video chats.</string>
+	<string>Lovelly uses your camera for the selfie check and video chats.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Korram uses your microphone for voice and video chats.</string>
+	<string>Lovelly uses your microphone for voice and video chats.</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<!-- Lets debug builds reach the local dev API; production uses HTTPS. -->

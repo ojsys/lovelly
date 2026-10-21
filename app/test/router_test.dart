@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:korram/auth/session.dart';
-import 'package:korram/router/router.dart';
-import 'package:korram/router/routes.dart';
+import 'package:lovelly/auth/session.dart';
+import 'package:lovelly/router/router.dart';
+import 'package:lovelly/router/routes.dart';
 
 AsyncValue<SessionState> at(OnboardingStep step) => AsyncData(SessionState(step));
 

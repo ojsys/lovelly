@@ -8,7 +8,7 @@ library;
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:korram/features/match/match_controller.dart';
+import 'package:lovelly/features/match/match_controller.dart';
 
 import 'support.dart';
 

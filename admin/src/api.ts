@@ -1,6 +1,6 @@
 // Moderator console API client (/admin-api/, SF-6). Token lives for the browser tab only.
 
-const TOKEN = 'korram.console.token'
+const TOKEN = 'lovelly.console.token'
 
 export class ApiError extends Error {
   status: number

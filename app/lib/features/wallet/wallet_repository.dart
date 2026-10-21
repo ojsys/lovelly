@@ -7,7 +7,7 @@ import '../../api/api.dart';
 class WalletRepository {
   WalletRepository(this._api);
 
-  final KorramApi _api;
+  final LovellyApi _api;
 
   Future<T> _call<T>(Future<T> Function() request) async {
     try {

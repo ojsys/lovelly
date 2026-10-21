@@ -1,4 +1,4 @@
-// Design tokens from the Korram canvas (design/screens/*.dc.html).
+// Design tokens from the Lovelly canvas (design/screens/*.dc.html).
 // This file and theme.dart are the only places colours and font families may be written
 // (enforced by test/theme_tokens_test.dart).
 import 'package:flutter/painting.dart';

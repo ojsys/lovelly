@@ -5,7 +5,7 @@ from channels.db import database_sync_to_async
 from channels.testing import WebsocketCommunicator
 from rest_framework_simplejwt.tokens import AccessToken
 
-from korram.asgi import application
+from lovelly.asgi import application
 from matching import service
 
 pytestmark = [pytest.mark.django_db(transaction=True), pytest.mark.asyncio]

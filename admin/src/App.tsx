@@ -24,7 +24,7 @@ export default function App() {
   return (
     <div className="shell">
       <nav className="row between">
-        <strong>Korram moderation</strong>
+        <strong>Lovelly moderation</strong>
         <div className="row">
           {tab('queue', 'Reports')}
           {tab('verifications', 'Selfie reviews')}

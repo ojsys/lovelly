@@ -24,7 +24,7 @@ export default function Login({ onDone }: { onDone: () => void }) {
 
   return (
     <main className="login">
-      <h1>Korram moderation</h1>
+      <h1>Lovelly moderation</h1>
       <form onSubmit={submit} className="card stack">
         <label>
           Phone

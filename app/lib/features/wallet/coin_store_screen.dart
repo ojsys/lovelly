@@ -59,7 +59,7 @@ class _CoinStoreScreenState extends ConsumerState<CoinStoreScreen> {
     try {
       final invite = await ref.read(walletRepositoryProvider).invite();
       await ref.read(shareProvider)(
-        'Join me on Korram, meet new people on video, voice or text: ${invite.link}',
+        'Join me on Lovelly, meet new people on video, voice or text: ${invite.link}',
       );
     } on ApiFailure catch (e) {
       _toast(e.detail);

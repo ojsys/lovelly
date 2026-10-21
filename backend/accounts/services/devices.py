@@ -23,7 +23,7 @@ def ensure_not_denied(request) -> None:
     h = from_request(request)
     if h and DeniedDevice.objects.filter(device_hash=h).exists():
         raise ApiError(
-            "device_denied", "This device can't be used on Korram.", status.HTTP_403_FORBIDDEN
+            "device_denied", "This device can't be used on Lovelly.", status.HTTP_403_FORBIDDEN
         )
 
 

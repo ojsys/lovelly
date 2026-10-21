@@ -20,7 +20,7 @@ class SplashScreen extends ConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      "Can't reach Korram right now.",
+                      "Can't reach Lovelly right now.",
                       style: KType.bodyLarge.copyWith(color: KColors.muted),
                       textAlign: TextAlign.center,
                     ),

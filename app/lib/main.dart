@@ -14,5 +14,5 @@ void main() {
       yield LicenseEntryWithLineBreaks([family], await rootBundle.loadString(asset));
     }
   });
-  runApp(const ProviderScope(child: KorramApp()));
+  runApp(const ProviderScope(child: LovellyApp()));
 }

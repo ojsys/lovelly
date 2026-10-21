@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:korram_api/korram_api.dart' as gen show ChatMessage;
+import 'package:lovelly_api/lovelly_api.dart' as gen show ChatMessage;
 
 import '../../api/api.dart' hide ChatMessage;
 import '../../auth/my_id.dart';

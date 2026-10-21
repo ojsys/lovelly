@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:korram/features/onboarding/phone_screen.dart';
-import 'package:korram/features/welcome/welcome_screen.dart';
-import 'package:korram/theme/tokens.dart';
+import 'package:lovelly/features/onboarding/phone_screen.dart';
+import 'package:lovelly/features/welcome/welcome_screen.dart';
+import 'package:lovelly/theme/tokens.dart';
 
 import 'helpers/pump.dart';
 
@@ -20,7 +20,7 @@ void main() {
     expect(find.text('Google'), findsOneWidget);
     expect(find.text('Apple'), findsOneWidget);
     expect(find.textContaining('18+ only.', findRichText: true), findsOneWidget);
-    expect(find.text('korram'), findsOneWidget);
+    expect(find.text('lovelly'), findsOneWidget);
   });
 
   testWidgets('Welcome uses the theme fonts and colours', (tester) async {

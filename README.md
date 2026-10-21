@@ -1,6 +1,9 @@
-# Korram
+# Lovelly
 
 Random video, voice and text chats with verified people. Nigeria first.
+
+The app was called Korram until 2026-10-21. The milestone plans and older entries in
+`docs/questions.md` still use that name.
 
 - Working rules: [`CLAUDE.md`](CLAUDE.md)
 - Spec (`docs/PRD.md`) and designs (`design/screens/*.dc.html`, 390 × 844 frames): confidential,
@@ -46,7 +49,7 @@ make lint
 
 `make test-e2e` runs the app's real API layer against the running stack (codes are read
 from the fake SMS provider's log lines). After changing the API, run `make api-client` to
-regenerate the Dart client (`app/packages/korram_api`, its own package so the code
+regenerate the Dart client (`app/packages/lovelly_api`, its own package so the code
 generators don't share dependency versions with the app); CI fails if they drift.
 
 `make test-calls` runs the M3 call acceptance: two headless LiveKit participants in the

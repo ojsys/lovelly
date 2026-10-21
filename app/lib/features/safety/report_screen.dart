@@ -261,7 +261,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
         ),
         const SizedBox(height: 14),
         Text(
-          'Thanks for keeping Korram safe',
+          'Thanks for keeping Lovelly safe',
           textAlign: TextAlign.center,
           style: KType.sheetTitle,
         ),

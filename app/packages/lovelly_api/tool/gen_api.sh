@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 # Regenerates the Dart API client from the backend's OpenAPI schema (PRD: API).
-# Usage: packages/korram_api/tool/gen_api.sh [schema URL]   (default: the local compose API)
+# Usage: packages/lovelly_api/tool/gen_api.sh [schema URL]   (default: the local compose API)
 set -eu
 cd "$(dirname "$0")/.."
 curl -sf "${1:-http://127.0.0.1:8100/api/v1/schema/}" -o api/openapi.yaml

@@ -3,8 +3,8 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:korram/api/api.dart';
-import 'package:korram/features/onboarding/phone_verification.dart';
+import 'package:lovelly/api/api.dart';
+import 'package:lovelly/features/onboarding/phone_verification.dart';
 
 import '../helpers/fakes.dart';
 import '../helpers/fonts.dart';
@@ -322,7 +322,7 @@ void main() {
     await golden(tester, 'profile');
   });
 
-  testWidgets('12 Korram Plus', (tester) async {
+  testWidgets('12 Lovelly Plus', (tester) async {
     await pumpApp(
       tester,
       setUp: (app) {

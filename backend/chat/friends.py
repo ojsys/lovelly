@@ -103,7 +103,7 @@ def _announce_request(friendship: Friendship, user: User, session: MatchSession)
     notify(
         friendship.addressee_id,
         Push(
-            "Korram", f"{user.profile.first_name} wants to be friends", {"type": "friend_request"}
+            "Lovelly", f"{user.profile.first_name} wants to be friends", {"type": "friend_request"}
         ),
     )
 
@@ -125,7 +125,7 @@ def accept(user: User, request_id) -> Friendship:
         notify(
             f.requester_id,
             Push(
-                "Korram",
+                "Lovelly",
                 f"{f.addressee.profile.first_name} accepted your friend request",
                 {"type": "chat", "chat_id": str(f.id)},
             ),

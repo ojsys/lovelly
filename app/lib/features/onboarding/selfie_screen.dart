@@ -256,7 +256,7 @@ class _SelfieScreenState extends ConsumerState<SelfieScreen> with WidgetsBinding
     final text = switch (_cameraState) {
       _ when _step == 2 => '',
       _Camera.starting => 'Starting camera…',
-      _Camera.denied || _Camera.blocked => 'Korram needs your camera\nfor the selfie check',
+      _Camera.denied || _Camera.blocked => 'Lovelly needs your camera\nfor the selfie check',
       _Camera.failed => 'Camera unavailable',
       _Camera.ready => '',
     };

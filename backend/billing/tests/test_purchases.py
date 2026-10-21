@@ -185,12 +185,12 @@ def pubsub(data: dict) -> dict:
     return {"message": {"data": base64.b64encode(json.dumps(data).encode()).decode()}}
 
 
-@override_settings(PLAY_PACKAGE_NAME="app.korram", PLAY_RTDN_SECRET="s3cret")
+@override_settings(PLAY_PACKAGE_NAME="app.lovelly", PLAY_RTDN_SECRET="s3cret")
 def test_google_notifications_are_authenticated_and_read():
     g = GooglePlay()
     voided = pubsub(
         {
-            "packageName": "app.korram",
+            "packageName": "app.lovelly",
             "voidedPurchaseNotification": {
                 "purchaseToken": "t",
                 "orderId": "GPA.1",
@@ -204,5 +204,5 @@ def test_google_notifications_are_authenticated_and_read():
         g.parse_webhook(pubsub({"packageName": "other.app"}), {"secret": "s3cret"})
     (event,) = g.parse_webhook(voided, {"secret": "s3cret"})
     assert (event.kind, event.store, event.txn_id) == ("refunded", "google", "GPA.1")
-    test = pubsub({"packageName": "app.korram", "testNotification": {"version": "1.0"}})
+    test = pubsub({"packageName": "app.lovelly", "testNotification": {"version": "1.0"}})
     assert g.parse_webhook(test, {"secret": "s3cret"})[0].kind == "test"

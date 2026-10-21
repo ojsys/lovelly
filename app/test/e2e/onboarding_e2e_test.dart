@@ -8,10 +8,10 @@ library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:korram/api/api.dart';
-import 'package:korram/auth/onboarding_repository.dart';
-import 'package:korram/auth/session.dart';
-import 'package:korram/auth/token_store.dart';
+import 'package:lovelly/api/api.dart';
+import 'package:lovelly/auth/onboarding_repository.dart';
+import 'package:lovelly/auth/session.dart';
+import 'package:lovelly/auth/token_store.dart';
 
 import '../helpers/fakes.dart';
 import 'support.dart';

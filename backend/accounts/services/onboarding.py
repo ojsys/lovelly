@@ -160,7 +160,7 @@ def set_basics(user: User, *, first_name: str, dob: date, gender: str) -> None:
     # Not atomic as a whole: the removal must commit even though we then raise.
     if age_on(dob, timezone.now().date()) < settings.MIN_AGE:
         remove_underage(user, reason="dob_under_18")
-        raise ApiError("underage", "Korram is for people 18 and over.", status.HTTP_403_FORBIDDEN)
+        raise ApiError("underage", "Lovelly is for people 18 and over.", status.HTTP_403_FORBIDDEN)
     with transaction.atomic():
         _save_basics(user, first_name=first_name, dob=dob, gender=gender)
 

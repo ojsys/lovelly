@@ -53,11 +53,11 @@ test('login refuses non-moderators and signs moderators in', async () => {
   fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'good' } })
   fireEvent.click(screen.getByText('Sign in'))
   expect(await screen.findByText('Report queue')).toBeInTheDocument()
-  expect(sessionStorage.getItem('korram.console.token')).toBe('tok')
+  expect(sessionStorage.getItem('lovelly.console.token')).toBe('tok')
 })
 
 test('SF-6: queue shows reports in the server’s severity order with counts', async () => {
-  sessionStorage.setItem('korram.console.token', 'tok')
+  sessionStorage.setItem('lovelly.console.token', 'tok')
   routes['reports'] = () => [
     200,
     { results: [row('1', 'minor', 5), row('2', 'nudity', 4), row('3', 'scam', 2)], open_by_reason: { minor: 1, nudity: 1, scam: 1 } },

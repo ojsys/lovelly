@@ -74,7 +74,7 @@ def send(user: User, gift_slug: str, client_key: str, session_id=None, chat_id=N
                 notify(
                     receiver_id,
                     Push(
-                        "Korram",
+                        "Lovelly",
                         f"{user.profile.first_name} sent you a gift",
                         {"type": "chat", "chat_id": str(conv.friendship.id)},
                     ),

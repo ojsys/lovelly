@@ -4,6 +4,6 @@
 set -eu
 cd "$(dirname "$0")"
 COMPOSE="docker compose -f ../../infra/docker-compose.yml"
-docker build -q -t korram-calltest . >/dev/null
+docker build -q -t lovelly-calltest . >/dev/null
 $COMPOSE exec -T api python manage.py calltest_setup \
-  | docker run --rm -i --network container:korram-livekit-1 --cap-add NET_ADMIN korram-calltest
+  | docker run --rm -i --network container:lovelly-livekit-1 --cap-add NET_ADMIN lovelly-calltest

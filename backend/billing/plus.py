@@ -1,4 +1,4 @@
-"""Korram Plus (MN-6) and spend settings (MN-9, MN-10)."""
+"""Lovelly Plus (MN-6) and spend settings (MN-9, MN-10)."""
 
 import logging
 from dataclasses import dataclass
@@ -27,9 +27,9 @@ class Plan:
 
 # M7 decision 6: one Google subscription with three base plans; three Apple products.
 PLANS = [
-    Plan("week", "1 week", "Try it out", "plus_week", "korram_plus", "week"),
-    Plan("month", "1 month", "Most popular", "plus_month", "korram_plus", "month"),
-    Plan("year", "12 months", "Best value", "plus_year", "korram_plus", "year"),
+    Plan("week", "1 week", "Try it out", "plus_week", "lovelly_plus", "week"),
+    Plan("month", "1 month", "Most popular", "plus_month", "lovelly_plus", "month"),
+    Plan("year", "12 months", "Best value", "plus_year", "lovelly_plus", "year"),
 ]
 PLUS_PRODUCTS = {p.apple_product for p in PLANS} | {p.google_product for p in PLANS}
 

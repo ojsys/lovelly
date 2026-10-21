@@ -1,4 +1,4 @@
-name: korram
+name: lovelly
 
 # Host ports are offset (5433, 6380, 8100, 5174) to avoid clashing with local Postgres,
 # Redis and dev servers. Inside the network services use their standard ports.
@@ -76,9 +76,9 @@ services:
   api-load:
     <<: *backend
     profiles: ["load"]
-    command: ["uvicorn", "korram.asgi:application", "--host", "0.0.0.0", "--port", "8000", "--workers", "4", "--log-level", "warning"]
+    command: ["uvicorn", "lovelly.asgi:application", "--host", "0.0.0.0", "--port", "8000", "--workers", "4", "--log-level", "warning"]
     environment:
-      DJANGO_SETTINGS_MODULE: korram.settings.prod
+      DJANGO_SETTINGS_MODULE: lovelly.settings.prod
       WS_CONNECTS_PER_IP_PER_MINUTE: "100000"  # every simulated user shares one IP
     depends_on:
       api:
@@ -86,11 +86,11 @@ services:
 
   worker:
     <<: *backend
-    command: ["celery", "-A", "korram", "worker", "-l", "info"]
+    command: ["celery", "-A", "lovelly", "worker", "-l", "info"]
 
   beat:
     <<: *backend
-    command: ["celery", "-A", "korram", "beat", "-l", "info", "-s", "/tmp/celerybeat-schedule"]
+    command: ["celery", "-A", "lovelly", "beat", "-l", "info", "-s", "/tmp/celerybeat-schedule"]
 
   # Samples video in live calls (SF-2). Shares LiveKit's network so it can reach media on
   # 127.0.0.1 (LiveKit's advertised dev IP); it still reaches redis/postgres by name.

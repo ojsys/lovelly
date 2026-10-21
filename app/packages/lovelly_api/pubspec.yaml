@@ -1,5 +1,5 @@
-name: korram_api
-description: Dart client for the Korram API, generated from the OpenAPI schema.
+name: lovelly_api
+description: Dart client for the Lovelly API, generated from the OpenAPI schema.
 publish_to: none
 version: 1.0.0
 

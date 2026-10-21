@@ -110,7 +110,7 @@ def send_message(session_id, user: User, body: str, chat_id=None) -> Message:
         notify(
             conv.peer_of(user.id),
             Push(
-                "Korram",
+                "Lovelly",
                 f"{user.profile.first_name} sent you a message",
                 {"type": "chat", "chat_id": str(conv.friendship.id)},
             ),

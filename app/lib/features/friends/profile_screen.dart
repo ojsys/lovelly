@@ -250,7 +250,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 padding: const EdgeInsets.symmetric(horizontal: 12),
                                 alignment: Alignment.center,
                                 child: Text(
-                                  'Korram Plus',
+                                  'Lovelly Plus',
                                   style: KType.caption.copyWith(
                                     fontWeight: FontWeight.w700,
                                     color: KColors.gold,

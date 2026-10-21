@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:korram/api/api.dart';
-import 'package:korram/features/wallet/coin_store_screen.dart';
-import 'package:korram/features/wallet/gift_sheet.dart';
-import 'package:korram/platform/invite_source.dart';
-import 'package:korram/platform/store_billing.dart';
+import 'package:lovelly/api/api.dart';
+import 'package:lovelly/features/wallet/coin_store_screen.dart';
+import 'package:lovelly/features/wallet/gift_sheet.dart';
+import 'package:lovelly/platform/invite_source.dart';
+import 'package:lovelly/platform/store_billing.dart';
 
 import 'helpers/fakes.dart';
 import 'helpers/pump.dart';
@@ -108,7 +108,7 @@ void main() {
       app.billing.complete('coins_550');
       await settle(tester);
       expect(app.billing.finished, isEmpty);
-      expect(find.text("Can't reach Korram. Check your connection."), findsOneWidget);
+      expect(find.text("Can't reach Lovelly. Check your connection."), findsOneWidget);
     });
 
     testWidgets('a cancelled purchase just re-enables the button', (tester) async {
@@ -155,7 +155,7 @@ void main() {
       await settle(tester, 2);
       await tester.tap(find.text('Share link'));
       await settle(tester, 2);
-      expect(app.shared.single, contains('https://example.com/korram/i/ADA23456'));
+      expect(app.shared.single, contains('https://example.com/lovelly/i/ADA23456'));
     });
 
     testWidgets('History lists the ledger', (tester) async {

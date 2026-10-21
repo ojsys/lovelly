@@ -2,10 +2,10 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:korram/api/api.dart';
-import 'package:korram/auth/onboarding_repository.dart';
-import 'package:korram/auth/session.dart';
-import 'package:korram/auth/token_store.dart';
+import 'package:lovelly/api/api.dart';
+import 'package:lovelly/auth/onboarding_repository.dart';
+import 'package:lovelly/auth/session.dart';
+import 'package:lovelly/auth/token_store.dart';
 
 import '../helpers/fakes.dart';
 
@@ -41,7 +41,7 @@ Future<String> codeFor(String phone) async {
 }
 
 Future<String> jpeg() async {
-  final file = File('${Directory.systemTemp.createTempSync('korram').path}/pose.jpg');
+  final file = File('${Directory.systemTemp.createTempSync('lovelly').path}/pose.jpg');
   await file.writeAsBytes([0xFF, 0xD8, 0xFF, 0xE0, ...List.filled(64, 0x30)]);
   return file.path;
 }

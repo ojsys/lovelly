@@ -1,5 +1,5 @@
 [project]
-name = "korram-backend"
+name = "lovelly-backend"
 version = "0.1.0"
 requires-python = ">=3.12,<3.13"
 dependencies = [
@@ -39,7 +39,7 @@ dev = [
 package = false
 
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "korram.settings.test"
+DJANGO_SETTINGS_MODULE = "lovelly.settings.test"
 python_files = ["test_*.py"]
 
 [tool.ruff]

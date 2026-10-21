@@ -19,9 +19,9 @@ import 'clients/reports_client.dart';
 import 'clients/sessions_client.dart';
 import 'clients/wallet_client.dart';
 
-/// Korram API `v1.0.0`
-class KorramApi {
-  KorramApi(Dio dio, {String? baseUrl}) : _dio = dio, _baseUrl = baseUrl;
+/// Lovelly API `v1.0.0`
+class LovellyApi {
+  LovellyApi(Dio dio, {String? baseUrl}) : _dio = dio, _baseUrl = baseUrl;
 
   final Dio _dio;
   final String? _baseUrl;

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'tokens.dart';
 
-ThemeData buildKorramTheme() {
+ThemeData buildLovellyTheme() {
   const scheme = ColorScheme.dark(
     primary: KColors.coral,
     onPrimary: KColors.onCoral,

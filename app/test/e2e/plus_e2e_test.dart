@@ -10,10 +10,10 @@ library;
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:korram/api/api.dart';
-import 'package:korram/features/match/match_controller.dart';
-import 'package:korram/features/plus/plus_repository.dart';
-import 'package:korram/features/wallet/wallet_repository.dart';
+import 'package:lovelly/api/api.dart';
+import 'package:lovelly/features/match/match_controller.dart';
+import 'package:lovelly/features/plus/plus_repository.dart';
+import 'package:lovelly/features/wallet/wallet_repository.dart';
 
 import 'support.dart';
 
@@ -136,9 +136,11 @@ void main() {
 
   test('M7-3: subscribers are never charged coins (MN-12)', () async {
     await payg(kwame); // pay as you go on too: the subscription wins
-    final status = await plus(
-      kwame,
-    ).verifyPlus('google', 'korram_plus', 'fakesub:month:${DateTime.now().microsecondsSinceEpoch}');
+    final status = await plus(kwame).verifyPlus(
+      'google',
+      'lovelly_plus',
+      'fakesub:month:${DateTime.now().microsecondsSinceEpoch}',
+    );
     expect(status.active, isTrue);
     final before = (await wallet(kwame).ledger()).entries.length;
     await ctl(kwame).start(MatchMode.video, {'gender': 'women', 'region': 'nigeria'}, true);

@@ -37,7 +37,7 @@ def _digest(phone: str, code: str) -> str:
 def ensure_not_denied(phone: str) -> None:
     if DeniedPhone.objects.filter(phone_hash=phone_hash(phone)).exists():
         raise ApiError(
-            "phone_denied", "This number can't be used on Korram.", status.HTTP_403_FORBIDDEN
+            "phone_denied", "This number can't be used on Lovelly.", status.HTTP_403_FORBIDDEN
         )
 
 
