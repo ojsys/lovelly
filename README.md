@@ -5,6 +5,7 @@ Random video, voice and text chats with verified people. Nigeria first.
 - Spec: [`docs/PRD.md`](docs/PRD.md) · Working rules: [`CLAUDE.md`](CLAUDE.md)
 - Designs: `design/screens/*.dc.html` (open in a browser; 390 × 844 frames)
 - Milestone plans: `docs/plans/` · Open questions: [`docs/questions.md`](docs/questions.md)
+- Publishing and working on GitHub: [`docs/github.md`](docs/github.md)
 
 ## Layout
 
