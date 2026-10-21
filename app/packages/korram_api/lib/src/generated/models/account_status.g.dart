@@ -18,6 +18,6 @@ AccountStatus _$AccountStatusFromJson(Map<String, dynamic> json) => AccountStatu
 
 Map<String, dynamic> _$AccountStatusToJson(AccountStatus instance) => <String, dynamic>{
   'status': instance.status,
-  'suspended_until': instance.suspendedUntil?.toIso8601String(),
+  'suspended_until': ?instance.suspendedUntil?.toIso8601String(),
   'notices': instance.notices,
 };

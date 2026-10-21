@@ -21,6 +21,10 @@ class OutgoingCallScreen extends ConsumerWidget {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(next.notice!)));
           ref.read(callInviteProvider.notifier).clearNotice();
         }
+        // A rematch that didn't connect: back to searching (the server paused our search).
+        if (prev!.rematch && ref.read(matchControllerProvider).phase != MatchPhase.matched) {
+          ref.read(matchControllerProvider.notifier).again();
+        }
         // Connected: the app-wide listener opens the call screen. Otherwise back to chat.
         if (ref.read(matchControllerProvider).phase != MatchPhase.matched && context.canPop()) {
           context.pop();
@@ -30,7 +34,9 @@ class OutgoingCallScreen extends ConsumerWidget {
     final invite = ref.watch(callInviteProvider);
     return _RingScreen(
       name: invite.name,
-      status: '${invite.mode == MatchMode.video ? 'Video' : 'Voice'} call · ringing…',
+      status: invite.rematch
+          ? 'Asking to talk again · ringing…'
+          : '${invite.mode == MatchMode.video ? 'Video' : 'Voice'} call · ringing…',
       actions: [
         CallButton(
           icon: KIcon.close,
@@ -69,7 +75,9 @@ class IncomingCallScreen extends ConsumerWidget {
     final controller = ref.read(callInviteProvider.notifier);
     return _RingScreen(
       name: invite.name,
-      status: 'is calling you · ${invite.mode == MatchMode.video ? 'video' : 'voice'}',
+      status: invite.rematch
+          ? 'wants to talk again · ${invite.mode.name}'
+          : 'is calling you · ${invite.mode == MatchMode.video ? 'video' : 'voice'}',
       actions: [
         CallButton(
           icon: KIcon.close,
@@ -83,7 +91,11 @@ class IncomingCallScreen extends ConsumerWidget {
           },
         ),
         CallButton(
-          icon: invite.mode == MatchMode.video ? KIcon.video : KIcon.phone,
+          icon: switch (invite.mode) {
+            MatchMode.video => KIcon.video,
+            MatchMode.voice => KIcon.phone,
+            MatchMode.text => KIcon.chat,
+          },
           label: 'Accept',
           size: 64,
           background: KColors.mint,

@@ -209,8 +209,9 @@ REST_FRAMEWORK = {
     # Generous per-IP limits: many Nigerian users share carrier NAT addresses.
     # Per-phone limits (FR-1) are enforced in accounts.services.otp.
     "DEFAULT_THROTTLE_RATES": {
-        "otp_request": "30/hour",
-        "otp_verify": "60/hour",
+        # Per IP. The dev stack raises them (e2e suites onboard many users from one IP).
+        "otp_request": env("THROTTLE_OTP_REQUEST", default="30/hour"),
+        "otp_verify": env("THROTTLE_OTP_VERIFY", default="60/hour"),
         "social": "60/hour",
         "selfie": "20/hour",
     },
@@ -237,6 +238,9 @@ SPECTACULAR_SETTINGS = {
         "StatusEnum": ["active", "suspended", "banned"],
         "LedgerReasonEnum": "wallet.models.CoinLedger.Reason",
         "PurchaseStatusEnum": "billing.models.Purchase.Status",
+        "GenderEnum": "accounts.models.User.Gender",
+        "FilterGenderEnum": ["everyone", "women", "men"],
+        "FilterRegionEnum": ["global", "nearby", "nigeria", "africa"],
     },
 }
 
@@ -270,3 +274,7 @@ APPLE_BUNDLE_ID = env("APPLE_BUNDLE_ID", default="")
 APPLE_APP_ID = env("APPLE_APP_ID", default="")
 APPLE_ENVIRONMENT = env("APPLE_ENVIRONMENT", default="Sandbox")
 APPLE_ROOT_CERTS_DIR = env("APPLE_ROOT_CERTS_DIR", default="/run/secrets/apple-roots")
+
+# NFR rate limit (M4): websocket connects per minute per IP. The load test raises it, since
+# all its simulated users share one address.
+WS_CONNECTS_PER_IP_PER_MINUTE = env.int("WS_CONNECTS_PER_IP_PER_MINUTE", default=30)

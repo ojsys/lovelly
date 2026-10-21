@@ -3,6 +3,8 @@
 from collections.abc import Callable
 from dataclasses import dataclass, field
 
+from accounts.services.regions import AFRICA
+
 WIDEN_AFTER_SECONDS = 30
 MAX_CANDIDATES = 200
 
@@ -15,6 +17,13 @@ class Ticket:
     interests: frozenset[str] = field(default_factory=frozenset)
     languages: frozenset[str] = field(default_factory=frozenset)
     city: str = ""
+    # Who they are, for other people's paid filters (FR-8)…
+    gender: str = ""
+    country: str = ""
+    state: str = ""
+    # …and their own filters: "women"/"men", "nearby"/"nigeria"/"africa" (or "").
+    want_gender: str = ""
+    want_region: str = ""
 
     def waited(self, now: float) -> float:
         return now - self.joined_at
@@ -27,9 +36,29 @@ class Ticket:
         return bool(self.interests or self.languages)
 
 
+GENDERS = {"women": "woman", "men": "man"}
+
+
+def meets(a: Ticket, b: Ticket) -> bool:
+    """Does `b` fit `a`'s paid filters (FR-8)? People who chose "other" only meet people
+    with no gender filter."""
+    if a.want_gender and b.gender != GENDERS[a.want_gender]:
+        return False
+    if a.want_region == "nearby":
+        return bool(a.state) and b.state == a.state and b.country == "NG"
+    if a.want_region == "nigeria":
+        return b.country == "NG"
+    if a.want_region == "africa":
+        return b.country in AFRICA
+    return True
+
+
 def compatible(a: Ticket, b: Ticket, now: float) -> bool:
-    """Before 30 s: share an interest or a language. Users with no preferences, or anyone
-    who has waited 30 s (FR-9), accept everyone."""
+    """Paid filters always hold, both ways; they never widen (M7 decision 3). Then, before
+    30 s: share an interest or a language. Users with no preferences, or anyone who has
+    waited 30 s (FR-9), accept everyone."""
+    if not (meets(a, b) and meets(b, a)):
+        return False
     if a.widened(now) or b.widened(now):
         return True
     if not a.has_preferences or not b.has_preferences:

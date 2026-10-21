@@ -301,6 +301,7 @@ void main() {
           firstName: 'Ada',
           age: 27,
           city: 'Enugu',
+          state: '',
           bio: 'Builder by day, amateur chef by night. Ask me about my egusi.',
           interests: [
             Interest(slug: 'afrobeats', label: 'Afrobeats'),
@@ -319,5 +320,46 @@ void main() {
     await tester.tap(find.bySemanticsLabel('Profile'));
     await tester.pumpAndSettle();
     await golden(tester, 'profile');
+  });
+
+  testWidgets('12 Korram Plus', (tester) async {
+    await pumpApp(
+      tester,
+      setUp: (app) {
+        app.verified();
+        app.store.values.addAll({'filter_gender': 'everyone', 'filter_region': 'nigeria'});
+      },
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Show me · Plus'));
+    await tester.pumpAndSettle();
+    await golden(tester, 'plus');
+  });
+
+  testWidgets('12 Pay as you go', (tester) async {
+    await pumpApp(tester, setUp: (app) => app.verified());
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Show me · Plus'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Pay as you go'));
+    await tester.pumpAndSettle();
+    await golden(tester, 'payg');
+  });
+
+  testWidgets('13 Charge sheet', (tester) async {
+    await pumpApp(
+      tester,
+      setUp: (app) {
+        app.verified();
+        app.plus
+          ..payg = true
+          ..autoTopup = true;
+        app.store.values.addAll({'filter_gender': 'women', 'filter_region': 'nigeria'});
+      },
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.bySemanticsLabel(RegExp('^Start matching')));
+    await tester.pumpAndSettle();
+    await golden(tester, 'charge');
   });
 }

@@ -15,6 +15,7 @@ class MyProfile {
     required this.firstName,
     required this.age,
     required this.city,
+    required this.state,
     required this.bio,
     required this.interests,
     required this.languages,
@@ -28,6 +29,9 @@ class MyProfile {
   final String firstName;
   final int? age;
   final String city;
+
+  /// Nigerian state slug (FR-8 nearby)
+  final String state;
   final String bio;
   final List<Interest> interests;
   final List<String> languages;

@@ -4,6 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../config/clock.dart';
 import '../../router/routes.dart';
+import '../plus/charge_sheet.dart';
+import '../plus/plus_controller.dart';
+import '../plus/plus_screen.dart';
+import '../plus/states.dart';
 import '../wallet/wallet_controller.dart';
 import '../../theme/icons.dart';
 import '../../theme/tokens.dart';
@@ -36,6 +40,7 @@ class HomeScreen extends ConsumerWidget {
     final controller = ref.read(matchControllerProvider.notifier);
     final name = profile?.firstName ?? '';
     final mode = match.mode;
+    final plus = ref.watch(plusControllerProvider);
     final modeAllowed = switch (mode) {
       MatchMode.video => allowed.video,
       MatchMode.voice => allowed.voice,
@@ -90,12 +95,7 @@ class HomeScreen extends ConsumerWidget {
                     hint: modeAllowed
                         ? _hints[mode]!
                         : 'Allow camera and mic in Settings to use ${mode.label.toLowerCase()} chat.',
-                    onTap: modeAllowed
-                        ? () {
-                            controller.start(mode);
-                            context.push(Routes.searching);
-                          }
-                        : null,
+                    onTap: modeAllowed ? () => startMatching(context, ref, mode) : null,
                   ),
                 ),
                 const SizedBox(height: 22),
@@ -104,16 +104,16 @@ class HomeScreen extends ConsumerWidget {
                     Expanded(
                       child: _FilterTile(
                         label: 'Show me · Plus',
-                        value: 'Everyone',
-                        onTap: () => context.push(Routes.plus),
+                        value: genderLabels[plus.filters.gender]!,
+                        onTap: () => _filters(context, plus),
                       ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: _FilterTile(
                         label: 'Region · Plus',
-                        value: 'Nigeria · Global',
-                        onTap: () => context.push(Routes.plus),
+                        value: regionLabels[plus.filters.region]!,
+                        onTap: () => _filters(context, plus),
                       ),
                     ),
                   ],
@@ -397,6 +397,25 @@ class _FilterTile extends StatelessWidget {
           ),
         ),
       ),
+    ),
+  );
+}
+
+/// Home's filter cards (FR-8): locked → 12; unlocked → the filter picker (no design).
+void _filters(BuildContext context, PlusState plus) {
+  if (!plus.filtersUnlocked) {
+    context.push(Routes.plus);
+    return;
+  }
+  showModalBottomSheet<void>(
+    context: context,
+    useRootNavigator: true,
+    backgroundColor: KColors.surface,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+    ),
+    builder: (context) => const SafeArea(
+      child: Padding(padding: EdgeInsets.fromLTRB(20, 20, 20, 24), child: FilterChooser()),
     ),
   );
 }

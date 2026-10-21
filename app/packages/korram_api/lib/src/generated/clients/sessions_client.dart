@@ -8,6 +8,7 @@ import 'package:retrofit/retrofit.dart';
 import '../models/gift_send_request_request.dart';
 import '../models/gift_sent.dart';
 import '../models/media_token.dart';
+import '../models/rematch.dart';
 import '../models/session_detail.dart';
 
 part 'sessions_client.g.dart';
@@ -29,4 +30,8 @@ abstract class SessionsClient {
   /// A fresh LiveKit join token to rejoin a call after a drop.
   @POST('/api/v1/sessions/{session_id}/media-token')
   Future<MediaToken> sessionsMediaTokenCreate({@Path('session_id') required String sessionId});
+
+  /// FR-7: ring someone you skipped today (20 coins, free with Plus).
+  @POST('/api/v1/sessions/{session_id}/rematch')
+  Future<Rematch> sessionsRematchCreate({@Path('session_id') required String sessionId});
 }

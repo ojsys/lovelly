@@ -16,8 +16,8 @@ FriendSummary _$FriendSummaryFromJson(Map<String, dynamic> json) => FriendSummar
 
 Map<String, dynamic> _$FriendSummaryToJson(FriendSummary instance) => <String, dynamic>{
   'first_name': instance.firstName,
-  'age': instance.age,
+  'age': ?instance.age,
   'city': instance.city,
   'verified': instance.verified,
-  'photo_url': instance.photoUrl,
+  'photo_url': ?instance.photoUrl,
 };

@@ -16,6 +16,6 @@ FriendRequestRow _$FriendRequestRowFromJson(Map<String, dynamic> json) => Friend
 Map<String, dynamic> _$FriendRequestRowToJson(FriendRequestRow instance) => <String, dynamic>{
   'id': instance.id,
   'sender': instance.sender,
-  'met_on': instance.metOn,
+  'met_on': ?instance.metOn,
   'created_at': instance.createdAt.toIso8601String(),
 };

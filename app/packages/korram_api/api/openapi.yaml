@@ -370,6 +370,27 @@ paths:
               schema:
                 $ref: '#/components/schemas/OnlineCount'
           description: ''
+  /api/v1/match/quote:
+    post:
+      operationId: match_quote_create
+      description: 'MN-7: the price of a filtered match, before the charge sheet (13).'
+      tags:
+      - match
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuoteRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quote'
+          description: ''
   /api/v1/me/basics:
     put:
       operationId: me_basics_update
@@ -662,6 +683,38 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: ''
+  /api/v1/me/spend-settings:
+    get:
+      operationId: me_spend_settings_retrieve
+      tags:
+      - me
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpendSettings'
+          description: ''
+    patch:
+      operationId: me_spend_settings_partial_update
+      tags:
+      - me
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSpendSettingsUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpendSettings'
+          description: ''
   /api/v1/me/status:
     get:
       operationId: me_status_retrieve
@@ -690,6 +743,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/VerificationState'
+          description: ''
+  /api/v1/plus/plans:
+    get:
+      operationId: plus_plans_list
+      tags:
+      - plus
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Plan'
+          description: ''
+  /api/v1/plus/verify:
+    post:
+      operationId: plus_verify_create
+      description: A Korram Plus purchase or Restore (MN-6).
+      tags:
+      - plus
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlusVerifyRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlusStatus'
           description: ''
   /api/v1/purchases/verify:
     post:
@@ -803,6 +893,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MediaToken'
+          description: ''
+  /api/v1/sessions/{session_id}/rematch:
+    post:
+      operationId: sessions_rematch_create
+      description: 'FR-7: ring someone you skipped today (20 coins, free with Plus).'
+      parameters:
+      - in: path
+        name: session_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - sessions
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Rematch'
           description: ''
   /api/v1/wallet:
     get:
@@ -1005,6 +1117,18 @@ components:
       - claimed_today
       - coins
       - day
+    DailyCapEnum:
+      enum:
+      - 50
+      - 100
+      - 200
+      - 0
+      type: integer
+      description: |-
+        * `50` - 50
+        * `100` - 100
+        * `200` - 200
+        * `0` - 0
     DeviceRequest:
       type: object
       properties:
@@ -1017,6 +1141,35 @@ components:
       required:
       - fcm_token
       - platform
+    FilterGenderEnum:
+      enum:
+      - everyone
+      - women
+      - men
+      type: string
+      description: |-
+        * `everyone` - everyone
+        * `women` - women
+        * `men` - men
+    FilterRegionEnum:
+      enum:
+      - global
+      - nearby
+      - nigeria
+      - africa
+      type: string
+      description: |-
+        * `global` - global
+        * `nearby` - nearby
+        * `nigeria` - nigeria
+        * `africa` - africa
+    FiltersRequest:
+      type: object
+      properties:
+        gender:
+          $ref: '#/components/schemas/FilterGenderEnum'
+        region:
+          $ref: '#/components/schemas/FilterRegionEnum'
     FriendRequest:
       type: object
       properties:
@@ -1273,6 +1426,8 @@ components:
       - daily_checkin
       - invite_reward
       - refund
+      - filtered_match
+      - rematch
       type: string
       description: |-
         * `purchase` - Coin pack
@@ -1281,6 +1436,8 @@ components:
         * `daily_checkin` - Daily check-in
         * `invite_reward` - Invite reward
         * `refund` - Refund
+        * `filtered_match` - Filtered match
+        * `rematch` - Rematch
     MediaToken:
       type: object
       properties:
@@ -1291,6 +1448,16 @@ components:
       required:
       - media_token
       - media_url
+    ModeEnum:
+      enum:
+      - video
+      - voice
+      - text
+      type: string
+      description: |-
+        * `video` - Video
+        * `voice` - Voice
+        * `text` - Text
     MyProfile:
       type: object
       properties:
@@ -1301,6 +1468,9 @@ components:
           nullable: true
         city:
           type: string
+        state:
+          type: string
+          description: Nigerian state slug (FR-8 nearby)
         bio:
           type: string
         interests:
@@ -1326,6 +1496,7 @@ components:
       - is_verified
       - languages
       - photos
+      - state
     NextStepEnum:
       enum:
       - phone
@@ -1439,6 +1610,8 @@ components:
           type: string
         city:
           type: string
+        state:
+          type: string
         languages:
           type: array
           items:
@@ -1454,6 +1627,15 @@ components:
           items:
             type: string
             minLength: 1
+    PatchedSpendSettingsUpdateRequest:
+      type: object
+      properties:
+        payg_enabled:
+          type: boolean
+        daily_cap:
+          $ref: '#/components/schemas/DailyCapEnum'
+        auto_topup:
+          type: boolean
     Peer:
       type: object
       properties:
@@ -1499,6 +1681,38 @@ components:
           format: binary
       required:
       - photo
+    Plan:
+      type: object
+      properties:
+        plan:
+          $ref: '#/components/schemas/PlanEnum'
+        label:
+          type: string
+        sub:
+          type: string
+        apple_product:
+          type: string
+        google_product:
+          type: string
+        google_base_plan:
+          type: string
+      required:
+      - apple_product
+      - google_base_plan
+      - google_product
+      - label
+      - plan
+      - sub
+    PlanEnum:
+      enum:
+      - week
+      - month
+      - year
+      type: string
+      description: |-
+        * `week` - 1 week
+        * `month` - 1 month
+        * `year` - 12 months
     PlatformEnum:
       enum:
       - android
@@ -1507,6 +1721,64 @@ components:
       description: |-
         * `android` - android
         * `ios` - ios
+    PlusStatus:
+      type: object
+      properties:
+        active:
+          type: boolean
+        plan:
+          type: string
+          nullable: true
+        store:
+          type: string
+          nullable: true
+        period_end:
+          type: string
+          format: date-time
+          nullable: true
+        auto_renews:
+          type: boolean
+      required:
+      - active
+      - auto_renews
+      - period_end
+      - plan
+      - store
+    PlusVerifyRequestRequest:
+      type: object
+      properties:
+        store:
+          $ref: '#/components/schemas/StoreEnum'
+        product_id:
+          type: string
+          minLength: 1
+          maxLength: 60
+        token:
+          type: string
+          minLength: 1
+          description: 'Google: the purchase token. Apple: the StoreKit 2 signed transaction.'
+      required:
+      - product_id
+      - store
+      - token
+    Prices:
+      type: object
+      description: Coins per use (MN-7, 12's pay-as-you-go table). Never hard-coded
+        in the app.
+      properties:
+        gender:
+          type: integer
+          description: per gender-filtered match that connects
+        region:
+          type: integer
+          description: per region-filtered match that connects
+        rematch:
+          type: integer
+          description: per rematch that connects
+      required:
+      - gender
+      - region
+      - rematch
     ProviderEnum:
       enum:
       - google
@@ -1560,6 +1832,74 @@ components:
       - product_id
       - store
       - token
+    Quote:
+      type: object
+      properties:
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuoteLine'
+        cost:
+          type: integer
+          description: Coins taken when the match has run 5 s
+        free_reason:
+          type: string
+          nullable: true
+          description: plus | no_filters
+        balance:
+          type: integer
+        available:
+          type: integer
+          description: Balance minus coins on hold
+        spent_today:
+          type: integer
+        daily_cap:
+          type: integer
+          description: 0 = no cap
+        cap_left:
+          type: integer
+          nullable: true
+        can_pay:
+          type: boolean
+        reason:
+          type: string
+          nullable: true
+          description: payg_off | cap_reached | low_balance
+        auto_topup:
+          type: boolean
+      required:
+      - auto_topup
+      - available
+      - balance
+      - can_pay
+      - cap_left
+      - cost
+      - daily_cap
+      - free_reason
+      - lines
+      - reason
+      - spent_today
+    QuoteLine:
+      type: object
+      properties:
+        kind:
+          type: string
+          description: gender | region | rematch
+        cost:
+          type: integer
+      required:
+      - cost
+      - kind
+    QuoteRequestRequest:
+      type: object
+      properties:
+        mode:
+          $ref: '#/components/schemas/ModeEnum'
+        filters:
+          $ref: '#/components/schemas/FiltersRequest'
+      required:
+      - filters
+      - mode
     ReasonEnum:
       enum:
       - minor
@@ -1576,6 +1916,13 @@ components:
         * `scam` - Scam or asking for money
         * `fake` - Fake profile or impersonation
         * `other` - Something else
+    Rematch:
+      type: object
+      properties:
+        invite_id:
+          type: string
+      required:
+      - invite_id
     Report:
       type: object
       properties:
@@ -1685,6 +2032,41 @@ components:
       required:
       - id_token
       - provider
+    SpendSettings:
+      type: object
+      properties:
+        payg_enabled:
+          type: boolean
+        daily_cap:
+          allOf:
+          - $ref: '#/components/schemas/DailyCapEnum'
+          description: |-
+            0 = no cap
+
+            * `50` - 50
+            * `100` - 100
+            * `200` - 200
+            * `0` - 0
+        auto_topup:
+          type: boolean
+        topup_pack:
+          type: string
+          readOnly: true
+        plus:
+          allOf:
+          - $ref: '#/components/schemas/PlusStatus'
+          readOnly: true
+        prices:
+          allOf:
+          - $ref: '#/components/schemas/Prices'
+          readOnly: true
+      required:
+      - auto_topup
+      - daily_cap
+      - payg_enabled
+      - plus
+      - prices
+      - topup_pack
     StatusEnum:
       enum:
       - active

@@ -11,8 +11,13 @@ import '../helpers/fakes.dart';
 
 const _compose = '../infra/docker-compose.yml';
 
-/// A fresh Nigerian mobile number for each run (0803 555 xxxx).
-String newPhone() => '0803555${Random().nextInt(9000) + 1000}';
+/// A fresh Nigerian mobile number for each run. Wide enough that numbers banned by earlier
+/// runs (M4 tests) don't come back.
+String newPhone() {
+  final r = Random();
+  const prefixes = ['0803', '0806', '0813', '0816', '0903', '0706'];
+  return '${prefixes[r.nextInt(prefixes.length)]}${r.nextInt(9000000) + 1000000}';
+}
 
 Future<String> codeFor(String phone) async {
   final e164 = '+234${phone.substring(1)}';
@@ -63,9 +68,9 @@ class Device {
   }
 
   /// Phone → basics → selfie: a verified user (SF-1).
-  Future<void> onboard(String name) async {
+  Future<void> onboard(String name, {GenderEnum gender = GenderEnum.other}) async {
     await signIn(newPhone());
-    await repo.setBasics(firstName: name, dob: DateTime(1998, 5, 1), gender: GenderEnum.other);
+    await repo.setBasics(firstName: name, dob: DateTime(1998, 5, 1), gender: gender);
     final pose = await jpeg();
     await repo.submitSelfie(front: pose, left: pose);
   }

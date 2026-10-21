@@ -19,6 +19,8 @@ class CoinLedger(UUIDModel):
         DAILY_CHECKIN = "daily_checkin", "Daily check-in"
         INVITE_REWARD = "invite_reward", "Invite reward"
         REFUND = "refund", "Refund"
+        FILTERED_MATCH = "filtered_match", "Filtered match"
+        REMATCH = "rematch", "Rematch"
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="coin_entries"

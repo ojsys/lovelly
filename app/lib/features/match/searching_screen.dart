@@ -9,6 +9,9 @@ import '../../theme/tokens.dart';
 import '../../widgets/format.dart';
 import '../../widgets/onboarding_scaffold.dart';
 import '../home/home_data.dart';
+import '../friends/friends_controller.dart';
+import '../plus/plus_controller.dart';
+import '../../theme/icons.dart';
 import 'match_controller.dart';
 
 /// 03 Matching — design/screens/03-Matching.dc.html (FR-9).
@@ -102,7 +105,7 @@ class _SearchingScreenState extends ConsumerState<SearchingScreen>
               ),
               const SizedBox(height: 28),
               Text(
-                state.widened ? 'Widening your search…' : 'Finding someone…',
+                state.widened && !state.paid ? 'Widening your search…' : 'Finding someone…',
                 style: KType.searchTitle,
                 textAlign: TextAlign.center,
               ),
@@ -110,7 +113,10 @@ class _SearchingScreenState extends ConsumerState<SearchingScreen>
               ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 290),
                 child: Text(
-                  state.widened
+                  // Paid filters never widen (M7 decision 3).
+                  state.widened && state.paid
+                      ? 'Few people match your filters right now. Keep waiting, or match free.'
+                      : state.widened
                       ? 'No one with your interests right now, so we’re matching with anyone online.'
                       : 'Matching on shared interests first. Usually under 10 seconds.',
                   textAlign: TextAlign.center,
@@ -145,7 +151,21 @@ class _SearchingScreenState extends ConsumerState<SearchingScreen>
                   _Chip('+ Edit', dashed: true, onTap: () => context.go(Routes.profileEdit)),
                 ],
               ),
+              if (state.skipped != null) ...[
+                const SizedBox(height: 20),
+                _RematchCard(skipped: state.skipped!, mode: state.mode),
+              ],
               const SizedBox(height: 28),
+              if (state.paid && state.widened) ...[
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: () => ref.read(matchControllerProvider.notifier).matchFree(),
+                    child: const Text('Match free instead'),
+                  ),
+                ),
+                const SizedBox(height: 10),
+              ],
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton(
@@ -291,4 +311,61 @@ class _DashedBorder extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// FR-7: ring the person you just skipped (no design). The price comes from the server.
+class _RematchCard extends ConsumerWidget {
+  const _RematchCard({required this.skipped, required this.mode});
+
+  final Skipped skipped;
+  final MatchMode mode;
+
+  Future<void> _rematch(BuildContext context, WidgetRef ref) async {
+    final error = await ref
+        .read(callInviteProvider.notifier)
+        .rematch(skipped.sessionId, skipped.name, mode);
+    if (!context.mounted) return;
+    if (error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+      return;
+    }
+    context.push(Routes.calling);
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final plus = ref.watch(plusControllerProvider);
+    final price = plus.settings?.prices.rematch;
+    final cost = plus.isPlus ? 'free with Plus' : (price == null ? '' : '$price coins');
+    return Semantics(
+      button: true,
+      label: 'Rematch ${skipped.name}${cost.isEmpty ? '' : ', $cost'}',
+      excludeSemantics: true,
+      child: Material(
+        color: KColors.surface,
+        borderRadius: BorderRadius.circular(KRadius.lg),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(KRadius.lg),
+          onTap: () => _rematch(context, ref),
+          child: Container(
+            constraints: const BoxConstraints(minHeight: 52),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            child: Row(
+              children: [
+                const KIconView(KIcon.phone, size: 18, color: KColors.gold),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Rematch ${skipped.name}',
+                    style: KType.button.copyWith(fontWeight: FontWeight.w700),
+                  ),
+                ),
+                if (cost.isNotEmpty) Text(cost, style: KType.caption.copyWith(color: KColors.gold)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

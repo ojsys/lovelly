@@ -11,6 +11,8 @@ import 'package:json_annotation/json_annotation.dart';
 /// * `daily_checkin` - Daily check-in.
 /// * `invite_reward` - Invite reward.
 /// * `refund` - Refund.
+/// * `filtered_match` - Filtered match.
+/// * `rematch` - Rematch.
 @JsonEnum()
 enum LedgerReasonEnum {
   @JsonValue('purchase')
@@ -25,6 +27,10 @@ enum LedgerReasonEnum {
   inviteReward('invite_reward'),
   @JsonValue('refund')
   refund('refund'),
+  @JsonValue('filtered_match')
+  filteredMatch('filtered_match'),
+  @JsonValue('rematch')
+  rematch('rematch'),
 
   /// Default value for all unparsed values, allows backward compatibility when adding new values on the backend.
   $unknown(null);

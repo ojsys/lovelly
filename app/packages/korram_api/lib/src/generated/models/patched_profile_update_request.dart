@@ -13,6 +13,7 @@ class PatchedProfileUpdateRequest {
     this.firstName,
     this.bio,
     this.city,
+    this.state,
     this.languages,
     this.interests,
     this.photoOrder,
@@ -25,6 +26,7 @@ class PatchedProfileUpdateRequest {
   final String? firstName;
   final String? bio;
   final String? city;
+  final String? state;
   final List<String>? languages;
   final List<String>? interests;
   @JsonKey(name: 'photo_order')

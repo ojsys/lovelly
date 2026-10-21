@@ -15,6 +15,8 @@ import '../models/invite.dart';
 import '../models/invite_redeem_request.dart';
 import '../models/my_profile.dart';
 import '../models/patched_profile_update_request.dart';
+import '../models/patched_spend_settings_update_request.dart';
+import '../models/spend_settings.dart';
 import '../models/verification_state.dart';
 
 part 'me_client.g.dart';
@@ -64,6 +66,14 @@ abstract class MeClient {
   Future<VerificationState> meSelfieCreate({
     @Part(name: 'pose_front') required File poseFront,
     @Part(name: 'pose_left') required File poseLeft,
+  });
+
+  @GET('/api/v1/me/spend-settings')
+  Future<SpendSettings> meSpendSettingsRetrieve();
+
+  @PATCH('/api/v1/me/spend-settings')
+  Future<SpendSettings> meSpendSettingsPartialUpdate({
+    @Body() PatchedSpendSettingsUpdateRequest? body,
   });
 
   /// Suspension and unseen notices (warnings) for the app (SF-6).

@@ -106,9 +106,16 @@ class _AppEventsState extends ConsumerState<AppEvents> {
       }
     });
     ref.listen(matchControllerProvider, (prev, next) {
-      final friendCall = next.chatId != null && next.phase == MatchPhase.matched;
-      if (friendCall && prev?.phase != MatchPhase.matched) {
-        _router.go(next.mode == MatchMode.video ? Routes.videoCall : Routes.voiceCall);
+      if (next.phase != MatchPhase.matched || prev?.phase == MatchPhase.matched) return;
+      final friendCall = next.chatId != null;
+      // A rematch can connect while we're anywhere (the searching screen handles its own).
+      final rematch = next.rematch && prev?.phase != MatchPhase.searching;
+      if (friendCall || rematch) {
+        _router.go(switch (next.mode) {
+          MatchMode.video => Routes.videoCall,
+          MatchMode.voice => Routes.voiceCall,
+          MatchMode.text => '/chat/${next.sessionId}',
+        });
       }
     });
     return widget.child;

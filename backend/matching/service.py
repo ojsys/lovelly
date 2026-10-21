@@ -21,12 +21,13 @@ from rest_framework import status
 
 from accounts.models import Profile, User, UserInterest
 from accounts.services.onboarding import age_on
+from accounts.services.regions import country_of
 from core.exceptions import ApiError
 from core.realtime import batched, send_to_user
 from core.redis import get_redis
 from safety.models import Block
 
-from . import calls
+from . import calls, pricing
 from .models import MatchSession
 from .pairing import WIDEN_AFTER_SECONDS, Ticket, pick_pairs
 
@@ -114,15 +115,25 @@ def _check_can_match(user: User) -> None:
             )
 
 
-def join(user: User, mode: str, filters: dict | None = None, now=None) -> None:
+def join(
+    user: User, mode: str, filters: dict | None = None, now=None, accept_charge: bool = False
+) -> None:
+    """Queues `user`. Filters (FR-8) are free for Plus and paid otherwise: their coins are
+    held now and taken once the match has run 5 s (MN-8)."""
     if mode not in MODES:
         raise ApiError("invalid_mode", "Pick video, voice or text.")
-    if filters:
-        # FR-8: filters are Plus / pay-as-you-go features (M7).
-        raise ApiError("filters_unavailable", "Filters aren't available yet.")
+    f = pricing.normalize(filters)
     if active_session(user.id):
         raise ApiError("in_session", "Finish your current chat first.", status.HTTP_409_CONFLICT)
     _check_can_match(user)
+    pricing.require_state(user, f)
+    if f["gender"] or f["region"]:
+        pricing.hold_for_queue(user, f, accept_charge)
+    else:
+        pricing.forget_filters(user.id)  # "Match free instead": Next stays free too
+        from wallet import holds
+
+        holds.release(user.id, "queue")
 
     profile = Profile.objects.get(user=user)
     ticket = {
@@ -132,6 +143,11 @@ def join(user: User, mode: str, filters: dict | None = None, now=None) -> None:
         "interests": list(user.interests.values_list("interest_id", flat=True)),
         "languages": [lang.lower() for lang in profile.languages],
         "city": profile.city,
+        "gender": user.gender or "",
+        "country": country_of(user.phone),
+        "state": profile.region,
+        "want_gender": f["gender"] or "",
+        "want_region": f["region"] or "",
         "widened": False,
     }
     r = _r()
@@ -144,6 +160,9 @@ def join(user: User, mode: str, filters: dict | None = None, now=None) -> None:
 
 
 def leave(user_id) -> None:
+    from wallet import holds
+
+    holds.release(user_id, "queue")  # MN-8: leaving the queue gives the coins back
     r = _r()
     pipe = r.pipeline()
     for m in MODES:
@@ -223,11 +242,12 @@ def peer_summary(user_id, peer_id) -> dict:
 
 
 def _start_sessions(
-    pairs: list[tuple[Ticket, Ticket]], now: float, friendship=None
+    pairs: list[tuple[Ticket, Ticket]], now: float, friendship=None, rematch_of=None
 ) -> list[MatchSession]:
     """Creates the tick's sessions in bulk and sends match.found to both sides.
 
-    `friendship` marks a direct call between friends (FR-16)."""
+    `friendship` marks a direct call between friends (FR-16); `rematch_of` a paid rematch
+    (FR-7)."""
     if not pairs:
         return []
     sessions = MatchSession.objects.bulk_create(
@@ -238,10 +258,14 @@ def _start_sessions(
                 user_b_id=b.user_id,
                 room_name=f"s_{uuid.uuid4().hex}",
                 friendship=friendship,
+                rematch_of=rematch_of,
             )
             for a, b in pairs
         ]
     )
+    if friendship is None and rematch_of is None:
+        for session, (a, b) in zip(sessions, pairs, strict=True):
+            pricing.bind(session, (a.user_id, b.user_id), started=now)
     if friendship is None:  # FR-7's 24 h rule is about random matching, not friends
         pipe = _r().pipeline()
         for a, b in pairs:
@@ -268,6 +292,7 @@ def _start_sessions(
                     "media_token": calls.media_token(session, me.user_id),
                     "media_url": calls.media_url() if session.mode != "text" else None,
                     "chat_id": str(friendship.id) if friendship else None,
+                    "rematch": rematch_of is not None,
                 },
             )
     return sessions
@@ -298,6 +323,11 @@ def _run_tick(now: float) -> list[MatchSession]:
                 interests=frozenset(t["interests"]),
                 languages=frozenset(t["languages"]),
                 city=t["city"],
+                gender=t.get("gender", ""),
+                country=t.get("country", ""),
+                state=t.get("state", ""),
+                want_gender=t.get("want_gender", ""),
+                want_region=t.get("want_region", ""),
             )
             for t in raw
         ]
@@ -332,6 +362,11 @@ def _requeue_ticket(t: Ticket) -> None:
         "interests": sorted(t.interests),
         "languages": sorted(t.languages),
         "city": t.city,
+        "gender": t.gender,
+        "country": t.country,
+        "state": t.state,
+        "want_gender": t.want_gender,
+        "want_region": t.want_region,
         "widened": True,
     }
     pipe = _r().pipeline()
@@ -387,6 +422,7 @@ def end_session(session_id, user, reason: str, now=None) -> MatchSession | None:
     session = MatchSession.objects.filter(id=session_id).first()
     if not updated or session is None:
         return None  # already ended
+    pricing.settle(session)  # MN-8: under 5 s costs nothing
     try:
         calls.close_room(session)
     except Exception:
@@ -404,7 +440,8 @@ def end_session(session_id, user, reason: str, now=None) -> MatchSession | None:
         _record_skip(session, peer_id, now)
         _r().delete(f"mq:skips:{user.id}")
         try:
-            join(user, session.mode, now=now)
+            # Same filters as before; the charge was accepted for this app session (MN-7).
+            join(user, session.mode, pricing.last_filters(user.id), now=now, accept_charge=True)
         except ApiError as e:
             send_to_user(user.id, "error", {"code": e.error_code, "detail": str(e.detail)})
     return session
@@ -442,6 +479,33 @@ def _sweep_disconnects(now: float) -> int:
         user = User.objects.filter(id=user_id).first()
         if session and user and end_session(session.id, user, "peer_left", now=now):
             ended += 1
+    return ended
+
+
+ORPHAN_AFTER_SECONDS = 60
+
+
+def sweep_orphans(now=None) -> int:
+    """Ends sessions where neither person is online any more.
+
+    Catches what the disconnect sweep can't: someone who disconnects in the instant they're
+    matched (the session is created after their disconnect was handled), crashed workers,
+    lost disconnect events. Without this such a session stays "active" forever, keeps the
+    moderation agent in its room and keeps any coin hold (MN-8) waiting.
+    """
+    now = now or time.time()
+    started_before = timezone.now() - timedelta(seconds=ORPHAN_AFTER_SECONDS)
+    ended = 0
+    with batched():
+        for session in MatchSession.objects.filter(
+            ended_at=None, started_at__lt=started_before
+        ).select_related("user_a"):
+            if is_online(session.user_a_id, now) or is_online(session.user_b_id, now):
+                continue
+            if end_session(session.id, session.user_a, "peer_left", now=now):
+                ended += 1
+    if ended:
+        logger.info("ended %d orphaned sessions", ended)
     return ended
 
 

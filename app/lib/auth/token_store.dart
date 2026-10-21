@@ -1,12 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-/// Persists the JWT pair and small onboarding flags on the device.
+/// Persists the JWT pair and small settings (onboarding flags, chosen filters) on the device.
 abstract interface class TokenStore {
   Future<({String access, String refresh})?> readTokens();
   Future<void> writeTokens({required String access, required String refresh});
   Future<bool> readFlag(String name);
   Future<void> writeFlag(String name, bool value);
+  Future<String?> readValue(String name);
+  Future<void> writeValue(String name, String value);
   Future<void> clear();
 }
 
@@ -36,6 +38,13 @@ class SecureTokenStore implements TokenStore {
   @override
   Future<void> writeFlag(String name, bool value) =>
       _storage.write(key: 'flag.$name', value: value ? '1' : '0');
+
+  @override
+  Future<String?> readValue(String name) => _storage.read(key: 'value.$name');
+
+  @override
+  Future<void> writeValue(String name, String value) =>
+      _storage.write(key: 'value.$name', value: value);
 
   @override
   Future<void> clear() => _storage.deleteAll();

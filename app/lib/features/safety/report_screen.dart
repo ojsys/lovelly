@@ -92,7 +92,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
   }
 
   void _meetSomeoneNew() {
-    ref.read(matchControllerProvider.notifier).start(_match.mode);
+    ref.read(matchControllerProvider.notifier).again(_match.mode);
     context.pushReplacement(Routes.searching);
   }
 

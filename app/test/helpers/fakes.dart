@@ -7,6 +7,8 @@ import 'package:korram/auth/onboarding_repository.dart';
 import 'package:korram/auth/token_store.dart';
 import 'package:korram/features/call/call_engine.dart';
 import 'package:korram/features/friends/friends_repository.dart';
+import 'package:korram/features/match/match_controller.dart' show MatchMode;
+import 'package:korram/features/plus/plus_repository.dart';
 import 'package:korram/features/wallet/wallet_repository.dart';
 import 'package:korram/platform/invite_source.dart';
 import 'package:korram/platform/push.dart';
@@ -33,6 +35,14 @@ class FakeTokenStore implements TokenStore {
 
   @override
   Future<void> writeFlag(String name, bool value) async => flags[name] = value;
+
+  final values = <String, String>{};
+
+  @override
+  Future<String?> readValue(String name) async => values[name];
+
+  @override
+  Future<void> writeValue(String name, String value) async => values[name] = value;
 
   @override
   Future<void> clear() async {
@@ -358,6 +368,7 @@ class FakeFriendsRepository implements FriendsRepository {
     firstName: 'Ada',
     age: 27,
     city: 'Enugu',
+    state: '',
     bio: 'Builder by day.',
     interests: [Interest(slug: 'afrobeats', label: 'Afrobeats')],
     languages: ['english'],
@@ -570,6 +581,33 @@ class FakeStoreBilling implements StoreBilling {
 
   @override
   Future<void> finish(StorePurchase purchase) async => finished.add(purchase.token);
+
+  @override
+  Future<Map<String, StoreProduct>> plans() async => const {
+    'week': StoreProduct('week', '₦1,500', 1500),
+    'month': StoreProduct('month', '₦4,500', 4500),
+    'year': StoreProduct('year', '₦36,000', 36000),
+  };
+
+  final boughtPlans = <String>[];
+  bool restored = false;
+
+  @override
+  Future<void> buyPlan(String plan, {required String accountId}) async =>
+      boughtPlans.add('$plan for $accountId');
+
+  @override
+  Future<void> restore({required String accountId}) async => restored = true;
+
+  /// What the store reports after its subscription sheet.
+  void subscribed(String productId, String token) => purchases_.add(
+    StorePurchase(
+      productId: productId,
+      store: 'google',
+      token: token,
+      status: StorePurchaseStatus.purchased,
+    ),
+  );
 }
 
 class FakeInviteSource implements InviteSource {
@@ -577,4 +615,114 @@ class FakeInviteSource implements InviteSource {
 
   @override
   Future<String?> code() async => value;
+}
+
+const plusPlans = [
+  Plan(
+    plan: PlanEnum.week,
+    label: '1 week',
+    sub: 'Try it out',
+    appleProduct: 'plus_week',
+    googleProduct: 'korram_plus',
+    googleBasePlan: 'week',
+  ),
+  Plan(
+    plan: PlanEnum.month,
+    label: '1 month',
+    sub: 'Most popular',
+    appleProduct: 'plus_month',
+    googleProduct: 'korram_plus',
+    googleBasePlan: 'month',
+  ),
+  Plan(
+    plan: PlanEnum.year,
+    label: '12 months',
+    sub: 'Best value',
+    appleProduct: 'plus_year',
+    googleProduct: 'korram_plus',
+    googleBasePlan: 'year',
+  ),
+];
+
+/// The server's side of Plus and pay as you go in tests (prices from MN-7).
+class FakePlusRepository implements PlusRepository {
+  final calls = <String>[];
+  bool payg = false;
+  bool plus = false;
+  int cap = 100;
+  bool autoTopup = false;
+  int balance = 240;
+  int spentToday = 32;
+  String? quoteReason;
+
+  SpendSettings get _settings => SpendSettings(
+    paygEnabled: payg,
+    dailyCap: DailyCapEnum.values.firstWhere((c) => c.json == cap),
+    autoTopup: autoTopup,
+    topupPack: 'coins_550',
+    plus: PlusStatus(
+      active: plus,
+      plan: plus ? 'month' : null,
+      store: plus ? 'google' : null,
+      periodEnd: plus ? DateTime(2026, 11, 20) : null,
+      autoRenews: plus,
+    ),
+    prices: const Prices(gender: 8, region: 5, rematch: 20),
+  );
+
+  @override
+  Future<Quote> quote(MatchMode mode, MatchFilters filters) async {
+    calls.add('quote ${mode.name} ${filters.toJson()}');
+    final lines = [
+      if (filters.gender != 'everyone') const QuoteLine(kind: 'gender', cost: 8),
+      if (filters.region != 'global') const QuoteLine(kind: 'region', cost: 5),
+    ];
+    final cost = plus ? 0 : lines.fold(0, (s, l) => s + l.cost);
+    final reason = quoteReason ?? (cost > balance ? 'low_balance' : null);
+    return Quote(
+      lines: lines,
+      cost: cost,
+      freeReason: plus ? 'plus' : (lines.isEmpty ? 'no_filters' : null),
+      balance: balance,
+      available: balance,
+      spentToday: spentToday,
+      dailyCap: cap,
+      capLeft: cap == 0 ? null : cap - spentToday,
+      canPay: reason == null,
+      reason: reason,
+      autoTopup: autoTopup,
+    );
+  }
+
+  @override
+  Future<SpendSettings> spendSettings() async => _settings;
+
+  @override
+  Future<SpendSettings> updateSpendSettings({
+    bool? paygEnabled,
+    int? dailyCap,
+    bool? autoTopup,
+  }) async {
+    calls.add('update payg=$paygEnabled cap=$dailyCap auto=$autoTopup');
+    payg = paygEnabled ?? payg;
+    cap = dailyCap ?? cap;
+    this.autoTopup = autoTopup ?? this.autoTopup;
+    return _settings;
+  }
+
+  @override
+  Future<List<Plan>> plans() async => plusPlans;
+
+  @override
+  Future<PlusStatus> verifyPlus(String store, String productId, String token) async {
+    calls.add('verifyPlus $store $productId $token');
+    plus = true;
+    return _settings.plus;
+  }
+
+  @override
+  Future<String> rematch(String sessionId) async {
+    calls.add('rematch $sessionId');
+    return 'rm1';
+  }
 }

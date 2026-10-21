@@ -26,5 +26,4 @@ abstract final class Routes {
   static const coins = '/coins';
   static const coinHistory = '/coins/history'; // no design
   static const plus = '/plus';
-  static const confirmCharge = '/match/confirm-charge';
 }

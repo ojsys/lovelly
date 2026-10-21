@@ -5,11 +5,12 @@ import time
 from django.core.management.base import BaseCommand
 from django.db import close_old_connections
 
-from matching import friend_calls, service
+from matching import friend_calls, pricing, service
 
 logger = logging.getLogger(__name__)
 
 TICK_SECONDS = 0.25
+ORPHAN_SWEEP_TICKS = 120  # about every 30 s (4 ticks a second)
 
 
 class Command(BaseCommand):
@@ -25,6 +26,7 @@ class Command(BaseCommand):
         signal.signal(signal.SIGTERM, stop)
         signal.signal(signal.SIGINT, stop)
         logger.info("matcher started")
+        ticks = 0
         while running:
             started = time.monotonic()
             try:
@@ -33,6 +35,10 @@ class Command(BaseCommand):
                 matched = time.monotonic()
                 swept = service.sweep_disconnects()
                 friend_calls.sweep_missed()
+                pricing.sweep_charges()  # MN-8: take holds of matches that ran 5 s
+                ticks += 1
+                if ticks % ORPHAN_SWEEP_TICKS == 0:
+                    service.sweep_orphans()
                 took = time.monotonic() - started
                 if pairs or took > TICK_SECONDS:
                     # Split timing: matching vs ending dropped sessions (which calls LiveKit).

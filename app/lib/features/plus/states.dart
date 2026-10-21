@@ -1,0 +1,50 @@
+/// Nigerian states for the "Nearby" filter (FR-8, M7 decision 1); slugs match the server.
+const nigerianStates = {
+  'abia': 'Abia',
+  'adamawa': 'Adamawa',
+  'akwa_ibom': 'Akwa Ibom',
+  'anambra': 'Anambra',
+  'bauchi': 'Bauchi',
+  'bayelsa': 'Bayelsa',
+  'benue': 'Benue',
+  'borno': 'Borno',
+  'cross_river': 'Cross River',
+  'delta': 'Delta',
+  'ebonyi': 'Ebonyi',
+  'edo': 'Edo',
+  'ekiti': 'Ekiti',
+  'enugu': 'Enugu',
+  'fct': 'FCT (Abuja)',
+  'gombe': 'Gombe',
+  'imo': 'Imo',
+  'jigawa': 'Jigawa',
+  'kaduna': 'Kaduna',
+  'kano': 'Kano',
+  'katsina': 'Katsina',
+  'kebbi': 'Kebbi',
+  'kogi': 'Kogi',
+  'kwara': 'Kwara',
+  'lagos': 'Lagos',
+  'nasarawa': 'Nasarawa',
+  'niger': 'Niger',
+  'ogun': 'Ogun',
+  'ondo': 'Ondo',
+  'osun': 'Osun',
+  'oyo': 'Oyo',
+  'plateau': 'Plateau',
+  'rivers': 'Rivers',
+  'sokoto': 'Sokoto',
+  'taraba': 'Taraba',
+  'yobe': 'Yobe',
+  'zamfara': 'Zamfara',
+}; // dart format off
+
+const genderLabels = {'everyone': 'Everyone', 'women': 'Women', 'men': 'Men'};
+
+/// "Anywhere" is not in the 12 design: without it the default would be a paid filter.
+const regionLabels = {
+  'global': 'Anywhere',
+  'nearby': 'Nearby',
+  'nigeria': 'Nigeria',
+  'africa': 'Africa',
+};

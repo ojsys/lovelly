@@ -7,6 +7,7 @@ import '../../api/api.dart';
 import '../../auth/my_id.dart';
 import '../../platform/store_billing.dart';
 import '../../realtime/realtime_client.dart';
+import '../plus/plus_controller.dart';
 import 'wallet_repository.dart';
 
 /// Balance, today's spend and the check-in (MN-2, MN-3). Live through `wallet.updated`.
@@ -146,6 +147,7 @@ class StoreController extends Notifier<StoreState> {
   }
 
   Future<void> _onPurchase(StorePurchase p) async {
+    if (p.isSubscription) return ref.read(plusControllerProvider.notifier).onSubscription(p);
     switch (p.status) {
       case StorePurchaseStatus.cancelled:
         state = state.copyWith(buying: false);

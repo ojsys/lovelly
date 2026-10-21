@@ -17,7 +17,7 @@ Peer _$PeerFromJson(Map<String, dynamic> json) => Peer(
 
 Map<String, dynamic> _$PeerToJson(Peer instance) => <String, dynamic>{
   'first_name': instance.firstName,
-  'age': instance.age,
+  'age': ?instance.age,
   'city': instance.city,
   'shared_interests': instance.sharedInterests,
   'shared_languages': instance.sharedLanguages,

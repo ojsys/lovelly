@@ -66,3 +66,58 @@ def test_each_user_is_in_at_most_one_pair():
 def test_oldest_waiting_user_is_served_first():
     pairs = pick_pairs([t("new", waited=1), t("old", waited=20), t("mid", waited=10)], NOW, never)
     assert pairs[0][0].user_id == "old"
+
+
+# --- Paid filters (FR-8, M7) --------------------------------------------------------------
+
+
+def who(
+    uid, gender="woman", country="NG", state="lagos", want_gender="", want_region="", waited=1.0
+):
+    return Ticket(
+        user_id=uid,
+        mode="text",
+        joined_at=NOW - waited,
+        gender=gender,
+        country=country,
+        state=state,
+        want_gender=want_gender,
+        want_region=want_region,
+    )
+
+
+def test_fr8_gender_filter_is_met_by_the_other_person():
+    seeker = who("a", gender="man", want_gender="women")
+    assert compatible(seeker, who("b", gender="woman"), NOW)
+    assert not compatible(seeker, who("c", gender="man"), NOW)
+    assert not compatible(seeker, who("d", gender="other"), NOW)  # "other": no-filter only
+
+
+def test_fr8_both_peoples_filters_must_hold():
+    a = who("a", gender="man", want_gender="women")
+    b = who("b", gender="woman", want_gender="women")
+    assert not compatible(a, b, NOW)
+
+
+def test_fr8_regions():
+    lagos, abuja = who("l", state="lagos"), who("f", state="fct")
+    ghana = who("g", country="GH", state="")
+    uk = who("u", country="GB", state="")
+    nearby = who("n", state="lagos", want_region="nearby")
+    assert compatible(nearby, lagos, NOW) and not compatible(nearby, abuja, NOW)
+    nigeria = who("ng", want_region="nigeria")
+    assert compatible(nigeria, abuja, NOW) and not compatible(nigeria, ghana, NOW)
+    africa = who("af", want_region="africa")
+    assert compatible(africa, ghana, NOW) and not compatible(africa, uk, NOW)
+
+
+def test_m7_paid_filters_never_widen():
+    seeker = who("a", gender="man", want_gender="women", waited=600)
+    assert not compatible(seeker, who("b", gender="man", waited=600), NOW)
+
+
+def test_fr8_pick_pairs_skips_people_who_dont_fit():
+    seeker = who("a", gender="man", want_gender="women", waited=10)
+    man, woman = who("m", gender="man", waited=9), who("w", gender="woman", waited=1)
+    pairs = pick_pairs([seeker, man, woman], NOW, never)
+    assert {(x.user_id, y.user_id) for x, y in pairs} == {("a", "w")}

@@ -30,6 +30,7 @@
 12. **Age filter.** FR-8 mentions gender, region *and age* filters, but Home, Premium and PayGo
     only show gender and region, and the PAYG price table has no age-filter price. Is age
     filtering in the MVP?
+    → **Answered 2026-10-20:** not in the MVP (plans/M7.md, decision 7).
 13. **Selfie compared to "main profile photo"** (FR-4), but onboarding has no photo-upload
     step before the selfie (photos are on Profile, screen 09). Is the selfie itself the first
     main photo, or is there a photo step?
@@ -112,10 +113,18 @@
     universal links). Which domain?
 38. **Regions for the paid filter** (FR-8): country from the phone number, Nearby = same
     Nigerian state (a new State field on the profile)? See plans/M7.md, decision 1.
+    → **Answered 2026-10-20:** yes; State is a new field under City on 09, asked when someone first picks Nearby.
 39. **Auto top-up with app-store billing** (MN-10): stores need the user to confirm each
     purchase, so "automatic" only works with a saved card (Paystack). See plans/M7.md,
     decision 2.
+    → **Answered 2026-10-20:** M7 ships "ask to add 550 coins" (one store confirmation); fully automatic waits for Paystack.
 40. **Rematch entry point** (FR-7): no design shows where to rematch. See plans/M7.md,
     decision 4.
+    → **Answered 2026-10-20:** "Rematch <name>" on the searching screen after Next; it rings like a friend call.
 41. **Live translation and ads** (MN-6): not in the build plan; translation needs speech and
     translation providers, and the app has no ads. Are ads planned? See plans/M7.md, decision 5.
+    → **Answered 2026-10-20:** both left out of M7 and hidden on 12; whether ads are planned is still open.
+42. **Per-IP sign-in limits and shared mobile IPs.** OTP requests are limited to 30 per hour
+    per IP (M1). Nigerian mobile networks put many users behind one IP (carrier-grade NAT), so
+    a busy cell could hit it. Raise it and rely more on the per-number limits? Needs real
+    traffic numbers.

@@ -23,7 +23,7 @@ Map<String, dynamic> _$SessionDetailToJson(SessionDetail instance) => <String, d
   'mode': instance.mode,
   'peer': instance.peer,
   'started_at': instance.startedAt.toIso8601String(),
-  'ended_at': instance.endedAt?.toIso8601String(),
+  'ended_at': ?instance.endedAt?.toIso8601String(),
   'end_reason': instance.endReason,
   'messages': instance.messages,
 };

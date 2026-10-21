@@ -3,6 +3,7 @@ import logging
 from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
+from django.conf import settings
 
 from accounts.models import User
 from chat import services as chat
@@ -44,7 +45,13 @@ def _handle(user_id, event: dict) -> dict | None:
         case "queue.join":
             limit(f"join:{user.id}", 120, 3600)
             mode = event.get("mode")
-            matching.join(user, mode, event.get("filters") or {})
+            # FR-8 / MN-7: paid filters need accept_charge (after the charge sheet).
+            matching.join(
+                user,
+                mode,
+                event.get("filters") or {},
+                accept_charge=bool(event.get("accept_charge")),
+            )
             return {"type": "queue.joined", "mode": mode}
         case "queue.leave":
             matching.leave(user.id)
@@ -100,7 +107,9 @@ class RealtimeConsumer(AsyncJsonWebsocketConsumer):
             return
         client = (self.scope.get("client") or ["?"])[0]
         try:
-            await sync_to_async(limit, thread_sensitive=False)(f"wsconnect:{client}", 30, 60)
+            await sync_to_async(limit, thread_sensitive=False)(
+                f"wsconnect:{client}", settings.WS_CONNECTS_PER_IP_PER_MINUTE, 60
+            )
         except ApiError:
             await self.close(code=4429)
             return

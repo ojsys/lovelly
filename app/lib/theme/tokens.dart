@@ -71,6 +71,12 @@ abstract final class KColors {
   static const giftScrim = Color(0x730F0E13);
   static const toast = Color(0xBF0F0E13);
 
+  /// 12/13: a selected plan card, and the pay-as-you-go tag.
+  static const goldSelected = Color(0xFF261F0E);
+
+  /// 13: Home dimmed behind the charge sheet.
+  static const chargeScrim = Color(0xC70F0E13);
+
   /// Avatar placeholders (initials) and their text.
   static const avatarPlum = Color(0xFF2A2233);
   static const avatarPlumText = Color(0xFFD9D3E6);

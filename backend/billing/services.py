@@ -13,7 +13,8 @@ from core.providers.store_receipts import InvalidReceipt, StoreEvent, StoreTrans
 from wallet.models import CoinLedger
 from wallet.services import balance, post_entry
 
-from .models import Purchase
+from . import plus
+from .models import Purchase, Subscription
 
 logger = logging.getLogger(__name__)
 R = CoinLedger.Reason
@@ -170,6 +171,24 @@ def refund(store: str, txn_id: str) -> None:
     logger.info("refunded %s %s", store, txn_id)
 
 
+def verify_plus(user: User, store: str, product_id: str, token: str) -> dict:
+    """The app's report of a Korram Plus purchase or restore (MN-6)."""
+    if product_id not in plus.PLUS_PRODUCTS:
+        raise ApiError("unknown_product", "That plan doesn’t exist.", 400)
+    provider = get_provider("store_receipts")
+    try:
+        sub = provider.verify_subscription(store, product_id, token)
+    except InvalidReceipt as e:
+        logger.warning("invalid %s subscription from %s: %s", store, user.id, e)
+        raise ApiError("invalid_receipt", "The store couldn’t confirm this purchase.", 400) from e
+    if sub.account_id and sub.account_id != str(user.id):
+        raise ApiError("not_yours", "This subscription belongs to another account.", 403)
+    plus.apply(user.id, sub)
+    if sub.state in Subscription.ACTIVE_STATUSES:
+        provider.acknowledge_subscription(store, product_id, token)
+    return plus.plus_status(user.id)
+
+
 def handle_webhook(store: str, body: dict, query: dict) -> int:
     """Store notifications: purchases the app never reported, and refunds."""
     try:
@@ -191,4 +210,17 @@ def handle_webhook(store: str, body: dict, query: dict) -> int:
                 get_provider("store_receipts").acknowledge(store, txn.product_id, txn.token)
         elif event.kind == "refunded":
             refund(event.store, event.txn_id)
+        elif event.kind == "subscription":
+            _subscription_event(store, event.subscription)
     return len(events)
+
+
+def _subscription_event(store: str, sub) -> None:
+    user_id = sub.account_id
+    if not (user_id and User.objects.filter(id=user_id).exists()):
+        known = Subscription.objects.filter(store=store, original_txn_id=sub.original_txn_id)
+        user_id = known.values_list("user_id", flat=True).first()
+    if user_id is None:
+        logger.error("%s subscription %s names no known account", store, sub.original_txn_id[:12])
+        return
+    plus.apply(user_id, sub)

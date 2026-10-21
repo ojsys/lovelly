@@ -2,7 +2,14 @@ from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView
 
-from billing.views import AppleWebhookView, GoogleWebhookView, PurchaseVerifyView
+from billing.views import (
+    AppleWebhookView,
+    GoogleWebhookView,
+    PlansView,
+    PlusVerifyView,
+    PurchaseVerifyView,
+    SpendSettingsView,
+)
 from chat.views import (
     ChatMessagesView,
     FriendRequestAcceptView,
@@ -11,7 +18,13 @@ from chat.views import (
     FriendsView,
 )
 from core.views import HealthView
-from matching.views import MediaTokenView, OnlineCountView, SessionDetailView
+from matching.views import (
+    MediaTokenView,
+    OnlineCountView,
+    QuoteView,
+    RematchView,
+    SessionDetailView,
+)
 from safety.views import (
     BlockDetailView,
     BlocksView,
@@ -36,6 +49,11 @@ api_v1 = [
     path("schema/", SpectacularAPIView.as_view(), name="schema"),
     path("", include("accounts.urls")),
     path("match/online-count", OnlineCountView.as_view(), name="online-count"),
+    path("match/quote", QuoteView.as_view(), name="match-quote"),
+    path("sessions/<uuid:session_id>/rematch", RematchView.as_view(), name="rematch"),
+    path("plus/plans", PlansView.as_view(), name="plus-plans"),
+    path("plus/verify", PlusVerifyView.as_view(), name="plus-verify"),
+    path("me/spend-settings", SpendSettingsView.as_view(), name="spend-settings"),
     path("sessions/<uuid:session_id>", SessionDetailView.as_view(), name="session-detail"),
     path("sessions/<uuid:session_id>/media-token", MediaTokenView.as_view(), name="media-token"),
     path("blocks", BlocksView.as_view(), name="blocks"),

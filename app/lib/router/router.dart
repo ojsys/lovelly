@@ -8,6 +8,7 @@ import '../features/friends/friend_chat_screen.dart';
 import '../features/friends/friends_screen.dart';
 import '../features/friends/profile_screen.dart';
 import '../features/home/home_screen.dart';
+import '../features/plus/plus_screen.dart';
 import '../features/wallet/coin_store_screen.dart';
 import '../features/match/chat_screen.dart';
 import '../features/call/video_call_screen.dart';
@@ -20,18 +21,11 @@ import '../features/onboarding/phone_screen.dart';
 import '../features/onboarding/review_screen.dart';
 import '../features/onboarding/selfie_screen.dart';
 import '../features/onboarding/splash_screen.dart';
-import '../features/placeholder/placeholder_screen.dart';
 import '../features/safety/account_screens.dart';
 import '../features/safety/report_screen.dart';
 import '../features/welcome/welcome_screen.dart';
 import '../widgets/main_shell.dart';
 import 'routes.dart';
-
-/// Screens not built yet, keyed by route: (canvas number, design title, milestone).
-const _pending = <String, (String, String, String)>{
-  Routes.plus: ('12', 'Korram Plus', 'M7'),
-  Routes.confirmCharge: ('13', 'Pay as you go — charge confirm', 'M7'),
-};
 
 /// Routes each onboarding step may show; the first is where the step lands.
 const _allowed = <OnboardingStep, List<String>>{
@@ -138,13 +132,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: Routes.videoCall, builder: (context, state) => const VideoCallScreen()),
       GoRoute(path: Routes.voiceCall, builder: (context, state) => const VoiceCallScreen()),
       GoRoute(path: Routes.coins, builder: (context, state) => const CoinStoreScreen()),
+      GoRoute(path: Routes.plus, builder: (context, state) => const PlusScreen()),
       GoRoute(path: Routes.coinHistory, builder: (context, state) => const CoinHistoryScreen()),
-      for (final MapEntry(key: path, value: (number, title, milestone)) in _pending.entries)
-        GoRoute(
-          path: path,
-          builder: (context, state) =>
-              PlaceholderScreen(number: number, title: title, milestone: milestone),
-        ),
     ],
   );
 });

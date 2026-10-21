@@ -22,10 +22,10 @@ def test_sf1_unverified_users_cannot_join(make_user, redis_db):
     assert e.value.error_code == "not_verified"
 
 
-def test_fr8_filters_are_not_available_yet(pair):
+def test_fr8_filters_are_locked_without_plus_or_pay_as_you_go(pair):
     with pytest.raises(ApiError) as e:
-        service.join(pair[0], "video", {"gender": "woman"})
-    assert e.value.error_code == "filters_unavailable"
+        service.join(pair[0], "video", {"gender": "women"})
+    assert e.value.error_code == "filters_locked"
 
 
 def test_fr6_two_users_in_a_mode_are_matched(pair, events):
@@ -237,3 +237,25 @@ def test_deleted_or_suspended_users_are_dropped_without_breaking_the_tick(
     s.refresh_from_db()
     assert {s.user_a_id, s.user_b_id} == {a.id, b.id}
     assert not service.is_queued(gone_id) and not service.is_queued(banned.id)
+
+
+def test_sessions_nobody_is_in_any_more_are_ended(pair, events):
+    """Load-test find: a user who disconnects in the instant they're matched leaves a
+    session nobody ends. The orphan sweep ends it once neither person is online."""
+    import time as _time
+
+    from django.utils import timezone as tz
+
+    from matching.models import MatchSession
+
+    a, b = pair
+    service.join(a, "video")
+    service.join(b, "video")
+    (s,) = service.run_tick()
+    MatchSession.objects.filter(id=s.id).update(started_at=tz.now() - tz.timedelta(minutes=2))
+    service.touch_presence(a.id)  # one of them is still here: keep it
+    assert service.sweep_orphans() == 0
+    later = _time.time() + 120  # both gone quiet
+    assert service.sweep_orphans(now=later) == 1
+    s.refresh_from_db()
+    assert s.ended_at is not None and s.end_reason == "peer_left"

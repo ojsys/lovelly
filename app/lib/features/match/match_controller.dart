@@ -105,11 +105,22 @@ class ChatMessage {
 }
 
 class MatchError {
-  const MatchError(this.code, this.detail, {this.retryAfter});
+  const MatchError(this.code, this.detail, {this.retryAfter, this.quote});
 
   final String code;
   final String detail;
   final int? retryAfter;
+
+  /// For refused paid joins (MN-7, MN-9, MN-11): the server's price and why it can't be paid.
+  final Map<String, dynamic>? quote;
+}
+
+/// Someone you just skipped, for "Rematch Tobi" while searching (FR-7).
+class Skipped {
+  const Skipped(this.sessionId, this.name);
+
+  final String sessionId;
+  final String name;
 }
 
 class MatchState {
@@ -124,6 +135,9 @@ class MatchState {
     this.mediaToken,
     this.mediaUrl,
     this.chatId,
+    this.rematch = false,
+    this.paid = false,
+    this.skipped,
     this.messages = const [],
     this.peerTyping = false,
     this.endReason,
@@ -142,6 +156,13 @@ class MatchState {
 
   /// Set for a direct call between friends (FR-16); null for random matches.
   final String? chatId;
+
+  /// A paid rematch (FR-7) rather than a random match.
+  final bool rematch;
+
+  /// Searching with paid filters (FR-8): "Match free instead" is offered after 30 s.
+  final bool paid;
+  final Skipped? skipped;
   final List<ChatMessage> messages;
   final bool peerTyping;
 
@@ -175,6 +196,9 @@ class MatchState {
     mediaToken: mediaToken ?? this.mediaToken,
     mediaUrl: mediaUrl ?? this.mediaUrl,
     chatId: chatId,
+    rematch: rematch,
+    paid: paid,
+    skipped: skipped,
     messages: messages ?? this.messages,
     peerTyping: peerTyping ?? this.peerTyping,
     endReason: endReason ?? this.endReason,
@@ -208,14 +232,43 @@ class MatchController extends Notifier<MatchState> {
     if (state.phase == MatchPhase.idle) state = state.copyWith(mode: mode);
   }
 
-  /// Starts searching in [mode] (Home's "Start matching").
-  Future<void> start([MatchMode? mode]) async {
+  Map<String, String> _filters = const {};
+  bool _acceptCharge = false;
+
+  /// Starts searching in [mode] (Home's "Start matching"). Paid [filters] (FR-8) need
+  /// [acceptCharge] once the charge sheet was confirmed or skipped (MN-7).
+  Future<void> start([
+    MatchMode? mode,
+    Map<String, String> filters = const {},
+    bool acceptCharge = false,
+  ]) async {
     _myId ??= await _readMyId();
     final m = mode ?? state.mode;
-    state = MatchState(phase: MatchPhase.searching, mode: m, searchingSince: now());
+    _filters = filters;
+    _acceptCharge = acceptCharge;
+    state = MatchState(
+      phase: MatchPhase.searching,
+      mode: m,
+      searchingSince: now(),
+      paid: filters.isNotEmpty,
+      skipped: state.phase == MatchPhase.searching ? state.skipped : null,
+    );
     await _rt.start();
-    _rt.send({'type': 'queue.join', 'mode': m.name, 'filters': <String, dynamic>{}});
+    _join(m);
   }
+
+  void _join(MatchMode m) => _rt.send({
+    'type': 'queue.join',
+    'mode': m.name,
+    'filters': _filters,
+    if (_filters.isNotEmpty) 'accept_charge': _acceptCharge,
+  });
+
+  /// "Match free instead" (MN-11, M7 decision 3): same mode, no filters, held coins back.
+  Future<void> matchFree() => start(state.mode);
+
+  /// Search again with the same filters ("Find someone new", "Meet someone new").
+  Future<void> again([MatchMode? mode]) => start(mode ?? state.mode, _filters, _acceptCharge);
 
   void cancel() {
     _rt.send({'type': 'queue.leave'});
@@ -227,7 +280,16 @@ class MatchController extends Notifier<MatchState> {
     final id = state.sessionId;
     if (id == null) return;
     _rt.send({'type': 'session.next', 'session_id': id});
-    state = MatchState(phase: MatchPhase.searching, mode: state.mode, searchingSince: now());
+    state = MatchState(
+      phase: MatchPhase.searching,
+      mode: state.mode,
+      searchingSince: now(),
+      paid: _filters.isNotEmpty,
+      // FR-7: the person just skipped can be rematched (never friends or rematches).
+      skipped: state.chatId == null && state.peer != null
+          ? Skipped(id, state.peer!.firstName)
+          : null,
+    );
   }
 
   /// End: leave this match and go home (FR-12).
@@ -279,6 +341,7 @@ class MatchController extends Notifier<MatchState> {
           mediaToken: e['media_token'] as String?,
           mediaUrl: e['media_url'] as String?,
           chatId: e['chat_id'] as String?,
+          rematch: e['rematch'] as bool? ?? false,
         );
       case 'match.widened' when state.phase == MatchPhase.searching:
         state = state.copyWith(widened: true);
@@ -328,8 +391,8 @@ class MatchController extends Notifier<MatchState> {
           // Text: show "<name> left" and let the user choose (M2 decision 1).
           state = state.copyWith(phase: MatchPhase.ended, endReason: reason, peerTyping: false);
         } else {
-          // Calls: straight back into the queue, so Next puts both back in it.
-          start(state.mode);
+          // Calls: straight back into the queue (same filters), so Next puts both back in it.
+          start(state.mode, _filters, _acceptCharge);
         }
     }
   }
@@ -339,6 +402,7 @@ class MatchController extends Notifier<MatchState> {
       e['code'] as String? ?? 'error',
       e['detail'] as String? ?? 'Something went wrong.',
       retryAfter: (e['retry_after'] as num?)?.toInt(),
+      quote: e['quote'] as Map<String, dynamic>?,
     );
     if (e['request'] == 'queue.join' && error.code != 'in_session') {
       state = MatchState(mode: state.mode, error: error);
@@ -352,7 +416,7 @@ class MatchController extends Notifier<MatchState> {
   Future<void> _onConnection(bool connected) async {
     if (!connected) return;
     if (state.phase == MatchPhase.searching) {
-      _rt.send({'type': 'queue.join', 'mode': state.mode.name, 'filters': <String, dynamic>{}});
+      _join(state.mode);
     } else if (state.phase == MatchPhase.matched && state.sessionId != null) {
       try {
         final detail = await ref

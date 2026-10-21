@@ -86,6 +86,8 @@ that's configured with hosting, not in local dev (docs/questions.md #24).
 | `infra/.env` | `PROVIDER_PUSH` | `fake` (default: pushes are logged) / `fcm` with `FCM_PROJECT_ID` and `FCM_CREDENTIALS_JSON` (service-account key) |
 | `flutter run --dart-define` | `PUSH` | unset (default: no Firebase) / `fcm` (needs `google-services.json` / `GoogleService-Info.plist`) |
 | `infra/.env` | `PROVIDER_STORE_RECEIPTS` | `fake` (default: tokens `fake:<product>:<txn>`) / `real` with `PLAY_PACKAGE_NAME`, `PLAY_CREDENTIALS_JSON`, `PLAY_RTDN_SECRET`, `APPLE_BUNDLE_ID`, `APPLE_APP_ID`, `APPLE_ENVIRONMENT`, `APPLE_ROOT_CERTS_DIR` |
+| `infra/.env` | `THROTTLE_OTP_REQUEST`, `THROTTLE_OTP_VERIFY` | per-IP sign-in limits; production defaults `30/hour`, `60/hour` (the dev example raises them for e2e runs) |
+| `infra/.env` | `WS_CONNECTS_PER_IP_PER_MINUTE` | default `30`; `api-load` raises it (all simulated users share one IP) |
 
 In development the phone code is printed in the API logs:
 `docker compose -f infra/docker-compose.yml logs api | grep "fake sms code"`.
@@ -105,10 +107,14 @@ http://localhost:8100/django-admin/ (create a login with
 ```sh
 docker compose -f infra/docker-compose.yml --profile load up -d api-load   # uvicorn, 4 workers
 docker compose -f infra/docker-compose.yml exec api \
-  python manage.py loadtest --users 500 --duration 180 --url ws://api-load:8000/ws/
+  python manage.py loadtest --users 500 --duration 180 --filter-rate 0.3 --url ws://api-load:8000/ws/
 ```
 
-It fails if any blocked pair is matched or the median wait is 10 s or more. Run it on a
+It fails if any blocked pair is matched, any match breaks someone's paid filter, or the median
+wait is 10 s or more. `--filter-rate` (M7) makes that share of users filter by gender, as Plus
+subscribers. Video matches make the moderation agent join their rooms: it joins 4 at a time,
+and restarts itself if the LiveKit SDK wedges, so expect a short catch-up after a run. Sessions
+the run leaves behind are ended by the matcher's orphan sweep within about a minute and a half. Run it on a
 machine with free memory: swapping causes multi-second stalls that look like server bugs.
 
 App golden images (`app/test/goldens/`) are rendered on macOS. After an intended UI change,

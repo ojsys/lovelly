@@ -31,6 +31,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
   Future<void> _openRequest(FriendRequestRow r) async {
     final accept = await showModalBottomSheet<bool>(
       context: context,
+      useRootNavigator: true, // over the tab bar
       backgroundColor: KColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(KRadius.xxl)),

@@ -12,6 +12,7 @@ import '../../theme/icons.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/onboarding_scaffold.dart';
 import '../home/home_data.dart';
+import '../plus/states.dart';
 import 'friends_repository.dart';
 
 /// Picks a photo from the gallery; swapped out in tests.
@@ -53,6 +54,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   List<Interest> _catalogue = const [];
   List<String> _interests = [];
   List<String> _langs = [];
+
+  /// FR-8 "nearby": a Nigerian state slug, or "".
+  String _state = '';
   bool _saving = false;
   bool _uploading = false;
 
@@ -89,6 +93,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     _profile = p;
     _name.text = p.firstName;
     _city.text = p.city;
+    _state = p.state;
     _bio.text = p.bio;
     _interests = [for (final i in p.interests) i.slug];
     _langs = [...p.languages];
@@ -147,6 +152,26 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
   }
 
+  Future<void> _pickState() async {
+    final picked = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: KColors.surface,
+      builder: (context) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.7,
+        builder: (context, scroll) => ListView(
+          controller: scroll,
+          children: [
+            for (final MapEntry(key: slug, value: name) in nigerianStates.entries)
+              ListTile(title: Text(name), onTap: () => Navigator.pop(context, slug)),
+          ],
+        ),
+      ),
+    );
+    if (picked != null) setState(() => _state = picked);
+  }
+
   Future<void> _addLanguage() async {
     final picked = await showModalBottomSheet<String>(
       context: context,
@@ -172,6 +197,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         PatchedProfileUpdateRequest(
           firstName: _name.text.trim(),
           city: _city.text.trim(),
+          state: _state,
           bio: _bio.text.trim(),
           interests: _interests,
           languages: _langs,
@@ -254,6 +280,32 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             child: _Field(label: 'CITY', controller: _city),
                           ),
                         ],
+                      ),
+                      const SizedBox(height: 14),
+                      // Not in 09: used by the "Nearby" filter (M7 decision 1).
+                      const FieldLabel('STATE'),
+                      const SizedBox(height: 6),
+                      Material(
+                        color: KColors.surface,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(KRadius.md),
+                          side: const BorderSide(color: KColors.line),
+                        ),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(KRadius.md),
+                          onTap: _pickState,
+                          child: Container(
+                            constraints: const BoxConstraints(minHeight: 48),
+                            padding: const EdgeInsets.symmetric(horizontal: 14),
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              nigerianStates[_state] ?? 'Choose your state',
+                              style: KType.button.copyWith(
+                                color: _state.isEmpty ? KColors.muted : KColors.text,
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 22),
                       _Field(

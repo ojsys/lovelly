@@ -26,6 +26,12 @@ from safety.moderation import handle_frame, sample_interval
 logger = logging.getLogger(__name__)
 JPEG_WIDTH = 320
 EMPTY_SECONDS = 60  # leave rooms nobody is in (e.g. sessions never ended cleanly)
+# A burst of new video calls queues here instead of stampeding the LiveKit SDK, which wedges
+# when hundreds of rooms connect at once (found under the M7 load test).
+MAX_CONCURRENT_JOINS = 4
+JOIN_TIMEOUT_SECONDS = 10
+# This many failed joins in a row means the SDK is stuck: exit, and Docker restarts us.
+FAILED_JOINS_TO_RESTART = 5
 
 
 def encode(frame) -> bytes:
@@ -122,23 +128,39 @@ class Watch:
 class Agent:
     def __init__(self):
         self.watches: dict[str, Watch] = {}
+        self.joins = asyncio.Semaphore(MAX_CONCURRENT_JOINS)
+        self.failed_joins = 0
+        self.unhealthy = asyncio.Event()
 
     async def start(self, session_id: str, room_name: str):
         if session_id in self.watches:
             return
         watch = Watch(session_id, room_name)
         self.watches[session_id] = watch
-        try:
-            await watch.start()
-            logger.info("watching %s", session_id)
-        except Exception:
-            logger.exception("could not join %s", room_name)
-            self.watches.pop(session_id, None)
+        async with self.joins:
+            if watch.done or self.watches.get(session_id) is not watch:
+                return  # the call ended while it waited its turn
+            try:
+                await asyncio.wait_for(watch.start(), JOIN_TIMEOUT_SECONDS)
+                self.failed_joins = 0
+                if watch.done:  # stopped while connecting
+                    await watch.room.disconnect()
+                    return
+                logger.info("watching %s", session_id)
+            except Exception:
+                logger.exception("could not join %s", room_name)
+                self.watches.pop(session_id, None)
+                self.failed_joins += 1
+                if self.failed_joins >= FAILED_JOINS_TO_RESTART:
+                    logger.error("%d joins failed in a row: restarting", self.failed_joins)
+                    self.unhealthy.set()
 
     async def stop(self, session_id: str):
         watch = self.watches.pop(session_id, None)
-        if watch:
+        if watch and watch.room.isconnected():
             await watch.stop()
+        elif watch:
+            watch.done = True  # still queued to join: never join it
 
     @_db
     def _active(self):
@@ -152,12 +174,12 @@ class Agent:
         import redis.asyncio as aioredis
 
         for session_id, room in await self._active():
-            await self.start(str(session_id), room)
+            asyncio.create_task(self.start(str(session_id), room))
         r = aioredis.from_url(settings.REDIS_URL, decode_responses=True)
         pubsub = r.pubsub()
         await pubsub.subscribe(MODERATION_CHANNEL)
         logger.info("moderation agent started")
-        while not stop.is_set():
+        while not stop.is_set() and not self.unhealthy.is_set():
             msg = await pubsub.get_message(ignore_subscribe_messages=True, timeout=1.0)
             now = time.monotonic()
             for session_id, watch in list(self.watches.items()):
@@ -174,6 +196,8 @@ class Agent:
         for session_id in list(self.watches):
             await self.stop(session_id)
         await pubsub.aclose()
+        if self.unhealthy.is_set():
+            raise SystemExit(1)
 
 
 class Command(BaseCommand):

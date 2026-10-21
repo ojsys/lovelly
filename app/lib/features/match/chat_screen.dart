@@ -48,7 +48,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   void _findNew() {
-    _controller.start(MatchMode.text);
+    _controller.again(MatchMode.text);
     context.pushReplacement(Routes.searching);
   }
 

@@ -16,6 +16,7 @@ from core.providers import get_provider
 from core.storage_urls import signed_url
 
 from .onboarding import age_on
+from .regions import NIGERIAN_STATES
 
 MAX_PHOTOS = 6
 MAX_INTERESTS = 5
@@ -39,6 +40,7 @@ def as_dict(user: User) -> dict:
         "first_name": profile.first_name,
         "age": age_on(user.dob, timezone.now().date()) if user.dob else None,
         "city": profile.city,
+        "state": profile.region,
         "bio": profile.bio,
         "interests": interests,
         "languages": profile.languages,
@@ -163,6 +165,12 @@ def update(user: User, data: dict) -> dict:
     if "city" in data:
         profile.city = data["city"].strip()[:80]
         fields.append("city")
+    if "state" in data:
+        # FR-8 "nearby": a Nigerian state, or "" to clear it.
+        if data["state"] and data["state"] not in NIGERIAN_STATES:
+            raise ApiError("invalid_state", "Pick a state from the list.")
+        profile.region = data["state"]
+        fields.append("region")
     if "languages" in data:
         langs = [lang.lower() for lang in data["languages"]]
         if any(lang not in LANGUAGES for lang in langs):

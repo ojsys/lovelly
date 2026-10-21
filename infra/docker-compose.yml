@@ -79,6 +79,7 @@ services:
     command: ["uvicorn", "korram.asgi:application", "--host", "0.0.0.0", "--port", "8000", "--workers", "4", "--log-level", "warning"]
     environment:
       DJANGO_SETTINGS_MODULE: korram.settings.prod
+      WS_CONNECTS_PER_IP_PER_MINUTE: "100000"  # every simulated user shares one IP
     depends_on:
       api:
         condition: service_healthy
@@ -96,6 +97,7 @@ services:
   moderator:
     <<: *backend
     command: ["python", "manage.py", "run_moderator"]
+    restart: unless-stopped  # it exits when the LiveKit SDK wedges (FAILED_JOINS_TO_RESTART)
     network_mode: "service:livekit"
     depends_on:
       postgres:

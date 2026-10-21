@@ -13,6 +13,7 @@ import 'clients/health_client.dart';
 import 'clients/interests_client.dart';
 import 'clients/match_client.dart';
 import 'clients/me_client.dart';
+import 'clients/plus_client.dart';
 import 'clients/purchases_client.dart';
 import 'clients/reports_client.dart';
 import 'clients/sessions_client.dart';
@@ -36,6 +37,7 @@ class KorramApi {
   InterestsClient? _interests;
   MatchClient? _match;
   MeClient? _me;
+  PlusClient? _plus;
   PurchasesClient? _purchases;
   ReportsClient? _reports;
   SessionsClient? _sessions;
@@ -58,6 +60,8 @@ class KorramApi {
   MatchClient get match => _match ??= MatchClient(_dio, baseUrl: _baseUrl);
 
   MeClient get me => _me ??= MeClient(_dio, baseUrl: _baseUrl);
+
+  PlusClient get plus => _plus ??= PlusClient(_dio, baseUrl: _baseUrl);
 
   PurchasesClient get purchases => _purchases ??= PurchasesClient(_dio, baseUrl: _baseUrl);
 

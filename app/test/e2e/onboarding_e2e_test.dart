@@ -32,7 +32,7 @@ void main() {
   Future<void> signIn(String phone) async {
     await session();
     final sent = await repo().requestCode(phone, ChannelEnum.sms);
-    expect(sent.masked, startsWith('+234 803'));
+    expect(sent.masked, startsWith('+234 ${phone.substring(1, 4)}'));
     await container
         .read(sessionProvider.notifier)
         .signedIn(await repo().verifyCode(sent.phone, await codeFor(phone)));

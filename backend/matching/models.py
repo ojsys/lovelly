@@ -38,6 +38,11 @@ class MatchSession(UUIDModel):
         "chat.Friendship", on_delete=models.SET_NULL, null=True, blank=True, related_name="calls"
     )
 
+    # FR-7: a paid rematch of an earlier session (charged like a filtered match, MN-8).
+    rematch_of = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.SET_NULL, related_name="rematches"
+    )
+
     class Meta:
         indexes = [
             models.Index(fields=["user_a", "started_at"]),

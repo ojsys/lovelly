@@ -18,7 +18,7 @@ LAGOS = ZoneInfo("Africa/Lagos")
 R = CoinLedger.Reason
 
 # Coins the user chose to spend (MN-9's "today's spend"). Refunds are not spending.
-SPENDING = [R.GIFT]
+SPENDING = [R.GIFT, R.FILTERED_MATCH, R.REMATCH]
 
 
 def lagos_today(now: datetime | None = None) -> date:
@@ -62,11 +62,13 @@ def post_entry(
     ref_type: str = "",
     ref_id: str = "",
     allow_negative: bool = False,
+    from_hold: int = 0,
 ) -> Posted:
     """Adds one ledger row, once per `key` (MN-2).
 
-    A debit that would take the balance below zero fails with `insufficient_coins`, unless
-    `allow_negative` (refunds of coins already spent, M6 decision 5).
+    A debit that would take the available coins (balance − holds, MN-8) below zero fails
+    with `insufficient_coins`, unless `allow_negative` (refunds of coins already spent, M6
+    decision 5). `from_hold` is the hold this debit uses up, so it isn't counted twice.
     """
     if delta == 0:
         raise ValueError("a ledger entry moves coins")
@@ -83,7 +85,7 @@ def post_entry(
                     "key_reused", "This request was already used for something else.", 409
                 )
             return Posted(existing, created=False)
-        if delta < 0 and not allow_negative and balance(user_id) + delta < 0:
+        if delta < 0 and not allow_negative and _available(user_id, from_hold) + delta < 0:
             raise ApiError("insufficient_coins", "You don’t have enough coins.", 402)
         entry = CoinLedger.objects.create(
             user_id=user_id,
@@ -95,6 +97,12 @@ def post_entry(
         )
         transaction.on_commit(lambda: announce(user_id))
     return Posted(entry, created=True)
+
+
+def _available(user_id, from_hold: int) -> int:
+    from .holds import held
+
+    return balance(user_id) - held(user_id) + from_hold
 
 
 def announce(user_id) -> None:

@@ -16,8 +16,8 @@ ReportRequestRequest _$ReportRequestRequestFromJson(Map<String, dynamic> json) =
 
 Map<String, dynamic> _$ReportRequestRequestToJson(ReportRequestRequest instance) =>
     <String, dynamic>{
-      'session_id': instance.sessionId,
-      'chat_id': instance.chatId,
+      'session_id': ?instance.sessionId,
+      'chat_id': ?instance.chatId,
       'reason': instance.reason,
       'block': instance.block,
     };

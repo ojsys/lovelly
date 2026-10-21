@@ -20,6 +20,6 @@ Map<String, dynamic> _$FriendRowToJson(FriendRow instance) => <String, dynamic>{
   'chat_id': instance.chatId,
   'friend': instance.friend,
   'online': instance.online,
-  'last_message': instance.lastMessage,
+  'last_message': ?instance.lastMessage,
   'unread': instance.unread,
 };

@@ -33,6 +33,12 @@ class Command(BaseCommand):
         parser.add_argument("--users", type=int, default=500)
         parser.add_argument("--duration", type=int, default=180, help="seconds")
         parser.add_argument("--block-rate", type=float, default=0.10)
+        parser.add_argument(
+            "--filter-rate",
+            type=float,
+            default=0.0,
+            help="share of users with a gender filter (M7; they're Plus, so no coins)",
+        )
         parser.add_argument("--url", default="ws://localhost:8000/ws/")
         parser.add_argument(
             "--random-languages",
@@ -44,18 +50,54 @@ class Command(BaseCommand):
     def handle(self, *args, **opts):
         started = timezone.now()
         users = self._seed(opts["users"], opts["block_rate"], opts["random_languages"])
+        self.filters = self._filtering(users, opts["filter_rate"])
         tokens = {str(u.id): str(AccessToken.for_user(u)) for u in users}
         stats = asyncio.run(self._run(tokens, opts["url"], opts["duration"]))
         self._report(stats, started)
 
+    def _filtering(self, users, rate) -> dict[str, dict]:
+        """FR-8 under load: a share of users filter by gender, as Plus subscribers."""
+        from billing.models import Subscription
+
+        chosen = [u for u in users if random.random() < rate]
+        Subscription.objects.bulk_create(
+            [
+                Subscription(
+                    user=u,
+                    plan="month",
+                    store="google",
+                    status="active",
+                    current_period_end=timezone.now() + timezone.timedelta(days=30),
+                    original_txn_id=f"load-{u.id}",
+                )
+                for u in chosen
+            ]
+        )
+        return {str(u.id): {"gender": random.choice(["women", "men"])} for u in chosen}
+
     # --- setup -------------------------------------------------------------------------
 
     def _seed(self, n, block_rate, random_languages):
-        User.objects.filter(phone__startswith=PHONE_PREFIX).delete()
+        from billing.models import Subscription
+
+        # The last run's load users. Money rows (gifts, ledger entries) are never deleted, so
+        # users other people sent gifts to are retired (renamed, deactivated) instead.
+        old = User.objects.filter(phone__startswith=PHONE_PREFIX)
+        Subscription.objects.filter(user__in=old).delete()
+        kept = old.filter(
+            Q(gifts_received__isnull=False) | Q(coin_entries__isnull=False)
+        ).distinct()
+        for u in kept:
+            User.objects.filter(id=u.id).update(phone=f"+999{u.id.hex[:12]}", is_active=False)
+        old.delete()
         interests = list(Interest.objects.all())
         users = User.objects.bulk_create(
             [
-                User(phone=f"{PHONE_PREFIX}{i:05d}", dob=date(1998, 1, 1), gender="other")
+                User(
+                    phone=f"{PHONE_PREFIX}{i:05d}",
+                    dob=date(1998, 1, 1),
+                    gender=random.choice(["woman", "man", "woman", "man", "other"]),
+                )
                 for i in range(n)
             ]
         )
@@ -102,16 +144,24 @@ class Command(BaseCommand):
         import websockets
 
         waits, errors, matches = [], [], [0]
+        filtered_waits = []
         deadline = time.monotonic() + duration
+
+        token_users = {t: uid for uid, t in tokens.items()}
 
         async def client(token):
             mode = random.choice(["video", "voice", "text"])
+            filters = self.filters.get(token_users[token])
+            join = {"type": "queue.join", "mode": mode}
+            if filters:
+                join |= {"filters": filters, "accept_charge": True}
+            sink = filtered_waits if filters else waits
             try:
                 async with websockets.connect(
                     f"{url}?token={token}", origin="http://localhost", open_timeout=30
                 ) as ws:
                     joined = time.monotonic()
-                    await ws.send(json.dumps({"type": "queue.join", "mode": mode}))
+                    await ws.send(json.dumps(join))
                     while time.monotonic() < deadline:
                         try:
                             raw = await asyncio.wait_for(
@@ -122,7 +172,7 @@ class Command(BaseCommand):
                         event = json.loads(raw)
                         kind = event["type"]
                         if kind == "match.found":
-                            waits.append(time.monotonic() - joined)
+                            sink.append(time.monotonic() - joined)
                             matches[0] += 1
                             sid = event["session_id"]
                             await ws.send(
@@ -139,7 +189,7 @@ class Command(BaseCommand):
                             elif event["reason"] in ("end", "peer_next", "peer_left", "blocked"):
                                 await asyncio.sleep(random.uniform(0.2, 1.0))
                                 joined = time.monotonic()
-                                await ws.send(json.dumps({"type": "queue.join", "mode": mode}))
+                                await ws.send(json.dumps(join))
                         elif kind == "error" and event["code"] not in (
                             "in_session",
                             "session_ended",
@@ -148,7 +198,7 @@ class Command(BaseCommand):
                             if event["code"] == "cooldown":
                                 await asyncio.sleep(event.get("retry_after", 5))
                                 joined = time.monotonic()
-                                await ws.send(json.dumps({"type": "queue.join", "mode": mode}))
+                                await ws.send(json.dumps(join))
             except Exception as e:  # noqa: BLE001
                 if time.monotonic() < deadline:  # closing at the deadline isn't a failure
                     at = int(duration - (deadline - time.monotonic()))
@@ -162,7 +212,12 @@ class Command(BaseCommand):
             await asyncio.gather(*tasks)
 
         await ramp()
-        return {"waits": waits, "errors": errors, "matches": matches[0]}
+        return {
+            "waits": waits,
+            "filtered_waits": filtered_waits,
+            "errors": errors,
+            "matches": matches[0],
+        }
 
     # --- report --------------------------------------------------------------------------
 
@@ -175,6 +230,17 @@ class Command(BaseCommand):
             )
         )
         violations = [p for p in pairs if p in blocked or (p[1], p[0]) in blocked]
+        genders = dict(
+            User.objects.filter(phone__startswith=PHONE_PREFIX).values_list("id", "gender")
+        )
+        want = {"women": "woman", "men": "man"}
+        filter_misses = [
+            (a, b)
+            for a, b in pairs
+            for me, other in ((a, b), (b, a))
+            if str(me) in self.filters and genders[other] != want[self.filters[str(me)]["gender"]]
+        ]
+        fw = sorted(stats["filtered_waits"])
         waits = sorted(stats["waits"])
         median = statistics.median(waits) if waits else float("inf")
         p95 = waits[int(len(waits) * 0.95) - 1] if waits else float("inf")
@@ -186,6 +252,10 @@ class Command(BaseCommand):
                     "median_wait_s": round(median, 2),
                     "p95_wait_s": round(p95, 2),
                     "blocked_pair_matches": len(violations),
+                    "filtered_users": len(self.filters),
+                    "filtered_matches": len(fw),
+                    "filtered_median_wait_s": round(statistics.median(fw), 2) if fw else None,
+                    "filter_misses": len(filter_misses),
                     "errors": {e: stats["errors"].count(e) for e in set(stats["errors"])},
                 },
                 indent=2,
@@ -193,6 +263,8 @@ class Command(BaseCommand):
         )
         if violations:
             raise CommandError(f"{len(violations)} blocked pairs were matched")
+        if filter_misses:
+            raise CommandError(f"{len(filter_misses)} matches broke someone's filter")
         if median >= 10:
             raise CommandError(f"median wait {median:.1f}s is not under 10s")
         self.stdout.write(self.style.SUCCESS("load test passed"))

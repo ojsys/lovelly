@@ -512,6 +512,8 @@ class _LedgerRow extends StatelessWidget {
         'A friend you invited joined',
       ),
       LedgerReasonEnum.refund => (KIcon.close, KColors.danger, 'Refunded pack'),
+      LedgerReasonEnum.filteredMatch => (KIcon.search, KColors.gold, 'Filtered match'),
+      LedgerReasonEnum.rematch => (KIcon.phone, KColors.gold, 'Rematch'),
       _ => (KIcon.coin, KColors.muted, 'Coins'),
     };
     final local = entry.createdAt.toLocal();

@@ -9,6 +9,7 @@ import '../../auth/my_id.dart';
 import '../../platform/permissions.dart';
 import '../../realtime/realtime_client.dart';
 import '../match/match_controller.dart';
+import '../plus/plus_repository.dart';
 import 'friends_repository.dart';
 
 /// The Friends screen (07): friends, unread counts and incoming requests (FR-16, FR-17).
@@ -215,6 +216,7 @@ class CallInvite {
     this.mode = MatchMode.video,
     this.name = '',
     this.notice,
+    this.rematch = false,
   });
 
   final InviteDirection direction;
@@ -225,6 +227,9 @@ class CallInvite {
 
   /// "Kwame declined", "No answer" — shown once.
   final String? notice;
+
+  /// A paid rematch with someone skipped earlier (FR-7), not a friend call.
+  final bool rematch;
 }
 
 class CallInviteController extends Notifier<CallInvite> {
@@ -241,6 +246,24 @@ class CallInviteController extends Notifier<CallInvite> {
     await _rt.start();
     _rt.send({'type': 'call.invite', 'chat_id': chatId, 'mode': mode.name});
     state = CallInvite(direction: InviteDirection.outgoing, chatId: chatId, mode: mode, name: name);
+  }
+
+  /// FR-7: ring someone you just skipped (20 coins, held now; free with Plus).
+  Future<String?> rematch(String sessionId, String name, MatchMode mode) async {
+    try {
+      await _rt.start();
+      final inviteId = await ref.read(plusRepositoryProvider).rematch(sessionId);
+      state = CallInvite(
+        direction: InviteDirection.outgoing,
+        inviteId: inviteId,
+        mode: mode,
+        name: name,
+        rematch: true,
+      );
+      return null;
+    } on ApiFailure catch (e) {
+      return e.detail;
+    }
   }
 
   /// Shown when the app was opened from a call push (the invite may have ended).
@@ -265,7 +288,7 @@ class CallInviteController extends Notifier<CallInvite> {
     if (invite.direction != InviteDirection.incoming || invite.inviteId == null) return false;
     final gateway = ref.read(permissionGatewayProvider);
     final needed = [
-      DevicePermission.microphone,
+      if (invite.mode != MatchMode.text) DevicePermission.microphone,
       if (invite.mode == MatchMode.video) DevicePermission.camera,
     ];
     for (final p in needed) {
@@ -300,6 +323,7 @@ class CallInviteController extends Notifier<CallInvite> {
     chatId: state.chatId,
     mode: state.mode,
     name: state.name,
+    rematch: state.rematch,
   );
 
   void _onEvent(RealtimeEvent e) {
@@ -309,9 +333,10 @@ class CallInviteController extends Notifier<CallInvite> {
         state = CallInvite(
           direction: InviteDirection.incoming,
           inviteId: e['invite_id'] as String,
-          chatId: e['chat_id'] as String,
+          chatId: e['chat_id'] as String?,
           mode: MatchMode.values.byName(e['mode'] as String),
           name: from['first_name'] as String? ?? '',
+          rematch: e['rematch'] as bool? ?? false,
         );
       case 'call.ringing' when state.direction == InviteDirection.outgoing:
         state = CallInvite(
@@ -320,6 +345,7 @@ class CallInviteController extends Notifier<CallInvite> {
           chatId: state.chatId,
           mode: state.mode,
           name: state.name,
+          rematch: state.rematch,
         );
       case 'call.declined':
         state = CallInvite(notice: '${state.name} can’t talk right now.');
@@ -329,7 +355,7 @@ class CallInviteController extends Notifier<CallInvite> {
         );
       case 'call.cancelled':
         state = const CallInvite();
-      case 'match.found' when e['chat_id'] != null:
+      case 'match.found' when e['chat_id'] != null || e['rematch'] == true:
         state = const CallInvite(); // connected: the call screens take over
       case 'error' when state.direction == InviteDirection.outgoing:
         state = CallInvite(notice: e['detail'] as String?);

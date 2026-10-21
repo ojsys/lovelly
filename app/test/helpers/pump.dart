@@ -11,6 +11,7 @@ import 'package:korram/features/call/call_engine.dart';
 import 'package:korram/features/friends/friends_repository.dart';
 import 'package:korram/features/friends/profile_screen.dart';
 import 'package:korram/features/home/home_data.dart';
+import 'package:korram/features/plus/plus_repository.dart';
 import 'package:korram/features/wallet/coin_store_screen.dart';
 import 'package:korram/features/wallet/wallet_repository.dart';
 import 'package:korram/platform/invite_source.dart';
@@ -35,6 +36,7 @@ class TestApp {
   final friends = FakeFriendsRepository();
   final push = FakePushService();
   final wallet = FakeWalletRepository();
+  final plus = FakePlusRepository();
   final billing = FakeStoreBilling();
   final invites = FakeInviteSource();
   final shared = <String>[];
@@ -44,6 +46,7 @@ class TestApp {
     firstName: 'Ada',
     age: 27,
     city: 'Enugu',
+    state: '',
     bio: 'Builder by day, amateur chef by night.',
     photos: [],
     interests: [
@@ -95,6 +98,7 @@ Future<TestApp> pumpApp(
         clockProvider.overrideWithValue(() => DateTime(2026, 10, 20, 14, 14)),
         pushServiceProvider.overrideWithValue(app.push),
         walletRepositoryProvider.overrideWithValue(app.wallet),
+        plusRepositoryProvider.overrideWithValue(app.plus),
         storeBillingProvider.overrideWithValue(app.billing),
         inviteSourceProvider.overrideWithValue(app.invites),
         shareProvider.overrideWithValue((text) async => app.shared.add(text)),

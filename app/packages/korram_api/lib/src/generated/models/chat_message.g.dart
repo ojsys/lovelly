@@ -23,7 +23,7 @@ Map<String, dynamic> _$ChatMessageToJson(ChatMessage instance) => <String, dynam
   'body': instance.body,
   'kind': instance.kind,
   'sent_at': instance.sentAt.toIso8601String(),
-  'seen_at': instance.seenAt?.toIso8601String(),
+  'seen_at': ?instance.seenAt?.toIso8601String(),
   'flagged': instance.flagged,
   'flag_reason': instance.flagReason,
 };
