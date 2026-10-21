@@ -5,8 +5,10 @@ to make first, the push itself, and what to set up afterwards.
 
 **Already checked (2026-10-21):**
 - **What goes up:** 590 tracked files, about 11 MB of history.
-- **Largest files:** the design file (4.6 MB) and the PRD PDF (0.6 MB), both well under
-  GitHub's 100 MB limit.
+- **Largest files:** about 0.2 MB (lock files and fonts), far under GitHub's 100 MB limit.
+- **The PRD and designs are not in the repo, in any commit.** The PDF, the design HTML,
+  `docs/PRD.md` and `design/screens/` were removed from the whole history before the first
+  push. They stay on your machine and are git-ignored.
 - **No real secrets anywhere in the history.**
   - `infra/.env` is ignored.
   - `infra/.env.example` and `backend/korram/settings/test.py` hold only clearly labelled
@@ -22,9 +24,8 @@ to make first, the push itself, and what to set up afterwards.
 
 ### Private or public? Recommendation: **private**
 
-The repo contains:
-- the full PRD, including the business model
-- the design file
+The PRD and the designs are already kept out (above), but the repo still contains:
+- the milestone plans, which describe the product and its business model in detail
 - the moderation and safety design (thresholds, how the agent works)
 - the open legal questions in `docs/questions.md`
 
@@ -33,14 +34,14 @@ GitHub account. Make it public later if you want to, after a fresh review.
 
 ### Which email the commits show
 
-All 13 commits are authored by `Jonah Onah <onahjonah@gmail.com>`. GitHub shows that address
+All commits are authored by `Jonah Onah <onahjonah@gmail.com>`. GitHub shows that address
 on every commit page, to everyone who can see the repo.
 
 - **If the repo stays private and that's fine with you:** nothing to do.
 - **If you'd rather hide it:**
   1. In GitHub, go to Settings → Emails and tick **Keep my email addresses private**. GitHub
      shows your no-reply address, for example `12345678+yourname@users.noreply.github.com`.
-  2. Use it for this repo and rewrite the 13 commits before the first push (safe now, because
+  2. Use it for this repo and rewrite the commits before the first push (safe now, because
      nothing has been pushed yet):
 
      ```sh
@@ -93,7 +94,7 @@ That creates the repo, adds it as `origin`, and pushes `main`.
 
 ### Check it worked
 
-- The repo page shows the README and 13 commits (14 with this guide).
+- The repo page shows the README and the full commit history.
 - The **Actions** tab shows a "CI" run with three jobs: `backend`, `app`, `admin`. All three
   should go green in about 5–8 minutes.
 

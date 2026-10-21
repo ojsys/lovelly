@@ -2,6 +2,12 @@
 .env
 infra/.env
 
+# Confidential product inputs: kept on the team's machines, never in the repo
+/Kora*.html
+/Kora*.pdf
+docs/PRD.md
+design/
+
 # Python
 __pycache__/
 *.py[cod]

@@ -2,8 +2,10 @@
 
 Random video, voice and text chats with verified people. Nigeria first.
 
-- Spec: [`docs/PRD.md`](docs/PRD.md) · Working rules: [`CLAUDE.md`](CLAUDE.md)
-- Designs: `design/screens/*.dc.html` (open in a browser; 390 × 844 frames)
+- Working rules: [`CLAUDE.md`](CLAUDE.md)
+- Spec (`docs/PRD.md`) and designs (`design/screens/*.dc.html`, 390 × 844 frames): confidential,
+  kept out of the repo. Ask the product owner for a copy and put them at those paths; they're
+  git-ignored.
 - Milestone plans: `docs/plans/` · Open questions: [`docs/questions.md`](docs/questions.md)
 - Publishing and working on GitHub: [`docs/github.md`](docs/github.md)
 

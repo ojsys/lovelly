@@ -2,6 +2,7 @@
 
 Korram is a random video/voice/text connect app for verified adults (18+), Nigeria first.
 The full spec is `docs/PRD.md`. UI designs are in `design/screens/*.dc.html` (390×844 frames;
+both are confidential and git-ignored, so they exist only on team machines;
 open one in a browser; `{{...}}` are template bindings, `[brackets]` are placeholder data that
 must come from the API).
 
